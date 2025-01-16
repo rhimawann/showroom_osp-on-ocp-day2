@@ -5,6 +5,11 @@ metadata:
 spec:
   secret: osp-secret
   storageClass: ocs-external-storagecluster-ceph-rbd
+  tls:
+    podLevel:
+      enabled: false
+    ingress:
+      enabled: false
 
   barbican:
     enabled: false
