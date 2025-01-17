@@ -47,7 +47,10 @@ spec:
   glance:
     enabled: false
     template:
-      glanceAPIs: {}
+      glanceAPIs:
+        default:
+          replicas: 0
+          type: single
 
   heat:
     enabled: false
