@@ -49,3 +49,15 @@ spec:
       - 172.18.0.10
       - 172.18.0.12
       cidr: 172.18.0.0/24
+  - name: external
+    dnsDomain: external.localdomain
+    subnets:
+    - name: subnet1
+      allocationRanges:
+      - end: 172.21.0.250
+        start: 172.21.0.100
+      excludeAddresses:
+      - 172.21.0.10
+      - 172.21.0.15
+      - 172.21.0.16
+      cidr: 172.21.0.0/24
