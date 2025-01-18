@@ -170,3 +170,5 @@ spec:
            sudo subscription-manager release --set=9.4
            sudo subscription-manager repos --disable=*
            sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=rhoso-18.0-for-rhel-9-x86_64-rpms --enable=rhceph-7-tools-for-rhel-9-x86_64-rpms
+           dnf -y upgrade openstack-selinux
+           rm -f /run/virtlogd.pid
