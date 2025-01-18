@@ -1,0 +1,41 @@
+#jinja2: trim_blocks:False
+network_config:
+- type: interface
+  name: eth1
+  mtu: 1500
+  domain: localdomain
+  use_dhcp: false
+  addresses:
+  - ip_netmask: 172.22.0.110/24
+  - ip_netmask: 172.22.0.110/32
+  - ip_netmask: 172.22.0.111/32     
+- type: interface
+  name: eth2
+  mtu: 1500
+  use_dhcp: false
+  addresses:
+  - ip_netmask: 172.17.0.110/24
+- type: interface
+  name: eth3
+  mtu: 1500
+  use_dhcp: false
+  addresses:
+  - ip_netmask: 172.18.0.110/24
+- type: ovs_bridge
+  name: br-ex
+  mtu: 1500
+  use_dhcp: false
+  addresses:
+  - ip_netmask: 172.21.0.110/24
+  members:
+  - type: interface
+    name: eth5
+    mtu: 1500
+    # force the MAC address of the bridge to this interface
+    primary: true
+- type: interface
+  name: eth4
+  mtu: 1500
+  use_dhcp: false
+  addresses:
+  - ip_netmask: 172.19.0.110/24

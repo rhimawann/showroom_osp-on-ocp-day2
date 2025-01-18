@@ -1,0 +1,4 @@
+resource_registry:
+  OS::TripleO::Services::NovaCompute: OS::Heat::None
+  OS::TripleO::Services::NovaLibvirt: OS::Heat::None
+  OS::TripleO::Services::ComputeCeilometerAgent: OS::Heat::None

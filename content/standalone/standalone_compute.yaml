@@ -1,0 +1,32 @@
+resource_registry:
+  OS::TripleO::Services::CACerts: OS::Heat::None
+  OS::TripleO::Services::CinderApi: OS::Heat::None
+  OS::TripleO::Services::CinderVolume: OS::Heat::None
+  OS::TripleO::Services::CinderScheduler: OS::Heat::None
+  OS::TripleO::Services::Clustercheck: OS::Heat::None
+  OS::TripleO::Services::HAproxy: OS::Heat::None
+  OS::TripleO::Services::Horizon: OS::Heat::None
+  OS::TripleO::Services::Keystone: OS::Heat::None
+  OS::TripleO::Services::Memcached: OS::Heat::None
+  OS::TripleO::Services::MySQL: OS::Heat::None
+  OS::TripleO::Services::NeutronApi: OS::Heat::None
+  OS::TripleO::Services::NeutronDhcpAgent: OS::Heat::None
+  OS::TripleO::Services::NovaApi: OS::Heat::None
+  OS::TripleO::Services::NovaConductor: OS::Heat::None
+  OS::TripleO::Services::NovaConsoleauth: OS::Heat::None
+  OS::TripleO::Services::NovaIronic: OS::Heat::None
+  OS::TripleO::Services::NovaMetadata: OS::Heat::None
+  OS::TripleO::Services::NovaPlacement: OS::Heat::None
+  OS::TripleO::Services::NovaScheduler: OS::Heat::None
+  OS::TripleO::Services::NovaVncProxy: OS::Heat::None
+  OS::TripleO::Services::OsloMessagingNotify: OS::Heat::None
+  OS::TripleO::Services::OsloMessagingRpc: OS::Heat::None
+  OS::TripleO::Services::Redis: OS::Heat::None
+  OS::TripleO::Services::SwiftProxy: OS::Heat::None
+  OS::TripleO::Services::SwiftStorage: OS::Heat::None
+  OS::TripleO::Services::SwiftRingBuilder: OS::Heat::None
+  OS::TripleO::Services::PlacementApi: OS::Heat::None
+  OS::TripleO::Services::GlanceApi: OS::Heat::None
+
+parameter_defaults:
+  GlanceCacheEnabled: true

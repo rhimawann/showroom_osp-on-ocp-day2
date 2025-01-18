@@ -1,0 +1,30 @@
+parameter_defaults:
+  ContainerImagePrepare:
+  - push_destination: false
+    set:
+      ceph_alertmanager_image: ose-prometheus-alertmanager
+      ceph_alertmanager_namespace: registry.redhat.io/openshift4
+      ceph_alertmanager_tag: v4.12
+      ceph_grafana_image: rhceph-6-dashboard-rhel9
+      ceph_grafana_namespace: registry.redhat.io/rhceph
+      ceph_grafana_tag: latest
+      ceph_image: rhceph-7-rhel9
+      ceph_namespace: registry.redhat.io/rhceph
+      ceph_node_exporter_image: ose-prometheus-node-exporter
+      ceph_node_exporter_namespace: registry.redhat.io/openshift4
+      ceph_node_exporter_tag: v4.12
+      ceph_prometheus_image: ose-prometheus
+      ceph_prometheus_namespace: registry.redhat.io/openshift4
+      ceph_prometheus_tag: v4.12
+      ceph_tag: latest
+      name_prefix: openstack-
+      name_suffix: ''
+      namespace: registry.redhat.io/rhosp-rhel9
+      neutron_driver: ovn
+      rhel_containers: false
+      tag: '17.1'
+    tag_from_label: '{version}-{release}'
+  ContainerImageRegistryLogin: true
+  ContainerImageRegistryCredentials:
+    registry.redhat.io:
+      1979710|test-rhosp16.1: eyJhbGciOiJSUzUxMiJ9.eyJzdWIiOiJhODU0YTEzMTI5NzA0MmY0YmVmYjBlMTM1OWI2OTZiYSJ9.mYlBdmv2vssWv5uQ5kI9__qZLmYn48AG_DghKtzjmTx5n3O1l-MU1sUMGCSJaekGP6m6OSWLfz5Rl82Px4BHZ7SDnSRtd8SNvsHmRkS85_djRwi5gW4V3TXjXhzV_e0rw-q8SmnMpe7uZklRKfJCsziPfrOziAnSLAqQAkcPujwXSpg2dzKtZjWjgfjldGEraIj3FBdY9ISs7ZilE4HdRHEvMseHtZzFu93Td7iOcsAHRkK78evoDntrXmoVjAueDc_kU_nCJ8l1-vuw3W0TJ8_5HZ0gqQur1G_NORq7qIh3Ffq0x7mLTNYpKcVf4Sg-T6wwWDxL2U3oBX6r9HKm8ZvasPB-D0mV_zd6we1EF4CPcXUBSzat1tPzJTISTp8QIOj8dnJ2vyQjwBC9A4VTlwQFr95Z4m3sGhjwqeTi-iBTTWGzlXettTsQfkpxK34qd6G5bGKIwRQsZ27JkPxhGRmEqP7H2d-Ann08NzKqOXYnYBeNUybOxGlvutRtiH0CnsY_NJVqZ3sTIoZHTTbUPdSKtiYW2XNwXbQ_L8jKaXtOAN1tPi-R-thx-9XFLwVJh9uXe9mZ1uH0mh8-oMXV5iDCVXmhmR58BUcWqb3EbLD9AKO2iwLZTFbsa-NRjEF3UgZgqaGx1IDbe7EQlgiqeXmZUfrpdO9YIjks3RGxp70

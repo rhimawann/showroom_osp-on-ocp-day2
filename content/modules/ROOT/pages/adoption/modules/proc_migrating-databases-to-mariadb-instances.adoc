@@ -1,0 +1,259 @@
+[id="migrating-databases-to-mariadb-instances_{context}"]
+
+= Migrating databases to MariaDB instances
+
+Migrate your databases from the original {rhos_prev_long} ({OpenStackShort}) deployment to the MariaDB instances in the {rhocp_long} cluster.
+
+//[NOTE]
+//This example scenario describes a simple single-cell setup. Real
+//multi-stack topology recommended for production use results in different
+//cells DBs layout, and should be using different naming schemes (not covered
+//here this time). kgilliga: I hid the same note in the Compute adoption procedure. Will likely reinstate this after multi-cell is released.
+
+.Prerequisites
+
+* Ensure that the control plane MariaDB and RabbitMQ are running, and that no other control plane services are running.
+* Retrieve the topology-specific service configuration. For more information, see xref:proc_retrieving-topology-specific-service-configuration_migrating-databases[Retrieving topology-specific service configuration].
+* Stop the {OpenStackShort} services. For more information, see xref:stopping-openstack-services_{context}[Stopping {rhos_prev_long} services].
+* Ensure that there is network routability between the original MariaDB and the MariaDB for the control plane.
+* Define the following shell variables. Replace the following example values with values that are correct for your environment:
++
+----
+PODIFIED_MARIADB_IP=$(oc get svc --selector "mariadb/name=openstack" -ojsonpath='{.items[0].spec.clusterIP}')
+PODIFIED_CELL1_MARIADB_IP=$(oc get svc --selector "mariadb/name=openstack-cell1" -ojsonpath='{.items[0].spec.clusterIP}')
+PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
+
+# The CHARACTER_SET and collation should match the source DB
+# if the do not then it will break foreign key relationships
+# for any tables that are created in the future as part of db sync
+CHARACTER_SET=utf8
+COLLATION=utf8_general_ci
+
+ifeval::["{build}" != "downstream"]
+STORAGE_CLASS=ocs-external-storagecluster-ceph-rbd
+MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
+endif::[]
+ifeval::["{build}" == "downstream"]
+STORAGE_CLASS=ocs-external-storagecluster-ceph-rbd
+MARIADB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-mariadb-rhel9:18.0
+endif::[]
+# Replace with your environment's MariaDB Galera cluster VIP and backend IPs:
+SOURCE_MARIADB_IP=172.17.0.16
+ifeval::["{build}" != "downstream"]
+SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' MysqlRootPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+ifeval::["{build}" == "downstream"]
+SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' MysqlRootPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+----
+
+* Prepare the MariaDB adoption helper pod:
+
+. Create a temporary volume claim and a pod for the database data copy. Edit the volume claim storage request if necessary, to give it enough space for the overcloud databases:
++
+[source,yaml]
+----
+oc apply -f - <<EOF
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mariadb-data
+spec:
+  storageClassName: $STORAGE_CLASS
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: mariadb-copy-data
+  annotations:
+    openshift.io/scc: anyuid
+    k8s.v1.cni.cncf.io/networks: internalapi
+  labels:
+    app: adoption
+spec:
+  containers:
+  - image: $MARIADB_IMAGE
+    command: [ "sh", "-c", "sleep infinity"]
+    name: adoption
+    volumeMounts:
+    - mountPath: /backup
+      name: mariadb-data
+  securityContext:
+    allowPrivilegeEscalation: false
+    capabilities:
+      drop: ALL
+    runAsNonRoot: true
+    seccompProfile:
+      type: RuntimeDefault
+  volumes:
+  - name: mariadb-data
+    persistentVolumeClaim:
+      claimName: mariadb-data
+EOF
+----
+
+. Wait for the pod to be ready:
++
+----
+$ oc wait --for condition=Ready pod/mariadb-copy-data --timeout=30s
+----
+
+.Procedure
+
+. Get the count of source databases with the `NOK` (not-OK) status:
++
+----
+$ oc rsh mariadb-copy-data mysql -h "${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" -e "SHOW databases;"
+----
+
+. Check that `mysqlcheck` had no errors:
++
+----
+. ~/.source_cloud_exported_variables
+test -z "$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK"  || [ "$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK" = " " ] && echo "OK" || echo "CHECK FAILED"
+----
+
+. Test the connection to the control plane databases:
++
+----
+$ oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+    mysql -rsh "$PODIFIED_MARIADB_IP" -uroot -p"$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;'
+$ oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+    mysql -rsh "$PODIFIED_CELL1_MARIADB_IP" -uroot -p"$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;'
+----
++
+[NOTE]
+You must transition {compute_service_first_ref} services that are imported later into a superconductor architecture by deleting the old service records in the cell databases, starting with `cell1`. New records are registered with different hostnames provided by the {compute_service} operator. All Compute services, except the Compute agent, have no internal state, and their service records can be safely deleted. You also need to rename the former `default` cell to `cell1`.
+
+. Create a dump of the original databases:
++
+----
+$ oc rsh mariadb-copy-data << EOF
+  mysql -h"${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" \
+  -N -e "show databases" | grep -E -v "schema|mysql|gnocchi|aodh" | \
+  while read dbname; do
+    echo "Dumping \${dbname}";
+    mysqldump -h"${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" \
+      --single-transaction --complete-insert --skip-lock-tables --lock-tables=0 \
+      "\${dbname}" > /backup/"\${dbname}".sql;
+   done
+EOF
+----
+
+. Restore the databases from `.sql` files into the control plane MariaDB:
++
+----
+ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
+$ oc rsh mariadb-copy-data << EOF
+endif::[]
+ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+$ oc rsh -n $OSPDO_NAMESPACE mariadb-copy-data << EOF
+endif::[]
+  # db schemas to rename on import
+  declare -A db_name_map
+  db_name_map['nova']='nova_cell1'
+  db_name_map['ovs_neutron']='neutron'
+  db_name_map['ironic-inspector']='ironic_inspector'
+
+  # db servers to import into
+  declare -A db_server_map
+  db_server_map['default']=${PODIFIED_MARIADB_IP}
+  db_server_map['nova_cell1']=${PODIFIED_CELL1_MARIADB_IP}
+
+  # db server root password map
+  declare -A db_server_password_map
+  db_server_password_map['default']=${PODIFIED_DB_ROOT_PASSWORD}
+  db_server_password_map['nova_cell1']=${PODIFIED_DB_ROOT_PASSWORD}
+
+  cd /backup
+  for db_file in \$(ls *.sql); do
+    db_name=\$(echo \${db_file} | awk -F'.' '{ print \$1; }')
+    if [[ -v "db_name_map[\${db_name}]" ]]; then
+      echo "renaming \${db_name} to \${db_name_map[\${db_name}]}"
+      db_name=\${db_name_map[\${db_name}]}
+    fi
+    db_server=\${db_server_map["default"]}
+    if [[ -v "db_server_map[\${db_name}]" ]]; then
+      db_server=\${db_server_map[\${db_name}]}
+    fi
+    db_password=\${db_server_password_map['default']}
+    if [[ -v "db_server_password_map[\${db_name}]" ]]; then
+      db_password=\${db_server_password_map[\${db_name}]}
+    fi
+    echo "creating \${db_name} in \${db_server}"
+    mysql -h"\${db_server}" -uroot "-p\${db_password}" -e \
+      "CREATE DATABASE IF NOT EXISTS \${db_name} DEFAULT \
+      CHARACTER SET ${CHARACTER_SET} DEFAULT COLLATE ${COLLATION};"
+    echo "importing \${db_name} into \${db_server}"
+    mysql -h "\${db_server}" -uroot "-p\${db_password}" "\${db_name}" < "\${db_file}"
+  done
+
+  mysql -h "\${db_server_map['default']}" -uroot -p"\${db_server_password_map['default']}" -e \
+    "update nova_api.cell_mappings set name='cell1' where name='default';"
+  mysql -h "\${db_server_map['nova_cell1']}" -uroot -p"\${db_server_password_map['nova_cell1']}" -e \
+    "delete from nova_cell1.services where host not like '%nova-cell1-%' and services.binary != 'nova-compute';"
+EOF
+----
+
+.Verification
+
+Compare the following outputs with the topology-specific service configuration.
+For more information, see xref:proc_retrieving-topology-specific-service-configuration_migrating-databases[Retrieving topology-specific service configuration].
+
+. Check that the databases are imported correctly:
++
+----
+. ~/.source_cloud_exported_variables
+
+# use 'oc exec' and 'mysql -rs' to maintain formatting
+dbs=$(oc exec openstack-galera-0 -c galera -- mysql -rs -uroot "-p$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;')
+echo $dbs | grep -Eq '\bkeystone\b' && echo "OK" || echo "CHECK FAILED"
+
+# ensure neutron db is renamed from ovs_neutron
+echo $dbs | grep -Eq '\bneutron\b'
+echo $PULL_OPENSTACK_CONFIGURATION_DATABASES | grep -Eq '\bovs_neutron\b' && echo "OK" || echo "CHECK FAILED"
+
+# ensure nova cell1 db is extracted to a separate db server and renamed from nova to nova_cell1
+c1dbs=$(oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot "-p$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;')
+echo $c1dbs | grep -Eq '\bnova_cell1\b' && echo "OK" || echo "CHECK FAILED"
+
+# ensure default cell renamed to cell1, and the cell UUIDs retained intact
+novadb_mapped_cells=$(oc exec openstack-galera-0 -c galera -- mysql -rs -uroot "-p$PODIFIED_DB_ROOT_PASSWORD" \
+  nova_api -e 'select uuid,name,transport_url,database_connection,disabled from cell_mappings;')
+uuidf='\S{8,}-\S{4,}-\S{4,}-\S{4,}-\S{12,}'
+left_behind=$(comm -23 \
+  <(echo $PULL_OPENSTACK_CONFIGURATION_NOVADB_MAPPED_CELLS | grep -oE " $uuidf \S+") \
+  <(echo $novadb_mapped_cells | tr -s "| " " " | grep -oE " $uuidf \S+"))
+changed=$(comm -13 \
+  <(echo $PULL_OPENSTACK_CONFIGURATION_NOVADB_MAPPED_CELLS | grep -oE " $uuidf \S+") \
+  <(echo $novadb_mapped_cells | tr -s "| " " " | grep -oE " $uuidf \S+"))
+test $(grep -Ec ' \S+$' <<<$left_behind) -eq 1 && echo "OK" || echo "CHECK FAILED"
+default=$(grep -E ' default$' <<<$left_behind)
+test $(grep -Ec ' \S+$' <<<$changed) -eq 1 && echo "OK" || echo "CHECK FAILED"
+grep -qE " $(awk '{print $1}' <<<$default) cell1$" <<<$changed && echo "OK" || echo "CHECK FAILED"
+
+# ensure the registered Compute service name has not changed
+novadb_svc_records=$(oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot "-p$PODIFIED_DB_ROOT_PASSWORD" \
+  nova_cell1 -e "select host from services where services.binary='nova-compute' order by host asc;")
+diff -Z <(echo $novadb_svc_records) <(echo $PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES) && echo "OK" || echo "CHECK FAILED"
+----
+
+. Delete the `mariadb-data` pod and the `mariadb-copy-data` persistent volume claim that contains the database backup:
++
+[NOTE]
+Consider taking a snapshot of them before deleting.
++
+----
+$ oc delete pod mariadb-copy-data
+$ oc delete pvc mariadb-data
+----
+
+[NOTE]
+During the pre-checks and post-checks, the `mariadb-client` pod might return a pod security warning related to the `restricted:latest` security context constraint. This warning is due to default security context constraints and does not prevent the admission controller from creating a pod. You see a warning for the short-lived pod, but it does not interfere with functionality.
+For more information, see link:https://learn.redhat.com/t5/DO280-Red-Hat-OpenShift/About-pod-security-standards-and-warnings/m-p/32502[About pod security standards and warnings].

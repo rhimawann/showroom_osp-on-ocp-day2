@@ -1,0 +1,81 @@
+[id="adopting-the-networking-service_{context}"]
+
+= Adopting the {networking_service}
+
+To adopt the {networking_first_ref}, you patch an existing `OpenStackControlPlane` custom resource (CR) that has the {networking_service} disabled. The patch starts the service with the
+configuration parameters that are provided by the {rhos_prev_long} ({OpenStackShort}) environment.
+
+The {networking_service} adoption is complete if you see the following results:
+
+* The `NeutronAPI` service is running.
+* The {identity_service_first_ref} endpoints are updated, and the same back end of the source cloud is available.
+
+.Prerequisites
+
+* Ensure that Single Node OpenShift or OpenShift Local is running in the {rhocp_long} cluster.
+* Adopt the {identity_service}. For more information, see xref:adopting-the-identity-service_adopt-control-plane[Adopting the {identity_service}].
+* Migrate your OVN databases to `ovsdb-server` instances that run in the {rhocp_long} cluster. For more information, see xref:migrating-ovn-data_migrating-databases[Migrating OVN data].
+
+
+.Procedure
+ifeval::["{build}" != "downstream"]
+The {networking_service} adoption follows a similar pattern to https://github.com/openstack-k8s-operators/data-plane-adoption/blob/main/keystone_adoption.md[Keystone].
+endif::[]
+
+* Patch the `OpenStackControlPlane` CR to deploy the {networking_service}:
++
+----
+$ oc patch openstackcontrolplane openstack --type=merge --patch '
+spec:
+  neutron:
+    enabled: true
+    apiOverride:
+      route: {}
+    template:
+      override:
+        service:
+          internal:
+            metadata:
+              annotations:
+                metallb.universe.tf/address-pool: internalapi
+                metallb.universe.tf/allow-shared-ip: internalapi
+                metallb.universe.tf/loadBalancerIPs: 172.17.0.89
+            spec:
+              type: LoadBalancer
+      databaseInstance: openstack
+      databaseAccount: neutron
+      secret: osp-secret
+      networkAttachments:
+      - internalapi
+'
+----
+
+.Verification
+
+* Inspect the resulting {networking_service} pods:
++
+----
+NEUTRON_API_POD=`oc get pods -l service=neutron | tail -n 1 | cut -f 1 -d' '`
+oc exec -t $NEUTRON_API_POD -c neutron-api -- cat /etc/neutron/neutron.conf
+----
+
+* Ensure that the `Neutron API` service is registered in the {identity_service}:
++
+----
+$ openstack service list | grep network
+----
++
+----
+$ openstack endpoint list | grep network
+
+| 6a805bd6c9f54658ad2f24e5a0ae0ab6 | regionOne | neutron      | network      | True    | public    | http://neutron-public-openstack.apps-crc.testing  |
+| b943243e596847a9a317c8ce1800fa98 | regionOne | neutron      | network      | True    | internal  | http://neutron-internal.openstack.svc:9696        |
+----
+
+* Create sample resources so that you can test whether the user can create networks, subnets, ports, or routers:
++
+----
+$ openstack network create net
+$ openstack subnet create --network net --subnet-range 10.0.0.0/24 subnet
+$ openstack router create router
+----

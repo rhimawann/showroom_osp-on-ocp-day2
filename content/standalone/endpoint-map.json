@@ -1,0 +1,694 @@
+{
+  "parameter_defaults": {
+    "EndpointMapOverride": {
+      "AodhAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8042",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8042",
+        "uri_no_suffix": "http://172.17.0.16:8042"
+      },
+      "AodhInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8042",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8042",
+        "uri_no_suffix": "http://172.17.0.16:8042"
+      },
+      "AodhPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8042",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8042",
+        "uri_no_suffix": "http://172.22.0.16:8042"
+      },
+      "BarbicanAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9311",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9311",
+        "uri_no_suffix": "http://172.17.0.16:9311"
+      },
+      "BarbicanInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9311",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9311",
+        "uri_no_suffix": "http://172.17.0.16:9311"
+      },
+      "BarbicanPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9311",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9311",
+        "uri_no_suffix": "http://172.22.0.16:9311"
+      },
+      "CephDashboardInternal": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8444",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8444",
+        "uri_no_suffix": "http://172.22.0.16:8444"
+      },
+      "CephGrafanaInternal": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "3100",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:3100",
+        "uri_no_suffix": "http://172.18.0.16:3100"
+      },
+      "CephRgwAdmin": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080/swift/v1/AUTH_%(project_id)s",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "CephRgwInternal": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080/swift/v1/AUTH_%(project_id)s",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "CephRgwPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8080/swift/v1/AUTH_%(project_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8080"
+      },
+      "CinderAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8776/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8776"
+      },
+      "CinderV2Admin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v2/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderV2Internal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v2/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderV2Public": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8776/v2/%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8776"
+      },
+      "CinderV3Admin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v3/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderV3Internal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8776/v3/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8776"
+      },
+      "CinderV3Public": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8776",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8776/v3/%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8776"
+      },
+      "DesignateAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9001",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9001/v2",
+        "uri_no_suffix": "http://172.17.0.16:9001"
+      },
+      "DesignateInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9001",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9001/v2",
+        "uri_no_suffix": "http://172.17.0.16:9001"
+      },
+      "DesignatePublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9001",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9001/v2",
+        "uri_no_suffix": "http://172.22.0.16:9001"
+      },
+      "DockerRegistryInternal": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8787",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8787",
+        "uri_no_suffix": "http://172.22.0.16:8787"
+      },
+      "GaneshaInternal": {
+        "host": "172.21.0.16",
+        "host_nobrackets": "172.21.0.16",
+        "port": "2049",
+        "protocol": "nfs",
+        "uri": "nfs://172.21.0.16:2049",
+        "uri_no_suffix": "nfs://172.21.0.16:2049"
+      },
+      "GlanceAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9293",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9293",
+        "uri_no_suffix": "http://172.17.0.16:9293"
+      },
+      "GlanceInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9293",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9293",
+        "uri_no_suffix": "http://172.17.0.16:9293"
+      },
+      "GlancePublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9292",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9292",
+        "uri_no_suffix": "http://172.22.0.16:9292"
+      },
+      "GnocchiAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8041",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8041",
+        "uri_no_suffix": "http://172.17.0.16:8041"
+      },
+      "GnocchiInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8041",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8041",
+        "uri_no_suffix": "http://172.17.0.16:8041"
+      },
+      "GnocchiPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8041",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8041",
+        "uri_no_suffix": "http://172.22.0.16:8041"
+      },
+      "HeatAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8004",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8004/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8004"
+      },
+      "HeatInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8004",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8004/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8004"
+      },
+      "HeatPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8004",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8004/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8004"
+      },
+      "HeatCfnAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8000",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8000/v1",
+        "uri_no_suffix": "http://172.17.0.16:8000"
+      },
+      "HeatCfnInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8000",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8000/v1",
+        "uri_no_suffix": "http://172.17.0.16:8000"
+      },
+      "HeatCfnPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8000",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8000/v1",
+        "uri_no_suffix": "http://172.22.0.16:8000"
+      },
+      "HorizonPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "80",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:80/dashboard",
+        "uri_no_suffix": "http://172.22.0.16:80"
+      },
+      "IronicAdmin": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "6385",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:6385/v1",
+        "uri_no_suffix": "http://172.22.0.16:6385"
+      },
+      "IronicInternal": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "6385",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:6385/v1",
+        "uri_no_suffix": "http://172.22.0.16:6385"
+      },
+      "IronicPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "6385",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:6385/v1",
+        "uri_no_suffix": "http://172.22.0.16:6385"
+      },
+      "IronicInspectorAdmin": {
+        "host": "",
+        "host_nobrackets": "",
+        "port": "5050",
+        "protocol": "http",
+        "uri": "http://:5050",
+        "uri_no_suffix": "http://:5050"
+      },
+      "IronicInspectorInternal": {
+        "host": "",
+        "host_nobrackets": "",
+        "port": "5050",
+        "protocol": "http",
+        "uri": "http://:5050",
+        "uri_no_suffix": "http://:5050"
+      },
+      "IronicInspectorPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "5050",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:5050",
+        "uri_no_suffix": "http://172.22.0.16:5050"
+      },
+      "KeystoneAdmin": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "35357",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:35357/",
+        "uri_no_suffix": "http://172.22.0.16:35357"
+      },
+      "KeystoneInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "5000",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:5000/",
+        "uri_no_suffix": "http://172.17.0.16:5000"
+      },
+      "KeystonePublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "5000",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:5000/",
+        "uri_no_suffix": "http://172.22.0.16:5000"
+      },
+      "KeystoneV3Admin": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "35357",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:35357/v3",
+        "uri_no_suffix": "http://172.22.0.16:35357"
+      },
+      "KeystoneV3Internal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "5000",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:5000/v3",
+        "uri_no_suffix": "http://172.17.0.16:5000"
+      },
+      "KeystoneV3Public": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "5000",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:5000/v3",
+        "uri_no_suffix": "http://172.22.0.16:5000"
+      },
+      "ManilaAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8786/v2",
+        "uri_no_suffix": "http://172.17.0.16:8786"
+      },
+      "ManilaInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8786/v2",
+        "uri_no_suffix": "http://172.17.0.16:8786"
+      },
+      "ManilaPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8786/v2",
+        "uri_no_suffix": "http://172.22.0.16:8786"
+      },
+      "ManilaV1Admin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8786/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8786"
+      },
+      "ManilaV1Internal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8786/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.17.0.16:8786"
+      },
+      "ManilaV1Public": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8786",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8786/v1/%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8786"
+      },
+      "MetricsQdrPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "5666",
+        "protocol": "amqp",
+        "uri": "amqp://172.22.0.16:5666",
+        "uri_no_suffix": "amqp://172.22.0.16:5666"
+      },
+      "MysqlInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "3306",
+        "protocol": "mysql+pymysql",
+        "uri": "mysql+pymysql://172.17.0.16:3306",
+        "uri_no_suffix": "mysql+pymysql://172.17.0.16:3306"
+      },
+      "NeutronAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9696",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9696",
+        "uri_no_suffix": "http://172.17.0.16:9696"
+      },
+      "NeutronInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9696",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9696",
+        "uri_no_suffix": "http://172.17.0.16:9696"
+      },
+      "NeutronPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9696",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9696",
+        "uri_no_suffix": "http://172.22.0.16:9696"
+      },
+      "NovaAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8774",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8774/v2.1",
+        "uri_no_suffix": "http://172.17.0.16:8774"
+      },
+      "NovaInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8774",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8774/v2.1",
+        "uri_no_suffix": "http://172.17.0.16:8774"
+      },
+      "NovaPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8774",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8774/v2.1",
+        "uri_no_suffix": "http://172.22.0.16:8774"
+      },
+      "NovaMetadataInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8775",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8775",
+        "uri_no_suffix": "http://172.17.0.16:8775"
+      },
+      "NovaVNCProxyAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "6080",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:6080",
+        "uri_no_suffix": "http://172.17.0.16:6080"
+      },
+      "NovaVNCProxyInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "6080",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:6080",
+        "uri_no_suffix": "http://172.17.0.16:6080"
+      },
+      "NovaVNCProxyPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "6080",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:6080",
+        "uri_no_suffix": "http://172.22.0.16:6080"
+      },
+      "NovajoinAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9090",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9090/v1",
+        "uri_no_suffix": "http://172.17.0.16:9090"
+      },
+      "NovajoinInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9090",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9090/v1",
+        "uri_no_suffix": "http://172.17.0.16:9090"
+      },
+      "NovajoinPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9090",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9090/v1",
+        "uri_no_suffix": "http://172.22.0.16:9090"
+      },
+      "OctaviaAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9876",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9876",
+        "uri_no_suffix": "http://172.17.0.16:9876"
+      },
+      "OctaviaInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "9876",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:9876",
+        "uri_no_suffix": "http://172.17.0.16:9876"
+      },
+      "OctaviaPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "9876",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:9876",
+        "uri_no_suffix": "http://172.22.0.16:9876"
+      },
+      "PlacementAdmin": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8778",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8778/placement",
+        "uri_no_suffix": "http://172.17.0.16:8778"
+      },
+      "PlacementInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8778",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8778/placement",
+        "uri_no_suffix": "http://172.17.0.16:8778"
+      },
+      "PlacementPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8778",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8778/placement",
+        "uri_no_suffix": "http://172.22.0.16:8778"
+      },
+      "SwiftAdmin": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "SwiftInternal": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080/v1/AUTH_%(tenant_id)s",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "SwiftPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8080/v1/AUTH_%(tenant_id)s",
+        "uri_no_suffix": "http://172.22.0.16:8080"
+      },
+      "SwiftS3Admin": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "SwiftS3Internal": {
+        "host": "172.18.0.16",
+        "host_nobrackets": "172.18.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.18.0.16:8080",
+        "uri_no_suffix": "http://172.18.0.16:8080"
+      },
+      "SwiftS3Public": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "8080",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:8080",
+        "uri_no_suffix": "http://172.22.0.16:8080"
+      },
+      "MysqlCellInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "3306",
+        "protocol": "mysql+pymysql",
+        "uri": "mysql+pymysql://172.17.0.16:3306",
+        "uri_no_suffix": "mysql+pymysql://172.17.0.16:3306"
+      },
+      "NovaVNCProxyCellPublic": {
+        "host": "172.22.0.16",
+        "host_nobrackets": "172.22.0.16",
+        "port": "6080",
+        "protocol": "http",
+        "uri": "http://172.22.0.16:6080",
+        "uri_no_suffix": "http://172.22.0.16:6080"
+      },
+      "NovaMetadataCellInternal": {
+        "host": "172.17.0.16",
+        "host_nobrackets": "172.17.0.16",
+        "port": "8775",
+        "protocol": "http",
+        "uri": "http://172.17.0.16:8775",
+        "uri_no_suffix": "http://172.17.0.16:8775"
+      }
+    }
+  }
+}

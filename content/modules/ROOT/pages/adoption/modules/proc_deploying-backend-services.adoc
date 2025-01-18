@@ -1,0 +1,154 @@
+[id="deploying-backend-services_{context}"]
+
+= Deploying back-end services
+
+Create the `OpenStackControlPlane` custom resource (CR) with the basic back-end services deployed, and disable all the {rhos_prev_long} ({OpenStackShort}) services. This CR is the foundation of the control plane.
+
+.Prerequisites
+
+* The cloud that you want to adopt is running, and it is on the latest minor version of {OpenStackShort} {rhos_prev_ver}.
+* All control plane and data plane hosts of the source cloud are running, and continue to run throughout the adoption procedure.
+* The `openstack-operator` is deployed, but `OpenStackControlPlane` is
+not deployed.
+ifeval::["{build}" != "downstream"]
++
+For developer/CI environments, the {OpenStackShort} operator can be deployed
+by running `make openstack` inside
+https://github.com/openstack-k8s-operators/install_yamls[install_yamls]
+repo.
++
+For production environments, the deployment method will likely be
+different.
+endif::[]
+ifeval::["{build}" == "downstream"]
+* Install the OpenStack Operators. For more information, see link:https://docs.redhat.com/en/documentation/red_hat_openstack_services_on_openshift/{rhos_curr_ver}/html-single/deploying_red_hat_openstack_services_on_openshift/index#assembly_installing-and-preparing-the-Operators[Installing and preparing the Operators] in _Deploying Red Hat OpenStack Services on OpenShift_.
+endif::[]
+
+* There are free PVs available for MariaDB and RabbitMQ.
+ifeval::["{build}" != "downstream"]
++
+For developer/CI environments driven by install_yamls, make sure
+you've run `make crc_storage`.
+endif::[]
+* Set the desired admin password for the control plane deployment. This can
+be the admin password from your original deployment or a different password:
++
+----
+ADMIN_PASSWORD=SomePassword
+----
++
+To use the existing {OpenStackShort} deployment password:
++
+----
+ifeval::["{build}" != "downstream"]
+ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AdminPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+ifeval::["{build}" == "downstream"]
+ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AdminPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+----
+* Set the service password variables to match the original deployment.
+Database passwords can differ in the control plane environment, but
+you must synchronize the service account passwords.
++
+For example, in developer environments with {OpenStackPreviousInstaller} Standalone, the passwords can be extracted:
++
+----
+ifeval::["{build}" != "downstream"]
+AODH_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AodhPassword:' | awk -F ': ' '{ print $2; }')
+BARBICAN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' BarbicanPassword:' | awk -F ': ' '{ print $2; }')
+CEILOMETER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' CeilometerPassword:' | awk -F ': ' '{ print $2; }')
+CINDER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' CinderPassword:' | awk -F ': ' '{ print $2; }')
+GLANCE_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' GlancePassword:' | awk -F ': ' '{ print $2; }')
+HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatAuthEncryptionKey:' | awk -F ': ' '{ print $2; }')
+HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatPassword:' | awk -F ': ' '{ print $2; }')
+HEAT_STACK_DOMAIN_ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatStackDomainAdminPassword:' | awk -F ': ' '{ print $2; }')
+IRONIC_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' IronicPassword:' | awk -F ': ' '{ print $2; }')
+MANILA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' ManilaPassword:' | awk -F ': ' '{ print $2; }')
+NEUTRON_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' NeutronPassword:' | awk -F ': ' '{ print $2; }')
+NOVA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' NovaPassword:' | awk -F ': ' '{ print $2; }')
+OCTAVIA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' OctaviaPassword:' | awk -F ': ' '{ print $2; }')
+PLACEMENT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' PlacementPassword:' | awk -F ': ' '{ print $2; }')
+SWIFT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' SwiftPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+ifeval::["{build}" == "downstream"]
+AODH_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AodhPassword:' | awk -F ': ' '{ print $2; }')
+BARBICAN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' BarbicanPassword:' | awk -F ': ' '{ print $2; }')
+CEILOMETER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' CeilometerPassword:' | awk -F ': ' '{ print $2; }')
+CINDER_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' CinderPassword:' | awk -F ': ' '{ print $2; }')
+GLANCE_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' GlancePassword:' | awk -F ': ' '{ print $2; }')
+HEAT_AUTH_ENCRYPTION_KEY=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatAuthEncryptionKey:' | awk -F ': ' '{ print $2; }')
+HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatPassword:' | awk -F ': ' '{ print $2; }')
+HEAT_STACK_DOMAIN_ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatStackDomainAdminPassword:' | awk -F ': ' '{ print $2; }')
+IRONIC_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' IronicPassword:' | awk -F ': ' '{ print $2; }')
+MANILA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' ManilaPassword:' | awk -F ': ' '{ print $2; }')
+NEUTRON_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' NeutronPassword:' | awk -F ': ' '{ print $2; }')
+NOVA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' NovaPassword:' | awk -F ': ' '{ print $2; }')
+OCTAVIA_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' OctaviaPassword:' | awk -F ': ' '{ print $2; }')
+PLACEMENT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' PlacementPassword:' | awk -F ': ' '{ print $2; }')
+SWIFT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' SwiftPassword:' | awk -F ': ' '{ print $2; }')
+endif::[]
+----
+
+.Procedure
+
+. Ensure that you are using the {rhocp_long} namespace where you want the
+control plane to be deployed:
++
+----
+$ oc project openstack
+----
+. Create the {OpenStackShort} secret.
++
+----
+cd /home/lab-user/labrepo/content/files
+oc apply -f osp-ng-ctlplane-secret.yaml
+----
+
+. If the `$ADMIN_PASSWORD` is different than the password you set
+in `osp-secret`, amend the `AdminPassword` key in the `osp-secret`:
++
+----
+oc set data secret/osp-secret "AdminPassword=$ADMIN_PASSWORD"
+----
+
+. Set service account passwords in `osp-secret` to match the service
+account passwords from the original deployment:
++
+----
+oc set data secret/osp-secret "AodhPassword=$AODH_PASSWORD"
+oc set data secret/osp-secret "BarbicanPassword=$BARBICAN_PASSWORD"
+oc set data secret/osp-secret "CeilometerPassword=$CEILOMETER_PASSWORD"
+oc set data secret/osp-secret "CinderPassword=$CINDER_PASSWORD"
+oc set data secret/osp-secret "GlancePassword=$GLANCE_PASSWORD"
+oc set data secret/osp-secret "HeatAuthEncryptionKey=$HEAT_AUTH_ENCRYPTION_KEY"
+oc set data secret/osp-secret "HeatPassword=$HEAT_PASSWORD"
+oc set data secret/osp-secret "HeatStackDomainAdminPassword=$HEAT_STACK_DOMAIN_ADMIN_PASSWORD"
+oc set data secret/osp-secret "IronicPassword=$IRONIC_PASSWORD"
+oc set data secret/osp-secret "IronicInspectorPassword=$IRONIC_PASSWORD"
+oc set data secret/osp-secret "ManilaPassword=$MANILA_PASSWORD"
+oc set data secret/osp-secret "MetadataSecret=$METADATA_SECRET"
+oc set data secret/osp-secret "NeutronPassword=$NEUTRON_PASSWORD"
+oc set data secret/osp-secret "NovaPassword=$NOVA_PASSWORD"
+oc set data secret/osp-secret "OctaviaPassword=$OCTAVIA_PASSWORD"
+oc set data secret/osp-secret "PlacementPassword=$PLACEMENT_PASSWORD"
+oc set data secret/osp-secret "SwiftPassword=$SWIFT_PASSWORD"
+----
+
+. Deploy the `OpenStackControlPlane` CR. Ensure that you only enable the DNS, MariaDB, Memcached, and RabbitMQ services. All other services must
+be disabled:
++
+[source,yaml]
+----
+cd labrepo/content/files/
+oc apply -f osp-ng-ctlplane-deploy-backend.yaml
+----
+
+.Verification
+
+* Verify that MariaDB is running:
++
+----
+oc get pod openstack-galera-0 -o jsonpath='{.status.phase}{"\n"}'
+oc get pod openstack-cell1-galera-0 -o jsonpath='{.status.phase}{"\n"}'
+----

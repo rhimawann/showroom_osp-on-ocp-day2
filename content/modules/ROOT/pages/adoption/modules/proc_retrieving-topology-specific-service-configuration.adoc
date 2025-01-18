@@ -8,9 +8,49 @@ Before you migrate your databases to the {rhos_long} control plane, retrieve the
 * To ensure that you have the data you need before the migration
 * To compare your {OpenStackShort} database with the adopted {rhos_acro} database
 
+Get the controller VIP, to use it later in the environment variable SOURCE_MARIADB_IP.
+
+* In the *allinone host*, get the internal_api VIP from this file:
++
+----
+[cloud-user@allinone ~]$ cat /home/cloud-user/deployed_network.yaml
+
+[...]
+  VipPortMap:
+    storage:
+      ip_address: 172.18.0.16
+      ip_address_uri: 172.18.0.16
+      ip_subnet: 172.18.0.16/24
+    storage_mgmt:
+      ip_address: 172.20.0.16
+      ip_address_uri: 172.20.0.16
+      ip_subnet: 172.20.0.16/24
+    internal_api:
+      ip_address: 172.17.0.16
+      ip_address_uri: 172.17.0.16
+      ip_subnet: 172.17.0.16/24
+    # tenant:
+    #   ip_address: 172.19.0.2
+    #   ip_address_uri: 172.19.0.2
+    #   ip_subnet: 172.19.0.2/24
+    external:
+      ip_address: 172.21.0.16
+      ip_address_uri: 172.21.0.16
+      ip_subnet: 172.21.0.16/24
+[...]
+----
++
+SOURCE_MARIADB_IP is then 172.17.0.16
++
+In the *bastion host* Copy the overcloud-passwords from the all-in-one node to the bastion node:
++
+----
+scp -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@allinone:/home/cloud-user/tripleo-standalone-passwords.yaml ~/.
+----
++
 .Prerequisites
 
-* Define the following shell variables. Replace the example values with values that are correct for your environment:
+* In the *bastion host*. Define the following shell variables. Replace the example values with values that are correct for your environment:
 +
 ----
 ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
@@ -19,23 +59,17 @@ CONTROLLER1_SSH="ssh -i ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@1
 MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 endif::[]
 ifeval::["{build}" == "downstream"]
-CONTROLLER1_SSH="ssh -i *<path to SSH key>* root@*<node IP>*"
+CONTROLLER1_SSH="ssh -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@allinone"
 MARIADB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-mariadb-rhel9:18.0
 endif::[]
-SOURCE_MARIADB_IP=172.17.0.2
+SOURCE_MARIADB_IP=172.17.0.16
 ifeval::["{build}" != "downstream"]
 SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' MysqlRootPassword:' | awk -F ': ' '{ print $2; }')
 endif::[]
 ifeval::["{build}" == "downstream"]
-SOURCE_DB_ROOT_PASSWORD=$(cat ~/overcloud-deploy/overcloud/overcloud-passwords.yaml | grep ' MysqlRootPassword:' | awk -F ': ' '{ print $2; }')
+SOURCE_DB_ROOT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' MysqlRootPassword:' | awk -F ': ' '{ print $2; }')
 endif::[]
 MARIADB_CLIENT_ANNOTATIONS='--annotations=k8s.v1.cni.cncf.io/networks=internalapi'
-----
-+
-To get the value to set `SOURCE_MARIADB_IP`, query the puppet-generated configurations in a Controller node:
-+
-----
-$ sudo grep -rI 'listen mysql' -A10 /var/lib/config-data/puppet-generated/ | grep bind
 ----
 
 .Procedure

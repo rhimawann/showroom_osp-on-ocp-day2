@@ -1,0 +1,31 @@
+ifdef::context[:parent-context: {context}]
+
+[id="storage-requirements_{context}"]
+
+:context: storage-requirements
+
+= Storage requirements
+
+Storage in a {rhos_prev_long} ({OpenStackShort}) deployment refers to the following types:
+
+* The storage that is needed for the service to run
+* The storage that the service manages
+
+Before you can deploy the services in {rhos_long}, you must review the storage requirements, plan your {rhocp_long} node selection, prepare your {OpenShiftShort} nodes, and so on.
+
+//*TODO: Galera, RabbitMQ, Swift, Glance, etc.*
+
+include::../modules/con_storage-driver-certification.adoc[leveloffset=+1]
+
+include::../modules/con_block-storage-service-requirements.adoc[leveloffset=+1]
+
+include::../modules/con_block-storage-service-limitations.adoc[leveloffset=+1]
+
+include::../modules/con_openshift-preparation-for-block-storage-adoption.adoc[leveloffset=+1]
+
+include::../modules/proc_preparing-block-storage-service-by-customizing-configuration.adoc[leveloffset=+1]
+
+include::../modules/con_changes-to-cephFS-via-NFS.adoc[leveloffset=+1]
+
+ifdef::parent-context[:context: {parent-context}]
+ifndef::parent-context[:!context:]

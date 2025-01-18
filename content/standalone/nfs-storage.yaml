@@ -1,0 +1,7 @@
+parameter_defaults:
+  CinderEnableIscsiBackend: false
+  CinderEnableNfsBackend: true
+  GlanceBackend: file
+  CinderNfsServers: 172.18.0.13:/nfs/cinder
+  GlanceNfsEnabled: true
+  GlanceNfsShare: 172.18.0.13:/nfs/glance

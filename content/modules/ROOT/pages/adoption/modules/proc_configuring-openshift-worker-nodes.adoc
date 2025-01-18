@@ -1,0 +1,87 @@
+[id="configuring-openshift-worker-nodes_{context}"]
+
+= Configuring isolated networks on {OpenShiftShort} worker nodes
+
+To connect service pods to isolated networks on {rhocp_long} worker nodes that run {rhos_prev_long} services, physical network configuration on the hypervisor is required.
+
+This configuration is managed by the NMState operator, which uses `NodeNetworkConfigurationPolicy` custom resources (CRs) to define the desired network configuration for the nodes.
+
+.Procedure
+
+* For each {OpenShiftShort} worker node, define a `NodeNetworkConfigurationPolicy` CR that describes the desired network configuration. For example:
++
+----
+apiVersion: v1
+items:
+- apiVersion: nmstate.io/v1
+  kind: NodeNetworkConfigurationPolicy
+  spec:
+    desiredState:
+      interfaces:
+      - description: internalapi vlan interface
+        ipv4:
+          address:
+          - ip: 172.17.0.10
+            prefix-length: 24
+          dhcp: false
+          enabled: true
+        ipv6:
+          enabled: false
+        name: enp6s0.20
+        state: up
+        type: vlan
+        vlan:
+          base-iface: enp6s0
+          id: 20
+          reorder-headers: true
+      - description: storage vlan interface
+        ipv4:
+          address:
+          - ip: 172.18.0.10
+            prefix-length: 24
+          dhcp: false
+          enabled: true
+        ipv6:
+          enabled: false
+        name: enp6s0.21
+        state: up
+        type: vlan
+        vlan:
+          base-iface: enp6s0
+          id: 21
+          reorder-headers: true
+      - description: tenant vlan interface
+        ipv4:
+          address:
+          - ip: 172.19.0.10
+            prefix-length: 24
+          dhcp: false
+          enabled: true
+        ipv6:
+          enabled: false
+        name: enp6s0.22
+        state: up
+        type: vlan
+        vlan:
+          base-iface: enp6s0
+          id: 22
+          reorder-headers: true
+    nodeSelector:
+      kubernetes.io/hostname: ocp-worker-0
+      node-role.kubernetes.io/worker: ""
+----
+
+// TODO: Move this to the IPv6 section once it is fully documented, both upstream and downstream.
+ifeval::["{build}" != "downstream"]
+[WARNING]
+In IPv6, {rhocp_long} worker nodes need a `/64` prefix allocation due to OVN
+limitations (RFC 4291). For dynamic IPv6 configuration, you need to change the
+prefix allocation on the Router Advertisement settings. If you want to use
+manual configuration for IPv6, define a similar CR to the
+`NodeNetworkConfigurationPolicy` CR example in this procedure, and define an
+IPv6 address and disable IPv4. Because the constraint for the `/64` prefix did
+not exist in {OpenstackPreviousInstaller}, your {OpenStackShort}
+control plane network might not have enough capacity to allocate these
+networks. If that is the case, allocate a prefix that fits a large enough number
+of addresses, for example, `/60`. The prefix depends on the number of worker nodes you have.
+endif::[]

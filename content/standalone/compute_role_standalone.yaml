@@ -1,0 +1,81 @@
+###############################################################################
+# Role: Compute_standalone                                                    #
+###############################################################################
+- name: Standalone
+  description: |
+    A standalone role that a minimal set of services. This can be used for
+    testing in a single node configuration with the
+    'openstack tripleo deploy --standalone' command or via an Undercloud using
+    'openstack overcloud deploy'.
+  CountDefault: 1
+  tags:
+    - primary
+    - controller
+    - standalone
+  # Define default_route_networks as empty for standalone where management
+  # interface is used. On single nic systems ControlPlaneStaticRoutes must
+  # be set in standalone_parameters.yaml.
+  default_route_networks: []
+  networks:
+    External:
+      subnet: external_subnet
+    InternalApi:
+      subnet: internal_api_subnet
+    Storage:
+      subnet: storage_subnet
+    StorageMgmt:
+      subnet: storage_mgmt_subnet
+    StorageNFS:
+      subnet: storage_nfs_subnet
+    Tenant:
+      subnet: tenant_subnet
+  RoleParametersDefault:
+    OVNCMSOptions: "enable-chassis-as-gw"
+  ServicesDefault:
+    - OS::TripleO::Services::Aide
+    - OS::TripleO::Services::AuditD
+    - OS::TripleO::Services::BootParams
+    - OS::TripleO::Services::CACerts
+    - OS::TripleO::Services::CephClient
+    - OS::TripleO::Services::CephExternal
+    - OS::TripleO::Services::Collectd
+    - OS::TripleO::Services::ComputeCeilometerAgent
+    - OS::TripleO::Services::CeilometerAgentIpmi
+    - OS::TripleO::Services::ComputeNeutronCorePlugin
+    - OS::TripleO::Services::ComputeNeutronL3Agent
+    - OS::TripleO::Services::ComputeNeutronMetadataAgent
+    - OS::TripleO::Services::ComputeNeutronOvsAgent
+    - OS::TripleO::Services::Frr
+    - OS::TripleO::Services::IpaClient
+    - OS::TripleO::Services::Ipsec
+    - OS::TripleO::Services::Iscsid
+    - OS::TripleO::Services::Kernel
+    - OS::TripleO::Services::LoginDefs
+    - OS::TripleO::Services::MetricsQdr
+    - OS::TripleO::Services::Multipathd
+    - OS::TripleO::Services::MySQLClient
+    - OS::TripleO::Services::NeutronBgpVpnBagpipe
+    - OS::TripleO::Services::NeutronLinuxbridgeAgent
+    - OS::TripleO::Services::NeutronVppAgent
+    - OS::TripleO::Services::NovaAZConfig
+    - OS::TripleO::Services::NovaCompute
+    - OS::TripleO::Services::NovaLibvirt
+    - OS::TripleO::Services::NovaLibvirtGuests
+    - OS::TripleO::Services::NovaMigrationTarget
+    - OS::TripleO::Services::ContainersLogrotateCrond
+    - OS::TripleO::Services::Podman
+    - OS::TripleO::Services::Rhsm
+    - OS::TripleO::Services::Rsyslog
+    - OS::TripleO::Services::RsyslogSidecar
+    - OS::TripleO::Services::Securetty
+    - OS::TripleO::Services::Snmp
+    - OS::TripleO::Services::Sshd
+    - OS::TripleO::Services::Timesync
+    - OS::TripleO::Services::Timezone
+    - OS::TripleO::Services::TripleoFirewall
+    - OS::TripleO::Services::TripleoPackages
+    - OS::TripleO::Services::Tuned
+    - OS::TripleO::Services::Vpp
+    - OS::TripleO::Services::OVNController
+    - OS::TripleO::Services::OVNMetadataAgent
+    - OS::TripleO::Services::OVNDBs

@@ -1,0 +1,13 @@
+{
+  "parameter_defaults": {
+    "ExtraHostFileEntries": [
+      "172.17.0.15 standalone.localdomain standalone",
+      "172.18.0.15 standalone.storage.localdomain standalone.storage",
+      "172.20.0.15 standalone.storagemgmt.localdomain standalone.storagemgmt",
+      "172.17.0.15 standalone.internalapi.localdomain standalone.internalapi",
+      "172.19.0.15 standalone.tenant.localdomain standalone.tenant",
+      "172.21.0.15 standalone.external.localdomain standalone.external",
+      "172.22.0.15 standalone.ctlplane.localdomain standalone.ctlplane"
+    ]
+  }
+}

@@ -1,0 +1,172 @@
+[id="adopting-the-block-storage-service_{context}"]
+
+= Adopting the {block_storage}
+
+To adopt a {OpenStackPreviousInstaller}-deployed {block_storage_first_ref}, create the manifest based on the existing `cinder.conf` file, deploy the {block_storage}, and validate the new deployment.
+
+.Prerequisites
+
+* You have reviewed the {block_storage} limitations. For more information, see xref:block-storage-limitations_storage-requirements[Limitations for adopting the {block_storage}].
+* You have planned the placement of the Block Storage services.
+* You have prepared the {rhocp_long} nodes where the volume and backup services run. For more information, see xref:openshift-preparation-for-block-storage-adoption_storage-requirements[{OpenShiftShort} preparation for {block_storage} adoption].
+* The {block_storage_first_ref} is stopped.
+* The service databases are imported into the control plane MariaDB.
+* The {identity_service_first_ref} and {key_manager_first_ref} are adopted.
+* The Storage network is correctly configured on the {OpenShiftShort} cluster.
+
+.Procedure
+. Prepare the secret to place the NFS server connection used by Cinder
++
+----
+$ oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
+----
+
+. Create a new file, for example, `cinder_nfs_patch.yaml`, and apply the configuration:
++
+[source,yaml]
+----
+cat << EOF > cinder_nfs_patch.yaml
+spec:
+ cinder:
+    enabled: true
+    apiOverride:
+      route: {}
+    template:
+      databaseInstance: openstack
+      secret: osp-secret
+      cinderAPI:
+        override:
+          service:
+            internal:
+              metadata:
+                annotations:
+                  metallb.universe.tf/address-pool: internalapi
+                  metallb.universe.tf/allow-shared-ip: internalapi
+                  metallb.universe.tf/loadBalancerIPs: 172.17.0.89
+              spec:
+                type: LoadBalancer
+        replicas: 1
+        customServiceConfig: |
+            [DEFAULT]
+            default_volume_type=tripleo
+      cinderScheduler:
+        replicas: 1
+      cinderBackup:
+        networkAttachments:
+        - storage
+        replicas: 0 # backend needs to be configured
+      cinderVolumes:
+        nfs:
+          networkAttachments:
+          - storage
+          customServiceConfig: |
+            [nfs]
+            volume_backend_name=nfs
+            volume_driver=cinder.volume.drivers.nfs.NfsDriver
+            nfs_snapshot_support=true
+            nas_secure_file_operations=false
+            nas_secure_file_permissions=false
+          customServiceConfigSecrets:
+          - cinder-nfs-config
+EOF
+----
+. Apply the configuration:
++
+----
+$ oc patch openstackcontrolplane openstack --type=merge --patch-file=cinder_nfs_patch.yaml
+----
+
+
+. Retrieve the list of the previous scheduler and backup services:
++
+----
+$ openstack volume service list
+
++------------------+-------------------------+------+---------+-------+----------------------------+
+| Binary           | Host                    | Zone | Status  | State | Updated At                 |
++------------------+-------------------------+------+---------+-------+----------------------------+
+| cinder-scheduler | standalone.localdomain  | nova | enabled | up    | 2025-01-17T17:08:12.000000 |
+| cinder-backup    | standalone.localdomain  | nova | enabled | up    | 2025-01-17T17:08:12.000000 |
+| cinder-volume    | hostgroup@tripleo_nfs   | nova | enabled | up    | 2025-01-17T17:08:12.000000 |
+| cinder-scheduler | cinder-scheduler-0      | nova | enabled | up    | 2025-01-17T17:08:23.000000 |
+| cinder-volume    | cinder-volume-nfs-0@nfs | nova | enabled | up    | 2025-01-17T17:09:01.000000 |
++------------------+-------------------------+------+---------+-------+----------------------------+
+----
+
+. Remove services for hosts that are in the `down` state:
++
+----
+oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remove cinder-scheduler standalone.localdomain
+oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remove cinder-backup  standalone.localdomain
+oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remove cinder-volume hostgroup@tripleo_nfs
+----
++
+* Replace `<service_binary>` with the name of the binary, for example, `cinder-backup`.
+* Replace `<service_host>` with the host name, for example, `cinder-backup-0`.
++
+
+. Check if all the services are up and running.
++
+----
+$ openstack volume service list
+
++------------------+-------------------------+------+---------+-------+----------------------------+
+| Binary           | Host                    | Zone | Status  | State | Updated At                 |
++------------------+-------------------------+------+---------+-------+----------------------------+
+| cinder-scheduler | cinder-scheduler-0      | nova | enabled | up    | 2025-01-17T17:11:23.000000 |
+| cinder-volume    | cinder-volume-nfs-0@nfs | nova | enabled | up    | 2025-01-17T17:11:31.000000 |
++------------------+-------------------------+------+---------+-------+----------------------------+
+----
+
+. Apply the DB data migrations:
++
+[NOTE]
+====
+You are not required to run the data migrations at this step, but you must run them before the next upgrade. However, for adoption, it is recommended to run the migrations now to ensure that there are no issues before you run production workloads on the deployment.
+====
++
+----
+$ oc exec -it cinder-scheduler-0 -- cinder-manage db online_data_migrations
+----
+
+.Verification
+
+. Ensure that the `openstack` alias is defined:
++
+----
+$ alias openstack="oc exec -t openstackclient -- openstack"
+----
+
+. Confirm that {block_storage} endpoints are defined and pointing to the control plane FQDNs:
++
+----
+$ openstack endpoint list --service <endpoint>
+----
++
+* Replace `<endpoint>` with the name of the endpoint that you want to confirm.
+
+. Confirm that the Block Storage services are running:
++
+----
+$ openstack volume service list
+----
++
+[NOTE]
+Cinder API services do not appear in the list. However, if you get a response from the `openstack volume service list` command, that means at least one of the cinder API services is running.
+
+. Confirm that you have your previous volume types, volumes, snapshots, and backups:
++
+----
+$ openstack volume type list
+$ openstack volume list
+$ openstack volume snapshot list
+$ openstack volume backup list
+----
+
+. To confirm that the configuration is working, perform the following steps:
+
+.. Create a volume from an image to check that the connection to {image_service_first_ref} is working:
++
+----
+$ openstack volume create --image cirros --bootable --size 1 disk_new
+----

@@ -1,0 +1,276 @@
+[id="adopting-compute-services-to-the-data-plane_{context}"]
+
+= Adopting Compute services to the {rhos_acro} data plane
+
+Adopt your Compute (nova) services to the {rhos_long} data plane.
+
+//kgilliga: The following text belongs under the code block in step 6 but I'm unable to hide it there: "For multi-cell, config maps and {rhos_prev_long} data plane services should be named like `nova-custom-ceph-cellX` and `nova-compute-extraconfig-cellX`."
+
+.Prerequisites
+
+* You have stopped the remaining control plane nodes, repositories, and packages on the {compute_service_first_ref} hosts. For more information, see xref:stopping-infrastructure-management-and-compute-services_{context}[Stopping infrastructure management and Compute services].
+* Create the dataplane network (IPAM):
++
+----
+cd labrepo/content/files/
+oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
+----
++
+
+* You have defined the shell variables to run the script that runs the fast-forward upgrade:
++
+----
+PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
+
+alias openstack="oc exec -t openstackclient -- openstack"
+declare -A computes
+computes=(
+  ["compute02.localdomain"]="172.22.0.110"
+  # ...
+)
+----
++
+** Replace `["compute02.localdomain"]="172.22.0.110"` with the name and IP address of the {compute_service} node.
+
+.Procedure
+
+ifeval::["{build}" != "downstream"]
+. Create a https://kubernetes.io/docs/concepts/configuration/secret/#ssh-authentication-secrets[ssh authentication secret] for the data plane nodes:
+//kgilliga:I need to check if we will document this in Red Hat docs.
+endif::[]
+ifeval::["{build}" != "upstream"]
+. Create an SSH authentication secret for the data plane nodes:
+endif::[]
++
+[subs=+quotes]
+----
+oc create secret generic dataplane-ansible-ssh-private-key-secret \
+--save-config \
+--dry-run=client \
+--from-file=authorized_keys=/home/lab-user/.ssh/t5ppwkey.pub \
+--from-file=ssh-privatekey=/home/lab-user/.ssh/t5ppwkey.pem \
+--from-file=ssh-publickey=/home/lab-user/.ssh/t5ppwkey.pub \
+-n openstack \
+-o yaml | oc apply -f-
+----
+TODO
++
+ifeval::["{build}" == "downstream"]
+* Replace `/home/lab-user/.ssh/t5ppwkey.pem` with the path to your SSH key. /TODO
+endif::[]
+
+. Generate an ssh key-pair `nova-migration-ssh-key` secret:
++
+----
+$ cd "$(mktemp -d)"
+ssh-keygen -f ./id -t ecdsa-sha2-nistp521 -N ''
+oc get secret nova-migration-ssh-key || oc create secret generic nova-migration-ssh-key \
+  -n openstack \
+  --from-file=ssh-privatekey=id \
+  --from-file=ssh-publickey=id.pub \
+  --type kubernetes.io/ssh-auth
+rm -f id*
+cd -
+----
+
+. As we use a local storage back end for libvirt, create a `nova-compute-extra-config` service to remove pre-fast-forward workarounds and configure Compute services to use a local storage back end:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nova-extra-config
+  namespace: openstack
+data:
+  19-nova-compute-cell1-workarounds.conf: |
+    [workarounds]
+    disable_compute_service_check_for_ffu=true
+EOF
+----
++
+[NOTE]
+The secret `nova-cell<X>-compute-config` auto-generates for each
+`cell<X>`. You must specify values for the `nova-cell<X>-compute-config` and `nova-migration-ssh-key` parameters for each custom `OpenStackDataPlaneService` CR that is related to the {compute_service}.
+
++
+The resources in the `ConfigMap` contain cell-specific configurations.
+
+ifeval::["{build}" == "downstream"]
+. Create a secret for the subscription manager:
++
+----
+$ oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
+----
++
+* Replace `<subscription_manager_username>` with the applicable user name.
+* Replace `<subscription_manager_password>` with the applicable password.
+
+. Create a secret for the Red Hat registry:
++
+----
+$ oc create secret generic redhat-registry \
+--from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
+----
++
+* Replace `<registry_username>` with the applicable user name.
+* Replace `<registry_password>` with the applicable password.
+endif::[]
+
+. Deploy the `OpenStackDataPlaneNodeSet` CR:
++
+[source,yaml]
+----
+oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
+----
+
+* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* file. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
+
+. Run the pre-adoption validation:
+
+.. Create the validation service:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: pre-adoption-validation
+spec:
+  playbook: osp.edpm.pre_adoption_validation
+EOF
+----
+
+.. Create a `OpenStackDataPlaneDeployment` CR that runs only the validation:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-pre-adoption
+spec:
+  nodeSets:
+  - openstack-edpm-compute-2
+  servicesOverride:
+  - pre-adoption-validation
+EOF
+----
+
+.. When the validation is finished, confirm that the status of the Ansible EE pods is `Completed`:
++
+----
+$ watch oc get pod -l app=openstackansibleee
+----
++
+----
+$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+----
+
+.. Wait for the deployment to reach the `Ready` status:
++
+----
+$ oc wait --for condition=Ready openstackdataplanedeployment/openstack-pre-adoption --timeout=10m
+----
++
+[IMPORTANT]
+====
+If any openstack-pre-adoption validations fail, you must reference the Ansible logs to determine which ones were unsuccessful, and then try the following troubleshooting options:
+
+* If the hostname validation failed, check that the hostname of the data plane
+node is correctly listed in the `OpenStackDataPlaneNodeSet` CR.
+
+* If the kernel argument check failed, ensure that the kernel argument configuration in the `edpm_kernel_args` and `edpm_kernel_hugepages` variables in the `OpenStackDataPlaneNodeSet` CR is the same as the kernel argument configuration that you used in the {rhos_prev_long} ({OpenStackShort}) {rhos_prev_ver} node.
+
+* If the tuned profile check failed, ensure that the
+`edpm_tuned_profile` variable in the `OpenStackDataPlaneNodeSet` CR is configured
+to use the same profile as the one set on the {OpenStackShort} {rhos_prev_ver} node.
+====
+
+. Remove the remaining {OpenStackPreviousInstaller} services:
+
+.. Create an `OpenStackDataPlaneService` CR to clean up the data plane services you are adopting:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneService
+metadata:
+  name: tripleo-cleanup
+spec:
+  playbook: osp.edpm.tripleo_cleanup
+EOF
+----
+
+.. Create the `OpenStackDataPlaneDeployment` CR to run the clean-up:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: tripleo-cleanup
+spec:
+  nodeSets:
+  - openstack-edpm-compute-2
+  servicesOverride:
+  - tripleo-cleanup
+EOF
+----
+
+. When the clean-up is finished, deploy the `OpenStackDataPlaneDeployment` CR:
++
+[source,yaml]
+----
+$ oc apply -f - <<EOF
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-compute-2-adoption
+spec:
+  nodeSets:
+  - openstack-edpm-compute-2
+EOF
+----
++
+
+.Verification
+
+. Confirm that all the Ansible EE pods reach a `Completed` status:
++
+----
+$ watch oc get pod -l app=openstackansibleee
+----
++
+----
+$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+----
+
+. Wait for the data plane node set to reach the `Ready` status:
++
+----
+$ oc wait --for condition=Ready osdpns/openstack-edpm-compute-2-adoption --timeout=30m
+----
+
+. Verify that the {networking_first_ref} agents are running:
++
+----
+$ oc exec openstackclient -- openstack network agent list
++--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+| ID                                   | Agent Type                   | Host                   | Availability Zone | Alive | State | Binary                     |
++--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+| 174fc099-5cc9-4348-b8fc-59ed44fcfb0e | DHCP agent                   | standalone.localdomain | nova              | :-)   | UP    | neutron-dhcp-agent         |
+| 10482583-2130-5b0d-958f-3430da21b929 | OVN Metadata agent           | standalone.localdomain |                   | :-)   | UP    | neutron-ovn-metadata-agent |
+| a4f1b584-16f1-4937-b2b0-28102a3f6eaa | OVN Controller agent         | standalone.localdomain |                   | :-)   | UP    | ovn-controller             |
++--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+----
+
+.Next steps
+
+* You must perform a fast-forward upgrade on your Compute services. For more information, see xref:performing-a-fast-forward-upgrade-on-compute-services_{context}[Performing a fast-forward upgrade on Compute services].

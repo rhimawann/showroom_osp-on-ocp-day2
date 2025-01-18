@@ -1,0 +1,23 @@
+ifdef::context[:parent-context: {context}]
+
+[id="adopting-the-image-service_{context}"]
+
+:context: image-service
+
+= Adopting the {image_service}
+
+To adopt the {image_service_first_ref} you patch an existing `OpenStackControlPlane` custom resource (CR) that has the {image_service} disabled. The patch starts the service with the configuration parameters that are provided by the {rhos_prev_long} ({OpenStackShort}) environment.
+
+The {image_service} adoption is complete if you see the following results:
+
+* The `GlanceAPI` service up and running.
+* The {identity_service} endpoints are updated, and the same back end of the source cloud is available.
+
+To complete the {image_service} adoption, ensure that your environment meets the following criteria:
+
+* You have a running {OpenStackPreviousInstaller} environment (the source cloud).
+
+include::../modules/proc_adopting-image-service-with-nfs-backend.adoc[leveloffset=+1]
+
+ifdef::parent-context[:context: {parent-context}]
+ifndef::parent-context[:!context:]

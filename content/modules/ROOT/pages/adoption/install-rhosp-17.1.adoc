@@ -1,0 +1,193 @@
+= Install RHOSP 17.1 environment to adop
+
+. Clone the Files Repo
++
+In the bastion terminal, clone the repo and change directory to the files that we will used later in the lab
++
+[source,bash,role=execute]
+----
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cd labrepo/content/files/standalone
+----
++
+Copy the SSH keys to the *all-in-one* host
++
+[source,bash,role=execute]
+----
+scp -i /home/lab-user/.ssh/t5ppwkey.pem /home/lab-user/.ssh/t5ppwkey.* cloud-user@allinone:/home/cloud-user/.ssh/
+
+----
+
+. Configure the standalone controller
++
+From the bastion connect to the *allinone* host and configure the networking:
++
+[source,bash,role=execute]
+----
+ssh -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@allinone
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/t5ppwkey.pem
+sudo -i
+hostnamectl set-hostname standalone.localdomain
+nmcli co delete 'Wired connection 2'
+nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.15/24
+nmcli con up "static-eth1"
+nmcli co delete 'Wired connection 3'
+nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.15/24
+nmcli con up "static-eth2"
+nmcli co delete 'Wired connection 4'
+nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.15/24
+nmcli con up "static-eth3"
+nmcli co delete 'Wired connection 5'
+nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.15/24
+nmcli con up "static-eth4"
+nmcli co delete 'Wired connection 6'
+nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.15/24
+nmcli con up "static-eth5"
+logout
+----
+
+. Configure the compute
++
+From the bastion connect to the *compute02* host and configure the networking:
++
+[source,bash,role=execute]
+----
+ssh -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@compute02
+hostnamectl set-hostname compute02.localdomain
+nmcli co delete 'Wired connection 2'
+nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
+nmcli con up "static-eth1"
+nmcli co delete 'Wired connection 3'
+nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.110/24
+nmcli con up "static-eth2"
+nmcli co delete 'Wired connection 4'
+nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.110/24
+nmcli con up "static-eth3"
+nmcli co delete 'Wired connection 5'
+nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.110/24
+nmcli con up "static-eth4"
+nmcli co delete 'Wired connection 6'
+nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.110/24
+nmcli con up "static-eth5"
+logout
+----
+
+. Install RHOSP 17.1 standalone controller
++
+From the bastion connect to the *allinone* host:
++
+[source,bash,role=execute]
+----
+ssh -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@allinone
+----
++
+From the bastion connect to the *allinone* host, subscribe the host with the subscription:
++
+[source,bash,role=execute]
+----
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cp labrepo/content/files/standalone/* /home/cloud-user/.
+sudo subscription-manager register --username $RHN_user --password $RHN_password
+sudo subscription-manager release --set=9.2
+sudo subscription-manager repos --disable=*
+sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms  --enable=fast-datapath-for-rhel-9-x86_64-rpms
+sudo dnf -y update
+sudo dnf -y install python3-tripleoclient python-jinja2
+sh openstack_standalone.sh
+----
+
+. Generate the files needed to the compute installation 
++
+Execute the *openstack_compute_prepare.sh* script and copy the files to the generated files to *compute02*:
++
+[source,bash,role=execute]
+----
+sh openstack_compute_prepare.sh
+scp -i /home/cloud-user/.ssh/t5ppwkey.pem oslo.yaml cloud-user@172.22.0.110:
+scp -i /home/cloud-user/.ssh/t5ppwkey.pem passwords.yaml cloud-user@172.22.0.110:
+----
+
+. Generate the files needed to the compute installation
++
+From the bastion connect to the *compte02* host:
++
+[source,bash,role=execute]
+----
+ssh -i /home/lab-user/.ssh/t5ppwkey.pem cloud-user@compute02
+----
++
+Execute the *openstack_compute.sh* script to install the compute02:
++
+[source,bash,role=execute]
+----
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cp labrepo/content/files/standalone/* /home/cloud-user/.
+sudo subscription-manager register --username $RHN_user --password $RHN_password
+sudo subscription-manager release --set=9.2
+sudo subscription-manager repos --disable=*
+sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms  --enable=fast-datapath-for-rhel-9-x86_64-rpms
+sudo dnf -y update
+sudo dnf -y install python3-tripleoclient python-jinja2
+sh openstack_compute.sh
+----
+
+. Discover the *compute02* host:
++
+From the *allinone" host, execute:
++
+[source,bash,role=execute]
+----
+sudo podman exec -it nova_api nova-manage cell_v2 discover_hosts --verbose
+----
++
+. Create some workloads:
++
+[source,bash,role=execute]
+----
+export OS_CLOUD=standalone
+export GATEWAY=172.21.0.1
+export PUBLIC_NETWORK_CIDR=172.21.0.1/24
+export PRIVATE_NETWORK_CIDR=192.168.100.0/24
+export PUBLIC_NET_START=172.21.0.200
+export PUBLIC_NET_END=172.21.0.210
+export DNS_SERVER=172.30.0.10
+openstack flavor create --ram 512 --disk 1 --vcpu 1 --public tiny
+curl -O -L https://github.com/cirros-dev/cirros/releases/download/0.6.2/cirros-0.6.2-x86_64-disk.img
+openstack image create cirros --container-format bare --disk-format qcow2 --public --file cirros-0.6.2-x86_64-disk.img
+
+ssh-keygen -m PEM -t rsa -b 2048 -f ~/.ssh/id_rsa_pem
+
+openstack keypair create --public-key ~/.ssh/id_rsa_pem.pub default
+openstack security group create basic
+openstack security group rule create basic --protocol tcp --dst-port 22:22 --remote-ip 0.0.0.0/0
+openstack security group rule create --protocol icmp basic
+openstack security group rule create --protocol udp --dst-port 53:53 basic
+openstack network create --external --provider-physical-network datacentre --provider-network-type flat public
+openstack network create --internal private
+openstack subnet create public-net \
+--subnet-range $PUBLIC_NETWORK_CIDR \
+--no-dhcp \
+--gateway $GATEWAY \
+--allocation-pool start=$PUBLIC_NET_START,end=$PUBLIC_NET_END \
+--network public
+openstack subnet create private-net \
+--subnet-range $PRIVATE_NETWORK_CIDR \
+--network private
+openstack router create vrouter
+openstack router set vrouter --external-gateway public
+openstack router add subnet vrouter private-net
+
+openstack server create \
+    --flavor tiny --key-name default --network private --security-group basic \
+    --image cirros test-server
+openstack floating ip create public
+
+openstack server create \
+    --flavor tiny --key-name default --network private --security-group basic \
+    --image cirros test-server-2
+openstack floating ip create public
+
+openstack server add floating ip test-server $(openstack floating ip list -c "Floating IP Address" -f value)
+openstack server add floating ip test-server-2 $(openstack floating ip list -c "Floating IP Address" -f value)
+----
