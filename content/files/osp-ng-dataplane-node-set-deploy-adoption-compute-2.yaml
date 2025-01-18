@@ -96,19 +96,19 @@ spec:
              - ip_netmask:
                  {{ tenant_ip }}/{{ tenant_cidr }}
              routes: {{ tenant_host_routes }}
-            - type: ovs_bridge
-              name: br-ex
-              mtu: 1500
-              use_dhcp: false
-              addresses:
-              - ip_netmask:
-                 {{ external_ip }}/{{ external_cidr }}
-              members:
-              - type: interface
-                name: eth5
-                mtu: 1500
-                # force the MAC address of the bridge to this interface
-                primary: true
+           - type: ovs_bridge
+             name: br-ex
+             mtu: 1500
+             use_dhcp: false
+             addresses:
+             - ip_netmask:
+                {{ external_ip }}/{{ external_cidr }}
+             members:
+             - type: interface
+               name: eth5
+               mtu: 1500
+               # force the MAC address of the bridge to this interface
+               primary: true
           
          edpm_network_config_hide_sensitive_logs: false
          #
