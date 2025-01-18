@@ -54,8 +54,6 @@ spec:
       - prefix: subscription_manager_
         secretRef:
           name: subscription-manager
-      - secretRef:
-          name: redhat-registry
       ansibleVars:
          edpm_network_config_template: |
            ---
