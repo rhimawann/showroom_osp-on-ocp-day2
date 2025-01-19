@@ -84,7 +84,6 @@ if [ "$TELEMETRY_ENABLED" = "true" ]; then
     ENV_ARGS+=" -e /usr/share/openstack-tripleo-heat-templates/environments/enable-legacy-telemetry.yaml"
 fi
 ENV_ARGS+=" -e $HOME/standalone_parameters.yaml"
-ENV_ARGS+=" -e $HOME/disable_compute.yaml"
 ENV_ARGS+=" -e $HOME/containers-prepare-parameters.yaml"
 ENV_ARGS+=" -e $HOME/deployed_network.yaml"
 ENV_ARGS+=" -e $HOME/disable-validations.yaml"

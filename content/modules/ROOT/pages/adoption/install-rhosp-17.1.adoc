@@ -18,7 +18,7 @@ In the bastion terminal, clone the repo and change directory to the files that w
 [source,bash,role=execute]
 ----
 git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cd labrepo/content/files/standalone
+cd labrepo/content/files
 ----
 +
 Copy the SSH keys to the *all-in-one* host
@@ -27,22 +27,24 @@ Copy the SSH keys to the *all-in-one* host
 ----
 scp -i /home/lab-user/.ssh/{guid}.pem /home/lab-user/.ssh/{guid}.* cloud-user@allinone:/home/cloud-user/.ssh/
 ----
-=== Install the nfs-server in the nfs-server node
 +
-. Configure the standalone controller
+== Install the nfs-server in the nfs-server node
++
+. Configure the nfs server for glance and cinder
 +
 From the bastion connect to the *nfs-server* host and configure the networking:
 +
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}.pem cloud-user@nfsserver
+sudo -i
 mkdir /nfs
 mkdir /nfs/cinder
 mkdir /nfs/glance
 chmod 777 /nfs/cinder
 chmod 777 /nfs/glance
 
-cat <<EOF > /etc/exports
+cat <<\EOF > /etc/exports
 /nfs/cinder *(rw,sync,no_root_squash)
 /nfs/glance *(rw,sync,no_root_squash)
 EOF
@@ -53,6 +55,7 @@ nmcli con up "static-eth1"
 
 systemctl start nfs-server
 systemctl enable nfs-server
+logout
 ----
 
 === Install the RHOSP 17.1 controller
@@ -93,6 +96,7 @@ From the bastion connect to the *compute02* host and configure the networking:
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}.pem cloud-user@compute02
+sudo -i
 hostnamectl set-hostname compute02.localdomain
 nmcli co delete 'Wired connection 2'
 nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
@@ -125,14 +129,15 @@ From the bastion connect to the *allinone* host, subscribe the host with the sub
 +
 [source,bash,role=execute]
 ----
-git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/files/standalone/* /home/cloud-user/.
+
 sudo subscription-manager register --username $RHN_user --password $RHN_password
 sudo subscription-manager release --set=9.2
 sudo subscription-manager repos --disable=*
 sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms  --enable=fast-datapath-for-rhel-9-x86_64-rpms
 sudo dnf -y update
-sudo dnf -y install python3-tripleoclient python-jinja2
+sudo dnf -y install python3-tripleoclient python-jinja2 git
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cp labrepo/content/standalone/* /home/cloud-user/.
 sh openstack_standalone.sh
 ----
 
@@ -160,14 +165,14 @@ Execute the *openstack_compute.sh* script to install the compute02:
 +
 [source,bash,role=execute]
 ----
-git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/files/standalone/* /home/cloud-user/.
 sudo subscription-manager register --username $RHN_user --password $RHN_password
 sudo subscription-manager release --set=9.2
 sudo subscription-manager repos --disable=*
 sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=openstack-17.1-for-rhel-9-x86_64-rpms  --enable=fast-datapath-for-rhel-9-x86_64-rpms
 sudo dnf -y update
-sudo dnf -y install python3-tripleoclient python-jinja2
+sudo dnf -y install python3-tripleoclient python-jinja2 git
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cp labrepo/content/files/standalone/* /home/cloud-user/.
 sh openstack_compute.sh
 ----
 
