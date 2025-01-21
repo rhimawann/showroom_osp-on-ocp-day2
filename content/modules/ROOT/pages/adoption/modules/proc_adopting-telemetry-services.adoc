@@ -19,7 +19,7 @@ You cannot automatically migrate old data because different back ends are used. 
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc create -f - <<\ EOF
+cat << EOF | oc apply -f -
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:

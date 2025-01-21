@@ -9,12 +9,20 @@ Adopt your Compute (nova) services to the {rhos_long} data plane.
 .Prerequisites
 
 * You have stopped the remaining control plane nodes, repositories, and packages on the {compute_service_first_ref} hosts. For more information, see xref:stopping-infrastructure-management-and-compute-services_{context}[Stopping infrastructure management and Compute services].
-* Create the dataplane network (IPAM):
+* In the bastion, create the dataplane network (IPAM):
 +
 [source,bash,role=execute,subs=attributes]
 ----
-cd labrepo/content/files/
+cd /home/lab-user/labrepo/content/files/
 oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
+----
++
+
+* Create the libvirt secret:
++
+[source,bash,role=execute,subs=attributes]
+----
+oc apply -f osp-ng-libvirt-secret.yaml
 ----
 +
 
@@ -44,7 +52,7 @@ ifeval::["{build}" != "upstream"]
 . Create an SSH authentication secret for the data plane nodes:
 endif::[]
 +
-[subs=+quotes]
+[source,bash,role=execute,subs=attributes]
 ----
 oc create secret generic dataplane-ansible-ssh-private-key-secret \
 --save-config \
@@ -55,7 +63,6 @@ oc create secret generic dataplane-ansible-ssh-private-key-secret \
 -n openstack \
 -o yaml | oc apply -f-
 ----
-TODO
 +
 ifeval::["{build}" == "downstream"]
 * Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key. /TODO
@@ -80,7 +87,7 @@ cd -
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -112,17 +119,6 @@ oc create secret generic subscription-manager \
 * Replace `<subscription_manager_username>` with the applicable user name.
 * Replace `<subscription_manager_password>` with the applicable password.
 
-. Create a secret for the Red Hat registry:
-+
-[source,bash,role=execute,subs=attributes]
-----
-oc create secret generic redhat-registry \
---from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
-----
-+
-* Replace `<registry_username>` with the applicable user name.
-* Replace `<registry_password>` with the applicable password.
-endif::[]
 
 . Deploy the `OpenStackDataPlaneNodeSet` CR:
 +
@@ -139,7 +135,7 @@ oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -153,7 +149,7 @@ EOF
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -205,7 +201,7 @@ to use the same profile as the one set on the {OpenStackShort} {rhos_prev_ver} n
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -219,7 +215,7 @@ EOF
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -236,7 +232,7 @@ EOF
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f - <<EOF
+cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -281,7 +277,7 @@ oc exec openstackclient -- openstack network agent list
 | 10482583-2130-5b0d-958f-3430da21b929 | OVN Metadata agent           | standalone.localdomain |                   | :-)   | UP    | neutron-ovn-metadata-agent |
 | a4f1b584-16f1-4937-b2b0-28102a3f6eaa | OVN Controller agent         | standalone.localdomain |                   | :-)   | UP    | ovn-controller             |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
-[source,bash,role=execute,subs=attributes]
+
 ----
 
 .Next steps

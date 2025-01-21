@@ -10,7 +10,7 @@ The following procedure applies to a single node standalone {OpenStackPreviousIn
 
 * Define the shell variables. Replace the following example values with values that apply to your environment:
 +
-[subs=+quotes]
+[subs=+quotes,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 EDPM_PRIVATEKEY_PATH="~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa"
