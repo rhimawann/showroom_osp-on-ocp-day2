@@ -10,6 +10,7 @@ This configuration is managed by the NMState operator, which uses `NodeNetworkCo
 
 * For each {OpenShiftShort} worker node, define a `NodeNetworkConfigurationPolicy` CR that describes the desired network configuration. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: v1
 items:

@@ -16,7 +16,7 @@ For example to be able to limit `MachineConfig` to the 3 {OpenShift} ({OpenShift
 marked with the `type: openstack` label, you create the
 `MachineConfigPool` like this:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfigPool
@@ -33,7 +33,7 @@ spec:
 
 And then you use it in the `MachineConfig`:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig

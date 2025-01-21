@@ -33,9 +33,9 @@ networkers=(
 [NOTE]
 You can reuse most of the `nodeTemplate` section from the `OpenStackDataPlaneNodeSet` CR that is designated for your Compute nodes. You can omit some of the variables because of the limited set of services that are running on Networker nodes.
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
@@ -207,6 +207,7 @@ EOF
 
 . Ensure that you use the same `ovn-controller` settings in the `OpenStackDataPlaneNodeSet` CR that you used in the Networker nodes before adoption. This configuration is stored in the `external_ids` column in the `Open_vSwitch` table in the Open vSwitch database:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ovs-vsctl list Open .
 ...
@@ -218,9 +219,9 @@ external_ids        : {hostname=standalone.localdomain, ovn-bridge=br-int, ovn-b
 
 . Optional: Enable `neutron-metadata` in the `OpenStackDataPlaneNodeSet` CR:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='[
+oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='[
   {
     "op": "add",
     "path": "/spec/services/-",
@@ -232,9 +233,9 @@ $ oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='
 
 . Optional: Enable `neutron-dhcp` in the `OpenStackDataPlaneNodeSet` CR:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='[
+oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='[
   {
     "op": "add",
     "path": "/spec/services/-",
@@ -246,9 +247,9 @@ $ oc patch openstackdataplanenodeset <networker_CR_name> --type='json' --patch='
 
 .. Create a `OpenStackDataPlaneDeployment` CR that runs only the validation:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -263,25 +264,28 @@ EOF
 
 .. When the validation is finished, confirm that the status of the Ansible EE pods is `Completed`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ watch oc get pod -l app=openstackansibleee
+watch oc get pod -l app=openstackansibleee
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+oc logs -l app=openstackansibleee -f --max-log-requests 20
 ----
 
 .. Wait for the deployment to reach the `Ready` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for condition=Ready openstackdataplanedeployment/openstack-pre-adoption-networker --timeout=10m
+oc wait --for condition=Ready openstackdataplanedeployment/openstack-pre-adoption-networker --timeout=10m
 ----
 
 . Deploy the `OpenStackDataPlaneDeployment` CR for Networker nodes:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -299,26 +303,30 @@ Alternatively, you can include the Networker node set in the `nodeSets` list bef
 
 . Confirm that all the Ansible EE pods reach a `Completed` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ watch oc get pod -l app=openstackansibleee
+watch oc get pod -l app=openstackansibleee
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+oc logs -l app=openstackansibleee -f --max-log-requests 20
 ----
 
 . Wait for the data plane node set to reach the `Ready` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for condition=Ready osdpns/<networker_CR_name> --timeout=30m
+oc wait --for condition=Ready osdpns/<networker_CR_name> --timeout=30m
 ----
 +
 * Replace `<networker_CR_name>` with the name of the CR that you deployed for your Networker nodes, for example, `openstack-networker`.
 
 . Verify that the {networking_first_ref} agents are running. The list of agents varies depending on the services you enabled:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec openstackclient -- openstack network agent list
+oc exec openstackclient -- openstack network agent list
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
 | ID                                   | Agent Type                   | Host                   | Availability Zone | Alive | State | Binary                     |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
@@ -326,4 +334,5 @@ $ oc exec openstackclient -- openstack network agent list
 | 10482583-2130-5b0d-958f-3430da21b929 | OVN Metadata agent           | standalone.localdomain |                   | :-)   | UP    | neutron-ovn-metadata-agent |
 | a4f1b584-16f1-4937-b2b0-28102a3f6eaa | OVN Controller Gateway agent | standalone.localdomain |                   | :-)   | UP    | ovn-controller             |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+[source,bash,role=execute,subs=attributes]
 ----

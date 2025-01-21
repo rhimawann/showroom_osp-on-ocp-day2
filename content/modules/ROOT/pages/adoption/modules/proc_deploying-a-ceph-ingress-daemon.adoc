@@ -21,6 +21,7 @@ After you complete this procedure, you can reach the RGW back end from the ingre
 
 . Log in to each Controller node and remove the following configuration from the `/var/lib/config-data/puppet-generated/haproxy/etc/haproxy/haproxy.cfg` file:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 listen ceph_rgw
   bind 10.0.0.103:8080 transparent
@@ -39,6 +40,7 @@ listen ceph_rgw
 
 . Restart `haproxy-bundle` and confirm that it is started:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [root@controller-0 ~]# sudo pcs resource restart haproxy-bundle
 haproxy-bundle successfully restarted
@@ -54,6 +56,7 @@ haproxy-bundle successfully restarted
 
 . Confirm that no process is connected to port 8080:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [root@controller-0 ~]# ss -antop | grep 8080
 [root@controller-0 ~]#
@@ -61,6 +64,7 @@ haproxy-bundle successfully restarted
 +
 You can expect the {object_storage_first_ref} CLI to fail to establish the connection:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 (overcloud) [root@cephstorage-0 ~]# swift list
 
@@ -69,6 +73,7 @@ HTTPConnectionPool(host='10.0.0.103', port=8080): Max retries exceeded with url:
 
 . Set the required images for both HAProxy and Keepalived:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 [ceph: root@controller-0 /]# ceph config set mgr mgr/cephadm/container_image_haproxy quay.io/ceph/haproxy:2.3
@@ -82,14 +87,15 @@ endif::[]
 
 . Create a file called `rgw_ingress` in `controller-0`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
-$ vim ${SPEC_DIR}/rgw_ingress
+SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
+vim ${SPEC_DIR}/rgw_ingress
 ----
 
 . Paste the following content into the `rgw_ingress` file:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 ---
 service_type: ingress
@@ -111,15 +117,17 @@ spec:
 
 . Apply the `rgw_ingress` spec by using the Ceph orchestrator CLI:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
-$ cephadm shell -m ${SPEC_DIR}/rgw_ingress -- ceph orch apply -i /mnt/rgw_ingress
+SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
+cephadm shell -m ${SPEC_DIR}/rgw_ingress -- ceph orch apply -i /mnt/rgw_ingress
 ----
 
 . Wait until the ingress is deployed and query the resulting endpoint:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell -- ceph orch ls
+sudo cephadm shell -- ceph orch ls
 
 NAME                 	PORTS            	RUNNING  REFRESHED  AGE  PLACEMENT
 crash                                         	6/6  6m ago 	3d   *
@@ -131,8 +139,9 @@ osd.default_drive_group   15  37s ago	3d   cephstorage-0;cephstorage-1;cephstora
 rgw.rgw   ?:8090          3/3  37s ago	4m   label:rgw
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ curl 10.0.0.89:8080
+curl 10.0.0.89:8080
 
 ---
 <?xml version="1.0" encoding="UTF-8"?><ListAllMyBucketsResult xmlns="http://s3.amazonaws.com/doc/2006-03-01/"><Owner><ID>anonymous</ID><DisplayName></DisplayName></Owner><Buckets></Buckets></ListAllMyBucketsResult>[ceph: root@controller-0 /]#

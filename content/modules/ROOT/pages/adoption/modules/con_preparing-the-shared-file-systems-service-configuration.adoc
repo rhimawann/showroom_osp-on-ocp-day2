@@ -20,7 +20,7 @@ tool.
 endif::[]
 * If a custom policy is necessary, you must provide it as a `ConfigMap`. The following example spec illustrates how you can set up a `ConfigMap` called `manila-policy` with the contents of a file called `policy.yaml`:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
   spec:
     manila:
@@ -60,7 +60,7 @@ link:https://catalog.redhat.com/software/containers/search?gs&q=manila[Red Hat E
 +
 The following example shows a manila spec from the `OpenStackControlPlane` CR that includes multiple storage back-end drivers, where only one is using a custom container image:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
   spec:
     manila:
@@ -104,7 +104,7 @@ The following example shows a manila spec from the `OpenStackControlPlane` CR th
 +
 The following example shows the `OpenStackVersion` CR that defines the custom container image:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackVersion
@@ -121,9 +121,9 @@ The name of the `OpenStackVersion` CR must match the name of your `OpenStackCont
 
 . Create a file that includes the secrets, for example, `netapp_secrets.conf`:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << __EOF__ > ~/netapp_secrets.conf
+cat << __EOF__ > ~/netapp_secrets.conf
 
 [netapp]
 netapp_server_hostname = 203.0.113.10
@@ -133,15 +133,16 @@ netapp_vserver = mydatavserver
 __EOF__
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc create secret generic osp-secret-manila-netapp --from-file=~/<secret> -n openstack
+oc create secret generic osp-secret-manila-netapp --from-file=~/<secret> -n openstack
 ----
 +
 ** Replace `<secret>` with the name of the file that includes your secrets, for example, `netapp_secrets.conf`.
 
 . Add the secret to any {rhos_component_storage_file} file in the `customServiceConfigSecrets` section. The following example adds the `osp-secret-manila-netapp` secret to the `manilaShares` service:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
   spec:
     manila:

@@ -21,39 +21,39 @@ endif::[]
 
 . Retrieve the existing `auth_encryption_key` and `service` passwords. You use these passwords to patch the `osp-secret`. In the following example, the `auth_encryption_key` is used as `HeatAuthEncryptionKey` and the `service` password is used as `HeatPassword`:
 +
+[source,bash]
 ----
-[stack@rhosp17 ~]$ grep -E 'HeatPassword|HeatAuth|HeatStackDomainAdmin' ~/overcloud-deploy/overcloud/overcloud-passwords.yaml
-  HeatAuthEncryptionKey: Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2
-  HeatPassword: dU2N0Vr2bdelYH7eQonAwPfI3
-  HeatStackDomainAdminPassword: dU2N0Vr2bdelYH7eQonAwPfI3
-----
-
-. Log in to a Controller node and verify the `auth_encryption_key` value in use:
-+
-----
-[stack@rhosp17 ~]$ ansible -i overcloud-deploy/overcloud/config-download/overcloud/tripleo-ansible-inventory.yaml overcloud-controller-0 -m shell -a "grep auth_encryption_key /var/lib/config-data/puppet-generated/heat/etc/heat/heat.conf | grep -Ev '^#|^$'" -b
-overcloud-controller-0 | CHANGED | rc=0 >>
-auth_encryption_key=Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2
+grep -E 'HeatPassword|HeatAuth|HeatStackDomainAdmin' ~/tripleo-standalone-passwords.yaml
+  HeatAuthEncryptionKey: BYJkXWIcFrybDDIx3kolIdyXCQt19GsM
+  HeatPassword: rsk4PSmajvqL2FnFoAhjKbLvU
+  HeatStackDomainAdminPassword: gcw9mMDo3r9AcZ1v2bWKlP7oF
 ----
 
 . Encode the password to Base64 format:
 +
 ----
-$ echo Q60Hj8PqbrDNu2dDCbyIQE2dibpQUPg2 | base64
+echo BYJkXWIcFrybDDIx3kolIdyXCQt19GsM | base64
 UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK
+echo rsk4PSmajvqL2FnFoAhjKbLvU | base64
+cnNrNFBTbWFqdnFMMkZuRm9BaGpLYkx2VQo=
+echo gcw9mMDo3r9AcZ1v2bWKlP7oF | base64
+Z2N3OW1NRG8zcjlBY1oxdjJiV0tsUDdvRgo=
 ----
 
 . Patch the `osp-secret` to update the `HeatAuthEncryptionKey` and `HeatPassword` parameters. These values must match the values in the {OpenStackPreviousInstaller} {orchestration} configuration:
 +
+[source,bash]
 ----
-$ oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatAuthEncryptionKey" ,"value" : "UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK"}]'
-secret/osp-secret patched
+oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatAuthEncryptionKey" ,"value" : "UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK"}]'
+oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatPassword" ,"value" : "cnNrNFBTbWFqdnFMMkZuRm9BaGpLYkx2VQo="}]'
+oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatStackDomainAdminPassword" ,"value" : "Z2N3OW1NRG8zcjlBY1oxdjJiV0tsUDdvRgo="}]'
 ----
 
 . Patch the `OpenStackControlPlane` CR to deploy the {orchestration}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack --type=merge --patch '
 spec:
   heat:
     enabled: true
@@ -75,8 +75,9 @@ spec:
 
 . Ensure that the statuses of all the CRs are `Setup complete`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get Heat,HeatAPI,HeatEngine,HeatCFNAPI
+oc get Heat,HeatAPI,HeatEngine,HeatCFNAPI
 NAME                           STATUS   MESSAGE
 heat.heat.openstack.org/heat   True     Setup complete
 
@@ -92,8 +93,9 @@ heatcfnapi.heat.openstack.org/heat-cfnapi   True     Setup complete
 
 . Check that the {orchestration} is registered in the {identity_service}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -it openstackclient -- openstack service list -c Name -c Type
+oc exec -it openstackclient -- openstack service list -c Name -c Type
 +------------+----------------+
 | Name       | Type           |
 +------------+----------------+
@@ -107,10 +109,12 @@ $ oc exec -it openstackclient -- openstack service list -c Name -c Type
 | nova       | compute        |
 | neutron    | network        |
 +------------+----------------+
+[source,bash,role=execute,subs=attributes]
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -it openstackclient -- openstack endpoint list --service=heat -f yaml
+oc exec -it openstackclient -- openstack endpoint list --service=heat -f yaml
 - Enabled: true
   ID: 1da7df5b25b94d1cae85e3ad736b25a5
   Interface: public
@@ -129,8 +133,9 @@ $ oc exec -it openstackclient -- openstack endpoint list --service=heat -f yaml
 
 . Check that the {orchestration} engine services are running:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -it openstackclient -- openstack orchestration service list -f yaml
+oc exec -it openstackclient -- openstack orchestration service list -f yaml
 - Binary: heat-engine
   Engine ID: b16ad899-815a-4b0c-9f2e-e6d9c74aa200
   Host: heat-engine-6d47856868-p7pzz
@@ -163,8 +168,9 @@ $ oc exec -it openstackclient -- openstack orchestration service list -f yaml
 
 . Verify that you can see your {orchestration} stacks:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack stack list -f yaml
+openstack stack list -f yaml
 - Creation Time: '2023-10-11T22:03:20Z'
   ID: 20f95925-7443-49cb-9561-a1ab736749ba
   Project: 4eacd0d1cab04427bc315805c28e66c9

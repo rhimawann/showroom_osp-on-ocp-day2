@@ -13,6 +13,7 @@ Migrate the data in the OVN databases from the original {rhos_prev_long} deploym
 * The cloud is migrated to the Modular Layer 2 plug-in with Open Virtual Networking (ML2/OVN) mechanism driver.
 * Define the following shell variables. Replace the example values with values that are correct for your environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 STORAGE_CLASS_NAME=ocs-external-storagecluster-ceph-rbd
@@ -27,8 +28,9 @@ SOURCE_OVSDB_IP=172.17.0.15 # For IPv4
 +
 To get the value to set `SOURCE_OVSDB_IP`, query the puppet-generated configurations in a Controller node:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ grep -rI 'ovn_[ns]b_conn' /var/lib/config-data/puppet-generated/
+grep -rI 'ovn_[ns]b_conn' /var/lib/config-data/puppet-generated/
 ----
 
 SOURCE_OVSDB_IP is 172.17.0.15
@@ -38,17 +40,18 @@ SOURCE_OVSDB_IP is 172.17.0.15
 ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
 . Get the {OpenShiftShort} master node that contains the {OpenStackShort} Controller:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get vmi -n $<ospdo_namespace> -o jsonpath='{.items[0].metadata.labels.kubevirt\.io/nodeName}'
+oc get vmi -n $<ospdo_namespace> -o jsonpath='{.items[0].metadata.labels.kubevirt\.io/nodeName}'
 ----
 +
 * Replace `<ospdo_namespace>` with your OSPdO namespace.
 endif::[]
 . Prepare a temporary `PersistentVolume` claim and the helper pod for the OVN backup. Adjust the storage requests for a large database, if needed:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 ---
 apiVersion: cert-manager.io/v1
 kind: Certificate
@@ -130,34 +133,36 @@ endif::[]
 
 . Wait for the pod to be ready:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
-$ oc wait --for=condition=Ready pod/ovn-copy-data --timeout=30s
+oc wait --for=condition=Ready pod/ovn-copy-data --timeout=30s
 endif::[]
 ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-$ oc wait --for=condition=Ready -n $OSPDO_NAMESPACE pod/ovn-copy-data --timeout=30s
+oc wait --for=condition=Ready -n $OSPDO_NAMESPACE pod/ovn-copy-data --timeout=30s
 endif::[]
 ----
 
 . Back up your OVN databases:
 * If you did not enable TLS everywhere, run the following command:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6641 > /backup/ovs-nb.db"
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6642 > /backup/ovs-sb.db"
+oc exec ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6641 > /backup/ovs-nb.db"
+oc exec ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6642 > /backup/ovs-sb.db"
 endif::[]
 ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-$ oc exec -n $OSPDO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6641 > /backup/ovs-nb.db"
-$ oc exec -n $OSPDO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6642 > /backup/ovs-sb.db"
+oc exec -n $OSPDO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6641 > /backup/ovs-nb.db"
+oc exec -n $OSPDO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client backup tcp:$SOURCE_OVSDB_IP:6642 > /backup/ovs-sb.db"
 endif::[]
 ----
 
 . Start the control plane OVN database services prior to import, with `northd` and `ovn-controller` disabled:
 +
-[source,yaml]
+[source,yaml,role=execute]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack --type=merge --patch '
 spec:
   ovn:
     enabled: true
@@ -183,13 +188,15 @@ spec:
 
 . Wait for the OVN database services to reach the `Running` phase:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for=jsonpath='{.status.phase}'=Running pod --selector=service=ovsdbserver-nb
-$ oc wait --for=jsonpath='{.status.phase}'=Running pod --selector=service=ovsdbserver-sb
+oc wait --for=jsonpath='{.status.phase}'=Running pod --selector=service=ovsdbserver-nb
+oc wait --for=jsonpath='{.status.phase}'=Running pod --selector=service=ovsdbserver-sb
 ----
 
 . Fetch the OVN database IP addresses on the `clusterIP` service network:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 PODIFIED_OVSDB_NB_IP=$(oc get svc --selector "statefulset.kubernetes.io/pod-name=ovsdbserver-nb-0" -ojsonpath='{.items[0].spec.clusterIP}')
 PODIFIED_OVSDB_SB_IP=$(oc get svc --selector "statefulset.kubernetes.io/pod-name=ovsdbserver-sb-0" -ojsonpath='{.items[0].spec.clusterIP}')
@@ -198,37 +205,40 @@ PODIFIED_OVSDB_SB_IP=$(oc get svc --selector "statefulset.kubernetes.io/pod-name
 . Upgrade the database schema for the backup files:
 .. As we did not enable TLS everywhere, use the following command:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client get-schema tcp:$PODIFIED_OVSDB_NB_IP:6641 > /backup/ovs-nb.ovsschema && ovsdb-tool convert /backup/ovs-nb.db /backup/ovs-nb.ovsschema"
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client get-schema tcp:$PODIFIED_OVSDB_SB_IP:6642 > /backup/ovs-sb.ovsschema && ovsdb-tool convert /backup/ovs-sb.db /backup/ovs-sb.ovsschema"
+oc exec ovn-copy-data -- bash -c "ovsdb-client get-schema tcp:$PODIFIED_OVSDB_NB_IP:6641 > /backup/ovs-nb.ovsschema && ovsdb-tool convert /backup/ovs-nb.db /backup/ovs-nb.ovsschema"
+oc exec ovn-copy-data -- bash -c "ovsdb-client get-schema tcp:$PODIFIED_OVSDB_SB_IP:6642 > /backup/ovs-sb.ovsschema && ovsdb-tool convert /backup/ovs-sb.db /backup/ovs-sb.ovsschema"
 ----
 
 . Restore the database backup to the new OVN database servers:
 .. As we did not enable TLS everywhere, use the following command:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_NB_IP:6641 < /backup/ovs-nb.db"
-$ oc exec ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_SB_IP:6642 < /backup/ovs-sb.db"
+oc exec ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_NB_IP:6641 < /backup/ovs-nb.db"
+oc exec ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_SB_IP:6642 < /backup/ovs-sb.db"
 endif::[]
 ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-$ oc exec -n $RHOSO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_NB_IP:6641 < /backup/ovs-nb.db"
-$ oc exec -n $RHOSO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_SB_IP:6642 < /backup/ovs-sb.db"
+oc exec -n $RHOSO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_NB_IP:6641 < /backup/ovs-nb.db"
+oc exec -n $RHOSO_NAMESPACE ovn-copy-data -- bash -c "ovsdb-client restore tcp:$PODIFIED_OVSDB_SB_IP:6642 < /backup/ovs-sb.db"
 endif::[]
 ----
 
 . Check that the data was successfully migrated by running the following commands against the new database servers, for example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -it ovsdbserver-nb-0 -- ovn-nbctl show
-$ oc exec -it ovsdbserver-sb-0 -- ovn-sbctl list Chassis
+oc exec -it ovsdbserver-nb-0 -- ovn-nbctl show
+oc exec -it ovsdbserver-sb-0 -- ovn-sbctl list Chassis
 ----
 
 . Start the control plane `ovn-northd` service to keep both OVN databases in sync:
 +
-[source,yaml]
+[source,yaml,role=execute]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack --type=merge --patch '
 spec:
   ovn:
     enabled: true
@@ -240,9 +250,9 @@ spec:
 
 . If you are running OVN gateway services on {OpenShiftShort} nodes, enable the control plane `ovn-controller` service:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack --type=merge --patch '
 spec:
   ovn:
     enabled: true
@@ -257,9 +267,10 @@ Running OVN gateways on {OpenShiftShort} nodes might be prone to data plane down
 
 . Delete the `ovn-data` helper pod and the temporary `PersistentVolumeClaim` that is used to store OVN database backup files:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc delete --ignore-not-found=true pod ovn-copy-data
-$ oc delete --ignore-not-found=true pvc ovn-data
+oc delete --ignore-not-found=true pod ovn-copy-data
+oc delete --ignore-not-found=true pvc ovn-data
 ----
 +
 [NOTE]
@@ -267,6 +278,7 @@ Consider taking a snapshot of the `ovn-data` helper pod and the temporary `Persi
 
 . Stop the adopted OVN database servers:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ServicesToStop=("tripleo_ovn_cluster_north_db_server.service"
                 "tripleo_ovn_cluster_south_db_server.service")

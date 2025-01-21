@@ -11,8 +11,9 @@ Adopt the {image_service_first_ref} that you deployed with a {Ceph} back end. Us
 the `openstack` namespace and that the `extraMounts` property of the
 `OpenStackControlPlane` custom resource (CR) is configured properly. For more information, see xref:configuring-a-ceph-backend_migrating-databases[Configuring a Ceph back end].
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << EOF > glance_patch.yaml
+cat << EOF > glance_patch.yaml
 spec:
   glance:
     enabled: true
@@ -64,6 +65,7 @@ This command produces the difference between both ini configuration files.
 
 * Patch the `OpenStackControlPlane` CR to deploy the {image_service} with a {Ceph} back end:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file glance_patch.yaml
+oc patch openstackcontrolplane openstack --type=merge --patch-file glance_patch.yaml
 ----

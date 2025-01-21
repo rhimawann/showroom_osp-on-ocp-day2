@@ -16,23 +16,27 @@ The {object_storage_first_ref} migration involves the following steps:
 * Adopt the {object_storage}. For more information, see xref:adopting-the-object-storage-service_adopt-control-plane[Adopting the {object_storage}].
 * For DNS servers, ensure that all existing nodes are able to resolve the hostnames of the {rhocp_long} pods, for example, by using the external IP of the DNSMasq service as the nameserver in `/etc/resolv.conf`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get service dnsmasq-dns -o jsonpath="{.status.loadBalancer.ingress[0].ip}" | $CONTROLLER1_SSH sudo tee /etc/resolv.conf
+oc get service dnsmasq-dns -o jsonpath="{.status.loadBalancer.ingress[0].ip}" | $CONTROLLER1_SSH sudo tee /etc/resolv.conf
 ----
 * Track the current status of the replication by using the `swift-dispersion` tool:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-dispersion-populate'
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-dispersion-populate'
 ----
 +
 The command might need a few minutes to complete. It creates 0-byte objects that are distributed across the {object_storage} deployment, and you can use the `swift-dispersion-report` afterward to show the current replication status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-dispersion-report'
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-dispersion-report'
 ----
 +
 The output of the `swift-dispersion-report` command looks similar to the following:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 Queried 1024 containers for dispersion reporting, 5s, 0 retries
 100.00% of container copies found (3072 of 3072)
@@ -48,27 +52,31 @@ Sample represents 100.00% of the object partition space
 . Add new nodes by scaling up the SwiftStorage resource from 0 to 3:
 // TODO add paragraph / link on EDPM node usage for Swift
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge -p='{"spec":{"swift":{"template":{"swiftStorage":{"replicas": 3}}}}}'
+oc patch openstackcontrolplane openstack --type=merge -p='{"spec":{"swift":{"template":{"swiftStorage":{"replicas": 3}}}}}'
 ----
 +
 This command creates three storage instances on the {rhocp_long} cluster that use Persistent Volume Claims.
 
 . Wait until all three pods are running:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait pods --for condition=Ready -l component=swift-storage
+oc wait pods --for condition=Ready -l component=swift-storage
 ----
 
 . From the current rings, get the storage management IP addresses of the nodes to drain:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-ring-builder object.builder search _' | tail -n +2 | awk '{print $4}' | sort -u
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-ring-builder object.builder search _' | tail -n +2 | awk '{print $4}' | sort -u
 
 ----
 +
 The output looks similar to the following:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 172.20.0.100
 swift-storage-0.swift-storage.openstack.svc
@@ -78,8 +86,9 @@ swift-storage-2.swift-storage.openstack.svc
 
 . Drain the old nodes. In the following example, the old node `172.20.0.100` is drained:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
 swift-ring-tool get
 swift-ring-tool drain 172.20.0.100
 swift-ring-tool rebalance
@@ -91,20 +100,23 @@ Depending on your deployment, you might have more nodes to include in the comman
 . Copy and apply the updated rings to the original nodes. Run the
 ssh commands for your existing nodes that store the {object_storage} data:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc extract --confirm cm/swift-ring-files
+oc extract --confirm cm/swift-ring-files
 $CONTROLLER1_SSH "tar -C /var/lib/config-data/puppet-generated/swift/etc/swift/ -xzf -" < swiftrings.tar.gz
 $CONTROLLER1_SSH "systemctl restart tripleo_swift_*"
 ----
 
 . Track the replication progress by using the `swift-dispersion-report` tool:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c "swift-ring-tool get && swift-dispersion-report"
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c "swift-ring-tool get && swift-dispersion-report"
 ----
 +
 The output shows less than 100% of copies found. Repeat the command until all container and object copies are found:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 Queried 1024 containers for dispersion reporting, 6s, 0 retries
 There were 5 partitions missing 1 copy.
@@ -119,13 +131,14 @@ Sample represents 100.00% of the object partition space
 
 . Move the next replica to the new nodes by rebalancing and distributing the rings:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
 swift-ring-tool get
 swift-ring-tool rebalance
 swift-ring-tool push'
 
-$ oc extract --confirm cm/swift-ring-files
+oc extract --confirm cm/swift-ring-files
 $CONTROLLER1_SSH "tar -C /var/lib/config-data/puppet-generated/swift/etc/swift/ -xzf -" < swiftrings.tar.gz
 $CONTROLLER1_SSH "systemctl restart tripleo_swift_*"
 ----
@@ -134,8 +147,9 @@ Monitor the `swift-dispersion-report` output again, wait until all copies are fo
 
 . Remove the nodes from the rings:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c '
 swift-ring-tool get
 swift-ring-tool remove 172.20.0.100
 swift-ring-tool rebalance
@@ -149,12 +163,14 @@ Even if all replicas are on the new nodes and the `swift-dispersion-report` comm
 
 . Check the disk usage of all disks in the cluster:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-recon -d'
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-recon -d'
 ----
 
 . Confirm that there are no more `\*.db` or `*.data` files in the `/srv/node` directory on the nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 $CONTROLLER1_SSH "find /srv/node/ -type f -name '*.db' -o -name '*.data' | wc -l"
 ----

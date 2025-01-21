@@ -17,13 +17,14 @@ To adopt a {OpenStackPreviousInstaller}-deployed {block_storage_first_ref}, crea
 .Procedure
 . Prepare the secret to place the NFS server connection used by Cinder
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
+oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
 ----
 
 . Create a new file, for example, `cinder_nfs_patch.yaml`, and apply the configuration:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 cat << EOF > cinder_nfs_patch.yaml
 spec:
@@ -70,17 +71,25 @@ spec:
           - cinder-nfs-config
 EOF
 ----
-. Apply the configuration:
+. Wait for Cinder control plane services' CRs to become ready:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file=cinder_nfs_patch.yaml
+oc wait --for condition=Ready --timeout=300s Cinder/cinder
 ----
 
+. Apply the configuration:
++
+[source,bash,role=execute,subs=attributes]
+----
+oc patch openstackcontrolplane openstack --type=merge --patch-file=cinder_nfs_patch.yaml
+----
 
 . Retrieve the list of the previous scheduler and backup services:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack volume service list
+openstack volume service list
 
 +------------------+-------------------------+------+---------+-------+----------------------------+
 | Binary           | Host                    | Zone | Status  | State | Updated At                 |
@@ -95,6 +104,7 @@ $ openstack volume service list
 
 . Remove services for hosts that are in the `down` state:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remove cinder-scheduler standalone.localdomain
 oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remove cinder-backup  standalone.localdomain
@@ -107,8 +117,9 @@ oc exec -it cinder-scheduler-0 -c cinder-scheduler -- cinder-manage service remo
 
 . Check if all the services are up and running.
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack volume service list
+openstack volume service list
 
 +------------------+-------------------------+------+---------+-------+----------------------------+
 | Binary           | Host                    | Zone | Status  | State | Updated At                 |
@@ -125,30 +136,34 @@ $ openstack volume service list
 You are not required to run the data migrations at this step, but you must run them before the next upgrade. However, for adoption, it is recommended to run the migrations now to ensure that there are no issues before you run production workloads on the deployment.
 ====
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -it cinder-scheduler-0 -- cinder-manage db online_data_migrations
+oc exec -it cinder-scheduler-0 -- cinder-manage db online_data_migrations
 ----
 
 .Verification
 
 . Ensure that the `openstack` alias is defined:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ alias openstack="oc exec -t openstackclient -- openstack"
+alias openstack="oc exec -t openstackclient -- openstack"
 ----
 
 . Confirm that {block_storage} endpoints are defined and pointing to the control plane FQDNs:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack endpoint list --service <endpoint>
+openstack endpoint list --service <endpoint>
 ----
 +
 * Replace `<endpoint>` with the name of the endpoint that you want to confirm.
 
 . Confirm that the Block Storage services are running:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack volume service list
+openstack volume service list
 ----
 +
 [NOTE]
@@ -156,17 +171,19 @@ Cinder API services do not appear in the list. However, if you get a response fr
 
 . Confirm that you have your previous volume types, volumes, snapshots, and backups:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack volume type list
-$ openstack volume list
-$ openstack volume snapshot list
-$ openstack volume backup list
+openstack volume type list
+openstack volume list
+openstack volume snapshot list
+openstack volume backup list
 ----
 
 . To confirm that the configuration is working, perform the following steps:
 
 .. Create a volume from an image to check that the connection to {image_service_first_ref} is working:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack volume create --image cirros --bootable --size 1 disk_new
+openstack volume create --image cirros --bootable --size 1 disk_new
 ----

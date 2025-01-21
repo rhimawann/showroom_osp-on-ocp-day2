@@ -8,14 +8,16 @@ Verify that you adopted the {image_service_first_ref} to the {rhos_long} {rhos_c
 
 . Test the {image_service} from the {rhos_prev_long} CLI. You can compare and ensure that the configuration is applied to the {image_service} pods:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ os-diff diff /etc/glance/glance.conf.d/02-config.conf glance_patch.yaml --frompod -p glance-api
+os-diff diff /etc/glance/glance.conf.d/02-config.conf glance_patch.yaml --frompod -p glance-api
 ----
 +
 If no line appears, then the configuration is correct.
 
 . Inspect the resulting {image_service} pods:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 GLANCE_POD=`oc get pod |grep glance-default | cut -f 1 -d' ' | head -n 1`
 oc exec -t $GLANCE_POD -c glance-api -- cat /etc/glance/glance.conf.d/02-config.conf
@@ -33,21 +35,23 @@ store_description=Ceph glance store backend.
 
 . If you use a {Ceph} back end, ensure that the {Ceph} secrets are mounted:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec -t $GLANCE_POD -c glance-api -- ls /etc/ceph
+oc exec -t $GLANCE_POD -c glance-api -- ls /etc/ceph
 ceph.client.openstack.keyring
 ceph.conf
 ----
 
 . Check that the service is active, and that the endpoints are updated in the {OpenStackShort} CLI:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc rsh openstackclient
-$ openstack service list | grep image
+oc rsh openstackclient
+openstack service list | grep image
 
 | fc52dbffef36434d906eeb99adfc6186 | glance    | image        |
 
-$ openstack endpoint list | grep image
+openstack endpoint list | grep image
 
 | 569ed81064f84d4a91e0d2d807e4c1f1 | regionOne | glance       | image        | True    | internal  | http://glance-internal-openstack.apps-crc.testing   |
 | 5843fae70cba4e73b29d4aff3e8b616c | regionOne | glance       | image        | True    | public    | http://glance-public-openstack.apps-crc.testing     |
@@ -55,20 +59,23 @@ $ openstack endpoint list | grep image
 
 . Check that the images that you previously listed in the source cloud are available in the adopted service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack image list
+openstack image list
 +--------------------------------------+--------+--------+
 | ID                                   | Name   | Status |
 +--------------------------------------+--------+--------+
 | c3158cad-d50b-452f-bec1-f250562f5c1f | cirros | active |
 +--------------------------------------+--------+--------+
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 . Test that you can create an image on the adopted service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(openstack)$ alias openstack="oc exec -t openstackclient -- openstack"
-(openstack)$ curl -L -o /tmp/cirros-0.5.2-x86_64-disk.img http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img
+(openstack)alias openstack="oc exec -t openstackclient -- openstack"
+(openstack)curl -L -o /tmp/cirros-0.5.2-x86_64-disk.img http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img
     qemu-img convert -O raw /tmp/cirros-0.5.2-x86_64-disk.img /tmp/cirros-0.5.2-x86_64-disk.img.raw
     openstack image create --container-format bare --disk-format raw --file /tmp/cirros-0.5.2-x86_64-disk.img.raw cirros2
     openstack image list
@@ -107,8 +114,8 @@ ifeval::["{build}" != "downstream"]
 +--------------------------------------+--------+--------+
 
 
-(openstack)$ oc rsh ceph
-sh-4.4$ ceph -s
+(openstack)oc rsh ceph
+sh-4.4ceph -s
 r  cluster:
     id:     432d9a34-9cee-4109-b705-0c59e8973983
     health: HEALTH_OK
@@ -124,7 +131,7 @@ r  cluster:
     usage:   247 MiB used, 6.8 GiB / 7.0 GiB avail
     pgs:     160 active+clean
 
-sh-4.4$ rbd -p images ls
+sh-4.4rbd -p images ls
 46a3eac1-7224-40bc-9083-f2f0cd122ba4
 c3158cad-d50b-452f-bec1-f250562f5c1f
 ----

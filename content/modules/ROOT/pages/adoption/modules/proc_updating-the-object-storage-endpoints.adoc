@@ -8,8 +8,9 @@ You must update the {object_storage_first_ref} endpoints to point to the new vir
 
 . List the current endpoints:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(overcloud) [stack@undercloud-0 ~]$ openstack endpoint list | grep object
+(overcloud) [stack@undercloud-0 ~]openstack endpoint list | grep object
 
 | 1326241fb6b6494282a86768311f48d1 | regionOne | swift    	| object-store   | True	| internal  | http://172.17.3.68:8080/swift/v1/AUTH_%(project_id)s |
 | 8a34817a9d3443e2af55e108d63bb02b | regionOne | swift    	| object-store   | True	| public	| http://10.0.0.103:8080/swift/v1/AUTH_%(project_id)s  |
@@ -18,10 +19,11 @@ You must update the {object_storage_first_ref} endpoints to point to the new vir
 
 . Update the endpoints that are pointing to the Ingress VIP:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(overcloud) [stack@undercloud-0 ~]$ openstack endpoint set --url "http://10.0.0.89:8080/swift/v1/AUTH_%(project_id)s" 95596a2d92c74c15b83325a11a4f07a3
+(overcloud) [stack@undercloud-0 ~]openstack endpoint set --url "http://10.0.0.89:8080/swift/v1/AUTH_%(project_id)s" 95596a2d92c74c15b83325a11a4f07a3
 
-(overcloud) [stack@undercloud-0 ~]$ openstack endpoint list | grep object-store
+(overcloud) [stack@undercloud-0 ~]openstack endpoint list | grep object-store
 | 6c7244cc8928448d88ebfad864fdd5ca | regionOne | swift    	| object-store   | True	| internal  | http://172.17.3.79:8080/swift/v1/AUTH_%(project_id)s |
 | 95596a2d92c74c15b83325a11a4f07a3 | regionOne | swift    	| object-store   | True	| public	| http://10.0.0.89:8080/swift/v1/AUTH_%(project_id)s   |
 | e6d0599c5bf24a0fb1ddf6ecac00de2d | regionOne | swift    	| object-store   | True	| admin 	| http://172.17.3.79:8080/swift/v1/AUTH_%(project_id)s |
@@ -31,8 +33,9 @@ Repeat this step for both internal and admin endpoints.
 
 . Test the migrated service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(overcloud) [stack@undercloud-0 ~]$ swift list --debug
+(overcloud) [stack@undercloud-0 ~]swift list --debug
 
 DEBUG:swiftclient:Versionless auth_url - using http://10.0.0.115:5000/v3 as endpoint
 DEBUG:keystoneclient.auth.identity.v3.base:Making authentication request to http://10.0.0.115:5000/v3/auth/tokens
@@ -53,8 +56,9 @@ DEBUG:swiftclient:RESP BODY: b'[]'
 ifeval::["{build}" != "downstream"]
 . Run tempest tests against {object_storage}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(overcloud) [stack@undercloud-0 tempest-dir]$ tempest run --regex tempest.api.object_storage
+(overcloud) [stack@undercloud-0 tempest-dir]tempest run --regex tempest.api.object_storage
 ...
 ...
 ...

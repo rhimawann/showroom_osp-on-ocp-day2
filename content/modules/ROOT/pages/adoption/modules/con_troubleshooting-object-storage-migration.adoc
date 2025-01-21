@@ -6,12 +6,14 @@ You can troubleshoot issues with the {object_storage_first_ref} migration.
 
 * If the replication is not working and the `swift-dispersion-report` is not back to 100% availability, check the replicator progress to help you debug:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ CONTROLLER1_SSH tail /var/log/containers/swift/swift.log | grep object-server
+CONTROLLER1_SSH tail /var/log/containers/swift/swift.log | grep object-server
 ----
 +
 The following shows an example of the output:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 Mar 14 06:05:30 standalone object-server[652216]: <f+++++++++ 4e2/9cbea55c47e243994b0b10d8957184e2/1710395823.58025.data
 Mar 14 06:05:30 standalone object-server[652216]: Successful rsync of /srv/node/vdd/objects/626/4e2 to swift-storage-1.swift-storage.openstack.svc::object/d1/objects/626 (0.094)
@@ -23,12 +25,14 @@ Mar 14 06:05:31 standalone object-server[652216]: Removing partition: /srv/node/
 
 * You can also check the ring consistency and replicator status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-recon -r --md5'
+oc debug --keep-labels=true job/swift-ring-rebalance -- /bin/sh -c 'swift-ring-tool get && swift-recon -r --md5'
 ----
 +
 The output might show a md5 mismatch until approximately 2 minutes after pushing the new rings. After the 2 minutes, the output looks similar to the following example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [...]
 Oldest completion was 2024-03-14 16:53:27 (3 minutes ago) by 172.20.0.100:6000.

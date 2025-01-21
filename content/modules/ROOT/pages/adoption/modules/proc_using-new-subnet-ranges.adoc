@@ -20,6 +20,7 @@ The values that are used in the following procedure are examples. Use values tha
 
 . Configure link local routes on the existing deployment nodes for the control plane subnets. This is done through {OpenStackPreviousInstaller} configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 network_config:
   - type: ovs_bridge
@@ -37,15 +38,17 @@ Repeat this configuration for other networks that need to use different subnets 
 
 . Apply the new configuration to every {OpenStackShort} node:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(undercloud)$ openstack overcloud network provision \
+(undercloud)openstack overcloud network provision \
  [--templates <templates_directory> \]
  --output  <deployment_file> \
  /home/stack/templates/<networks_definition_file>
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-(undercloud)$ openstack overcloud node provision \
+(undercloud)openstack overcloud node provision \
  [--templates <templates_directory> \]
  --stack <stack> \
  --network-config \
@@ -66,6 +69,7 @@ the risk of network disruption. You must enforce the changes by setting the
 
 . Confirm that there are new link local routes to the new subnet on each node. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # ip route | grep 172
 172.31.0.0/24 via 192.168.122.100 dev br-ctlplane
@@ -73,6 +77,7 @@ the risk of network disruption. You must enforce the changes by setting the
 
 . You also must configure link local routes to existing deployment on {rhos_long} worker nodes. This is achieved by adding `routes` entries to the `NodeNetworkConfigurationPolicy` CRs for each network. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
   - destination: 192.168.122.0/24 <1>
     next-hop-interface: ospbr <2>
@@ -82,6 +87,7 @@ the risk of network disruption. You must enforce the changes by setting the
 +
 As a result, the following route is added to your {OpenShiftShort} nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # ip route | grep 192
 192.168.122.0/24 dev ospbr proto static scope link
@@ -89,6 +95,7 @@ As a result, the following route is added to your {OpenShiftShort} nodes:
 +
 . Later, during the data plane adoption, in the `network_config` section of the `OpenStackDataPlaneNodeSet` CR, add the same link local routes for the new control plane subnet ranges. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
   nodeTemplate:
     ansible:
@@ -106,6 +113,7 @@ As a result, the following route is added to your {OpenShiftShort} nodes:
 
 . List the IP addresses that are used for the data plane nodes in the existing deployment as `ansibleHost` and `fixedIP`. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
   nodes:
     standalone:
@@ -125,6 +133,7 @@ Do not change {OpenStackShort} node IP addresses during the adoption process. Li
 
 . Expand the SSH range for the firewall configuration to include both subnets to allow SSH access to data plane nodes from both subnets:
 +
+[source,bash,role=execute,subs=attributes]
 ----
   edpm_sshd_allowed_ranges:
   - 192.168.122.0/24

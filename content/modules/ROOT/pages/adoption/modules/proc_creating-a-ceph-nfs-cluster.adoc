@@ -29,7 +29,7 @@ tasks.
 endif::[]
 .. Edit the networks that are associated with the {CephCluster} nodes to include the `StorageNFS` network:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 - name: CephStorage
   count: 3
@@ -56,7 +56,7 @@ endif::[]
 .. Edit the network configuration template file, for example, `/home/stack/network/nic-configs/ceph-storage.j2`, for the {CephCluster} nodes
 to include an interface that connects to the `StorageNFS` network:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 - type: vlan
   device: nic2
@@ -67,8 +67,9 @@ to include an interface that connects to the `StorageNFS` network:
 ----
 .. Update the {CephCluster} nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack overcloud node provision \
+openstack overcloud node provision \
     --stack overcloud   \
     --network-config -y  \
     -o overcloud-baremetal-deployed-storage_nfs.yaml \
@@ -81,28 +82,32 @@ When the update is complete, ensure that a new interface is created in the{CephC
 . Identify the IP address from the `StorageNFS` network to use as the Virtual IP
 address (VIP) for the Ceph NFS service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack port list -c "Fixed IP Addresses" --network storage_nfs
+openstack port list -c "Fixed IP Addresses" --network storage_nfs
 ----
 
 . In a running `cephadm` shell, identify the hosts for the NFS service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph orch host ls
+ceph orch host ls
 ----
 
 . Label each host that you identified. Repeat this command for each host that you want to label:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph orch host label add <hostname> nfs
+ceph orch host label add <hostname> nfs
 ----
 +
 * Replace `<hostname>` with the name of the host that you identified.
 
 . Create the NFS cluster:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph nfs cluster create cephfs \
+ceph nfs cluster create cephfs \
     "label:nfs" \
     --ingress \
     --virtual-ip=<VIP> \
@@ -127,7 +132,8 @@ endif::[]
 
 . Check the status of the NFS cluster:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph nfs cluster ls
-$ ceph nfs cluster info cephfs
+ceph nfs cluster ls
+ceph nfs cluster info cephfs
 ----

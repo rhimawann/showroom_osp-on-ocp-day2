@@ -11,6 +11,7 @@ Adopt your Compute (nova) services to the {rhos_long} data plane.
 * You have stopped the remaining control plane nodes, repositories, and packages on the {compute_service_first_ref} hosts. For more information, see xref:stopping-infrastructure-management-and-compute-services_{context}[Stopping infrastructure management and Compute services].
 * Create the dataplane network (IPAM):
 +
+[source,bash,role=execute,subs=attributes]
 ----
 cd labrepo/content/files/
 oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
@@ -19,6 +20,7 @@ oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
 
 * You have defined the shell variables to run the script that runs the fast-forward upgrade:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 PODIFIED_DB_ROOT_PASSWORD=$(oc get -o json secret/osp-secret | jq -r .data.DbRootPassword | base64 -d)
 
@@ -47,22 +49,23 @@ endif::[]
 oc create secret generic dataplane-ansible-ssh-private-key-secret \
 --save-config \
 --dry-run=client \
---from-file=authorized_keys=/home/lab-user/.ssh/t5ppwkey.pub \
---from-file=ssh-privatekey=/home/lab-user/.ssh/t5ppwkey.pem \
---from-file=ssh-publickey=/home/lab-user/.ssh/t5ppwkey.pub \
+--from-file=authorized_keys=/home/lab-user/.ssh/{guid}.pub \
+--from-file=ssh-privatekey=/home/lab-user/.ssh/{guid}.pem \
+--from-file=ssh-publickey=/home/lab-user/.ssh/{guid}.pub \
 -n openstack \
 -o yaml | oc apply -f-
 ----
 TODO
 +
 ifeval::["{build}" == "downstream"]
-* Replace `/home/lab-user/.ssh/t5ppwkey.pem` with the path to your SSH key. /TODO
+* Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key. /TODO
 endif::[]
 
 . Generate an ssh key-pair `nova-migration-ssh-key` secret:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ cd "$(mktemp -d)"
+cd "$(mktemp -d)"
 ssh-keygen -f ./id -t ecdsa-sha2-nistp521 -N ''
 oc get secret nova-migration-ssh-key || oc create secret generic nova-migration-ssh-key \
   -n openstack \
@@ -75,9 +78,9 @@ cd -
 
 . As we use a local storage back end for libvirt, create a `nova-compute-extra-config` service to remove pre-fast-forward workarounds and configure Compute services to use a local storage back end:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -100,8 +103,9 @@ The resources in the `ConfigMap` contain cell-specific configurations.
 ifeval::["{build}" == "downstream"]
 . Create a secret for the subscription manager:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc create secret generic subscription-manager \
+oc create secret generic subscription-manager \
 --from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
@@ -110,8 +114,9 @@ $ oc create secret generic subscription-manager \
 
 . Create a secret for the Red Hat registry:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc create secret generic redhat-registry \
+oc create secret generic redhat-registry \
 --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
@@ -121,7 +126,7 @@ endif::[]
 
 . Deploy the `OpenStackDataPlaneNodeSet` CR:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
 ----
@@ -132,9 +137,9 @@ oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
 
 .. Create the validation service:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -146,9 +151,9 @@ EOF
 
 .. Create a `OpenStackDataPlaneDeployment` CR that runs only the validation:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -163,18 +168,21 @@ EOF
 
 .. When the validation is finished, confirm that the status of the Ansible EE pods is `Completed`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ watch oc get pod -l app=openstackansibleee
+watch oc get pod -l app=openstackansibleee
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+oc logs -l app=openstackansibleee -f --max-log-requests 20
 ----
 
 .. Wait for the deployment to reach the `Ready` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for condition=Ready openstackdataplanedeployment/openstack-pre-adoption --timeout=10m
+oc wait --for condition=Ready openstackdataplanedeployment/openstack-pre-adoption --timeout=10m
 ----
 +
 [IMPORTANT]
@@ -195,9 +203,9 @@ to use the same profile as the one set on the {OpenStackShort} {rhos_prev_ver} n
 
 .. Create an `OpenStackDataPlaneService` CR to clean up the data plane services you are adopting:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneService
 metadata:
@@ -209,9 +217,9 @@ EOF
 
 .. Create the `OpenStackDataPlaneDeployment` CR to run the clean-up:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -226,9 +234,9 @@ EOF
 
 . When the clean-up is finished, deploy the `OpenStackDataPlaneDeployment` CR:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
@@ -244,24 +252,28 @@ EOF
 
 . Confirm that all the Ansible EE pods reach a `Completed` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ watch oc get pod -l app=openstackansibleee
+watch oc get pod -l app=openstackansibleee
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc logs -l app=openstackansibleee -f --max-log-requests 20
+oc logs -l app=openstackansibleee -f --max-log-requests 20
 ----
 
 . Wait for the data plane node set to reach the `Ready` status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for condition=Ready osdpns/openstack-edpm-compute-2-adoption --timeout=30m
+oc wait --for condition=Ready osdpns/openstack-edpm-compute-2-adoption --timeout=30m
 ----
 
 . Verify that the {networking_first_ref} agents are running:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc exec openstackclient -- openstack network agent list
+oc exec openstackclient -- openstack network agent list
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
 | ID                                   | Agent Type                   | Host                   | Availability Zone | Alive | State | Binary                     |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
@@ -269,6 +281,7 @@ $ oc exec openstackclient -- openstack network agent list
 | 10482583-2130-5b0d-958f-3430da21b929 | OVN Metadata agent           | standalone.localdomain |                   | :-)   | UP    | neutron-ovn-metadata-agent |
 | a4f1b584-16f1-4937-b2b0-28102a3f6eaa | OVN Controller agent         | standalone.localdomain |                   | :-)   | UP    | ovn-controller             |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+[source,bash,role=execute,subs=attributes]
 ----
 
 .Next steps

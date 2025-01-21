@@ -23,48 +23,13 @@ Adopt the {image_service_first_ref} that you deployed with an NFS back end. To c
 
 ----
 +
-[NOTE]
-====
-In this example, the `GlanceBackend` variable shows that the {image_service} has no notion of an NFS back end. The variable is using the `File` driver and, in the background, the `filesystem_store_datadir`. The `filesystem_store_datadir` is mapped to the export value provided by the `GlanceNfsShare` variable instead of `/var/lib/glance/images/`.
-If you do not export the `GlanceNfsShare` through a network that is propagated to the adopted {rhos_long} control plane, you must stop the `nfs-server` and remap the export to the `storage` network. Before doing so, ensure that the {image_service} is stopped in the source Controller nodes.
-ifeval::["{build}" != "downstream"]
-In the control plane, as per the (https://github.com/openstack-k8s-operators/docs/blob/main/images/network_diagram.jpg)[network isolation diagram],
-the {image_service} is attached to the Storage network, propagated via the associated `NetworkAttachmentsDefinition` custom resource, and the resulting Pods have already the right permissions to handle the {image_service} traffic through this network.
-endif::[]
-
-ifeval::["{build}" != "upstream"]
-In the control plane, the {image_service} is attached to the Storage network, then propagated through the associated `NetworkAttachmentsDefinition` custom resource (CR), and the resulting pods already have the right permissions to handle the {image_service} traffic through this network.
-endif::[]
-In a deployed {OpenStackShort} control plane, you can verify that the network mapping matches with what has been deployed in the {OpenStackPreviousInstaller}-based environment by checking both the `NodeNetworkConfigPolicy` (`nncp`) and the `NetworkAttachmentDefinition` (`net-attach-def`). The following is an example of the output that you should check in the {rhocp_long} environment to make sure that there are no issues with the propagated networks:
-
-----
-$ oc get nncp
-NAME                        STATUS      REASON
-enp6s0-crc-8cf2w-master-0   Available   SuccessfullyConfigured
-
-$ oc get net-attach-def
-NAME
-ctlplane
-internalapi
-storage
-tenant
-
-$ oc get ipaddresspool -n metallb-system
-NAME          AUTO ASSIGN   AVOID BUGGY IPS   ADDRESSES
-ctlplane      true          false             ["192.168.122.80-192.168.122.90"]
-internalapi   true          false             ["172.17.0.80-172.17.0.90"]
-storage       true          false             ["172.18.0.80-172.18.0.90"]
-tenant        true          false             ["172.19.0.80-172.19.0.90"]
-----
-====
-
 .Procedure
 
 . Adopt the {image_service} and create a new `default` `GlanceAPI` instance that is connected with the existing NFS share:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << EOF > glance_nfs_patch.yaml
-
+cat << EOF > glance_nfs_patch.yaml
 spec:
   extraMounts:
   - extraVol:
@@ -118,16 +83,18 @@ EOF
 
 . Patch the `OpenStackControlPlane` CR to deploy the {image_service} with an NFS back end:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file glance_nfs_patch.yaml
+oc patch openstackcontrolplane openstack --type=merge --patch-file glance_nfs_patch.yaml
 ----
 
 .Verification
 
 * When `GlanceAPI` is active, confirm that you can see a single API instance:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get pods -l service=glance
+oc get pods -l service=glance
 NAME                      READY   STATUS    RESTARTS
 glance-default-single-0   3/3     Running   0
 ```
@@ -135,6 +102,7 @@ glance-default-single-0   3/3     Running   0
 
 * Ensure that the description of the pod reports the following output:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 Mounts:
 ...
@@ -148,8 +116,9 @@ Mounts:
 
 * Check that the mountpoint that points to `/var/lib/glance/images` is mapped to the expected `nfs server ip` and `nfs path` that you defined in the new default `GlanceAPI` instance:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc rsh -c glance-api glance-default-single-0
+oc rsh -c glance-api glance-default-single-0
 
 sh-5.1# mount
 ...
@@ -161,29 +130,32 @@ sh-5.1# mount
 
 * Confirm that the UUID is created in the exported directory on the NFS node. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc rsh openstackclient
-$ openstack image list
+oc rsh openstackclient
+openstack image list
 
-sh-5.1$  curl -L -o /tmp/cirros-0.5.2-x86_64-disk.img http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img
-...
-...
-
-sh-5.1$ openstack image create --container-format bare --disk-format raw --file /tmp/cirros-0.5.2-x86_64-disk.img cirros
+sh-5.1 curl -L -o /tmp/cirros-0.5.2-x86_64-disk.img http://download.cirros-cloud.net/0.5.2/cirros-0.5.2-x86_64-disk.img
 ...
 ...
 
-sh-5.1$ openstack image list
+sh-5.1openstack image create --container-format bare --disk-format raw --file /tmp/cirros-0.5.2-x86_64-disk.img cirros
+...
+...
+
+sh-5.1openstack image list
 +--------------------------------------+--------+--------+
 | ID                                   | Name   | Status |
 +--------------------------------------+--------+--------+
 | 634482ca-4002-4a6d-b1d5-64502ad02630 | cirros | active |
 +--------------------------------------+--------+--------+
+[source,bash,role=execute,subs=attributes]
 ----
 
 * On the `nfs-server` node, the same `uuid` is in the exported `/var/nfs`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ls /var/nfs/
+ls /var/nfs/
 634482ca-4002-4a6d-b1d5-64502ad02630
 ----

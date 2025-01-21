@@ -13,19 +13,16 @@ To adopt the {compute_service_first_ref}, you patch an existing `OpenStackContro
 * You have completed the previous adoption steps.
 * You have defined the following shell variables. Replace the following example values with the values that are correct for your environment:
 ----
-$ alias openstack="oc exec -t openstackclient -- openstack"
+alias openstack="oc exec -t openstackclient -- openstack"
 ----
 
 .Procedure
 
 . Patch the `OpenStackControlPlane` CR to deploy the {compute_service}:
 +
-[NOTE]
-This procedure assumes that {compute_service} metadata is deployed on the top level and not on each cell level. If the {OpenStackShort} deployment has a per-cell metadata deployment, adjust the following patch as needed. You cannot run the metadata service in `cell0`.
-+
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack -n openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack -n openstack --type=merge --patch '
 spec:
   nova:
     enabled: true
@@ -102,15 +99,17 @@ Note that `disable_compute_service_check_for_ffu` is mandatory for all imported 
 * Check that {compute_service} endpoints are defined and pointing to the
 control plane FQDNs, and that the Nova API responds:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack endpoint list | grep nova
-$ openstack server list
+openstack endpoint list | grep nova
+openstack server list
 ----
 +
 ** Compare the outputs with the topology-specific configuration in xref:proc_retrieving-topology-specific-service-configuration_migrating-databases[Retrieving topology-specific service configuration].
 
 * Query the superconductor to check that `cell1` exists, and compare it to pre-adoption values:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 . ~/.source_cloud_exported_variables
 echo $PULL_OPENSTACK_CONFIGURATION_NOVAMANAGE_CELL_MAPPINGS

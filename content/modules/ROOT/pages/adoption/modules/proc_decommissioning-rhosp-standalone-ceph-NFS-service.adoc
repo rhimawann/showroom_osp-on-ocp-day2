@@ -20,9 +20,9 @@ Clients that are creating new workloads cannot use share exports through the pre
 [NOTE]
 This restarts the `manila-share` process and removes the export locations that applied to the previous NFS service from all the shares.
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << __EOF__ > ~/manila.patch
+cat << __EOF__ > ~/manila.patch
 spec:
   manila:
     enabled: true
@@ -53,8 +53,9 @@ __EOF__
 
 . Patch the `OpenStackControlPlane` custom resource:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.patch>
+oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.patch>
 ----
 * Replace `<manila.patch>` with the name of your patch file.
 
@@ -63,11 +64,12 @@ $ oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.p
 [IMPORTANT]
 You can defer this step until after {rhos_acro} {rhos_curr_ver} is operational. During this time, you cannot decommission the Controller nodes.
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo pcs resource disable ceph-nfs
-$ sudo pcs resource disable ip-<VIP>
-$ sudo pcs resource unmanage ceph-nfs
-$ sudo pcs resource unmanage ip-<VIP>
+sudo pcs resource disable ceph-nfs
+sudo pcs resource disable ip-<VIP>
+sudo pcs resource unmanage ceph-nfs
+sudo pcs resource unmanage ip-<VIP>
 ----
 +
 * Replace `<VIP>` with the IP address assigned to the `ceph-nfs` service in your environment.

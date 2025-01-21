@@ -33,12 +33,14 @@ endif::[]
 * Set the desired admin password for the control plane deployment. This can
 be the admin password from your original deployment or a different password:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ADMIN_PASSWORD=SomePassword
 ----
 +
 To use the existing {OpenStackShort} deployment password:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AdminPassword:' | awk -F ': ' '{ print $2; }')
@@ -53,6 +55,7 @@ you must synchronize the service account passwords.
 +
 For example, in developer environments with {OpenStackPreviousInstaller} Standalone, the passwords can be extracted:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{build}" != "downstream"]
 AODH_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' AodhPassword:' | awk -F ': ' '{ print $2; }')
@@ -95,11 +98,13 @@ endif::[]
 . Ensure that you are using the {rhocp_long} namespace where you want the
 control plane to be deployed:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc project openstack
+oc project openstack
 ----
 . Create the {OpenStackShort} secret.
 +
+[source,bash,role=execute,subs=attributes]
 ----
 cd /home/lab-user/labrepo/content/files
 oc apply -f osp-ng-ctlplane-secret.yaml
@@ -108,6 +113,7 @@ oc apply -f osp-ng-ctlplane-secret.yaml
 . If the `$ADMIN_PASSWORD` is different than the password you set
 in `osp-secret`, amend the `AdminPassword` key in the `osp-secret`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 oc set data secret/osp-secret "AdminPassword=$ADMIN_PASSWORD"
 ----
@@ -115,6 +121,7 @@ oc set data secret/osp-secret "AdminPassword=$ADMIN_PASSWORD"
 . Set service account passwords in `osp-secret` to match the service
 account passwords from the original deployment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 oc set data secret/osp-secret "AodhPassword=$AODH_PASSWORD"
 oc set data secret/osp-secret "BarbicanPassword=$BARBICAN_PASSWORD"
@@ -138,7 +145,7 @@ oc set data secret/osp-secret "SwiftPassword=$SWIFT_PASSWORD"
 . Deploy the `OpenStackControlPlane` CR. Ensure that you only enable the DNS, MariaDB, Memcached, and RabbitMQ services. All other services must
 be disabled:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 cd labrepo/content/files/
 oc apply -f osp-ng-ctlplane-deploy-backend.yaml
@@ -148,6 +155,7 @@ oc apply -f osp-ng-ctlplane-deploy-backend.yaml
 
 * Verify that MariaDB is running:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 oc get pod openstack-galera-0 -o jsonpath='{.status.phase}{"\n"}'
 oc get pod openstack-cell1-galera-0 -o jsonpath='{.status.phase}{"\n"}'

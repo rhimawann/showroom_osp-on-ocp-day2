@@ -9,11 +9,12 @@ You might need to restrict the {OpenShiftShort} nodes where the {block_storage} 
 +
 An example of when you need to restrict nodes for a specific {block_storage} is when you deploy the {block_storage} with the LVM driver. In that scenario, the LVM data where the volumes are stored only exists in a specific host, so you need to pin the Block Storage-volume service to that specific {OpenShiftShort} node. Running the service on any other {OpenShiftShort} node does not work. You cannot use the {OpenShiftShort} host node name to restrict the LVM back end. You need to identify the LVM back end by using a unique label, an existing label, or a new label:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc label nodes worker0 lvm=cinder-volumes
+oc label nodes worker0 lvm=cinder-volumes
 ----
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
@@ -58,7 +59,7 @@ iSCSI:::
 the {OpenShiftShort} CSI plugins and the {OpenStackShort} services.
 ** If you are not already running `iscsid` on the {OpenShiftShort} nodes, then you must apply a `MachineConfig`. For example:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
@@ -90,6 +91,7 @@ NVMe-TCP:::
 ** To connect to NVMe-TCP volumes, load NVMe-TCP kernel modules on the {OpenShiftShort} hosts.
 ** If you do not already load the `nvme-fabrics` module on the {OpenShiftShort} nodes where the volume and backup services are going to run, then you must apply a `MachineConfig`. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: machineconfiguration.openshift.io/v1
 kind: MachineConfig
@@ -131,8 +133,9 @@ ifeval::["{build}" != "upstream"]
 endif::[]
 ** After the {OpenShiftShort} nodes reboot and load the `nvme-fabrics` module, you can confirm that the operating system is configured and that it supports ANA by checking the host:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat /sys/module/nvme_core/parameters/multipath
+cat /sys/module/nvme_core/parameters/multipath
 ----
 +
 [IMPORTANT]
@@ -146,7 +149,7 @@ Multipathing:::
 *** Configure the {compute_service}
 ** To prepare the {OpenShiftShort} hosts, ensure that the Linux Multipath Device Mapper is configured and running on the {OpenShiftShort} hosts by using `MachineConfig`. For example:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 # Includes the /etc/multipathd.conf contents and the systemd unit changes
 apiVersion: machineconfiguration.openshift.io/v1

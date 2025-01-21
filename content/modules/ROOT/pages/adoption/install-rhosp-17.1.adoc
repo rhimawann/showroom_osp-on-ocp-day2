@@ -69,24 +69,22 @@ From the bastion connect to the *allinone* host and configure the networking:
 ssh -i /home/lab-user/.ssh/{guid}.pem cloud-user@allinone
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/{guid}.pem
-sudo -i
-hostnamectl set-hostname standalone.localdomain
-nmcli co delete 'Wired connection 2'
-nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.15/24
-nmcli con up "static-eth1"
-nmcli co delete 'Wired connection 3'
-nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.15/24
-nmcli con up "static-eth2"
-nmcli co delete 'Wired connection 4'
-nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.15/24
-nmcli con up "static-eth3"
-nmcli co delete 'Wired connection 5'
-nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.15/24
-nmcli con up "static-eth4"
-nmcli co delete 'Wired connection 6'
-nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.15/24
-nmcli con up "static-eth5"
-logout
+sudo hostnamectl set-hostname standalone.localdomain
+sudo nmcli co delete 'Wired connection 2'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.15/24
+sudo nmcli con up "static-eth1"
+sudo nmcli co delete 'Wired connection 3'
+sudo nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.15/24
+sudo nmcli con up "static-eth2"
+sudo nmcli co delete 'Wired connection 4'
+sudo nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.15/24
+sudo nmcli con up "static-eth3"
+sudo nmcli co delete 'Wired connection 5'
+sudo nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.15/24
+sudo nmcli con up "static-eth4"
+sudo nmcli co delete 'Wired connection 6'
+sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.15/24
+sudo nmcli con up "static-eth5"
 ----
 
 . Configure the compute
@@ -96,24 +94,22 @@ From the bastion connect to the *compute02* host and configure the networking:
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}.pem cloud-user@compute02
-sudo -i
-hostnamectl set-hostname compute02.localdomain
-nmcli co delete 'Wired connection 2'
-nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
-nmcli con up "static-eth1"
-nmcli co delete 'Wired connection 3'
-nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.110/24
-nmcli con up "static-eth2"
-nmcli co delete 'Wired connection 4'
-nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.110/24
-nmcli con up "static-eth3"
-nmcli co delete 'Wired connection 5'
-nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.110/24
-nmcli con up "static-eth4"
-nmcli co delete 'Wired connection 6'
-nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.110/24
-nmcli con up "static-eth5"
-logout
+sudo hostnamectl set-hostname compute02.localdomain
+sudo nmcli co delete 'Wired connection 2'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
+sudo nmcli con up "static-eth1"
+sudo nmcli co delete 'Wired connection 3'
+sudo nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.110/24
+sudo nmcli con up "static-eth2"
+sudo nmcli co delete 'Wired connection 4'
+sudo nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.110/24
+sudo nmcli con up "static-eth3"
+sudo nmcli co delete 'Wired connection 5'
+sudo nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.110/24
+sudo nmcli con up "static-eth4"
+sudo nmcli co delete 'Wired connection 6'
+sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.110/24
+sudo nmcli con up "static-eth5"
 ----
 
 . Install RHOSP 17.1 standalone controller
@@ -129,7 +125,6 @@ From the bastion connect to the *allinone* host, subscribe the host with the sub
 +
 [source,bash,role=execute]
 ----
-
 sudo subscription-manager register --username $RHN_user --password $RHN_password
 sudo subscription-manager release --set=9.2
 sudo subscription-manager repos --disable=*
@@ -140,7 +135,21 @@ git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
 cp labrepo/content/standalone/* /home/cloud-user/.
 sh openstack_standalone.sh
 ----
-
++
+. Disable the standalone compute
++
+From the *allinone* host:
++
+[source,bash,role=execute,subs=attributes]
+----
+export OS_CLOUD=standalone
+openstack compute service set --disable standalone.localdomain nova-compute
+sudo systemctl stop tripleo_nova_compute.service
+sudo systemctl disable tripleo_nova_compute.service
+openstack compute service delete 5
+----
++
++
 . Generate the files needed to the compute installation 
 +
 Execute the *openstack_compute_prepare.sh* script and copy the files to the generated files to *compute02*:
@@ -151,7 +160,7 @@ sh openstack_compute_prepare.sh
 scp -i /home/cloud-user/.ssh/{guid}.pem oslo.yaml cloud-user@172.22.0.110:
 scp -i /home/cloud-user/.ssh/{guid}.pem passwords.yaml cloud-user@172.22.0.110:
 ----
-
++
 . Generate the files needed to the compute installation
 +
 From the bastion connect to the *compte02* host:
@@ -172,13 +181,13 @@ sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --ena
 sudo dnf -y update
 sudo dnf -y install python3-tripleoclient python-jinja2 git
 git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/files/standalone/* /home/cloud-user/.
+cp labrepo/content/standalone/* /home/cloud-user/.
 sh openstack_compute.sh
 ----
 
 . Discover the *compute02* host:
 +
-From the *allinone" host, execute:
+From the *allinone* host, execute:
 +
 [source,bash,role=execute]
 ----

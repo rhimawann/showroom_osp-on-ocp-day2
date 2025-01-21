@@ -39,7 +39,7 @@ telemetry-operator-controller-manager-564b55fd8-tzmcb             2/2     Runnin
 . First of all, determine the name and status of the openstack control plane:
 +
 ----
-$ oc get openstackcontrolplane -n openstack
+oc get openstackcontrolplane -n openstack
 ----
 .Sample Output
 ----
@@ -106,7 +106,7 @@ oc get openstackansibleee -l openstackdataplanedeployment=<deployment_name>
 The following example filters the list to only show services and their job condition for the `openstack-edpm-ipam1` deployment:
 +
 ----
-$ oc get openstackansibleee -l openstackdataplanedeployment=openstack-edpm-ipam1
+oc get openstackansibleee -l openstackdataplanedeployment=openstack-edpm-ipam1
 
 NAME                            NETWORKATTACHMENTS   STATUS   MESSAGE
 bootstrap-openstack-edpm        ["ctlplane"]         True     Job completed

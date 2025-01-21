@@ -19,7 +19,7 @@ The following procedure uses a single {rhocp_long} cluster that is shared by the
 . Log in to the {OpenShift } environment where {OpenStackShort} OSPdO is deployed and change to the project that hosts your {OpenStackShort} deployment:
 +
 ----
-$ oc project openstack
+oc project openstack
 ----
 
 . Define the common environment variables:
@@ -46,7 +46,7 @@ export STORAGE_CLASS=$(oc get -n $OSPDO_NAMESPACE pvc openstackclient-hosts -o j
 . Get the name of the node where the current {OpenStackShort} Controller virtual machine (VM) is running:
 +
 ----
-$ export CONTROLLER_NODE=$(oc -n $OSPDO_NAMESPACE get vmi -ojson | jq -r '.items[0].status.nodeName')
+export CONTROLLER_NODE=$(oc -n $OSPDO_NAMESPACE get vmi -ojson | jq -r '.items[0].status.nodeName')
 ----
 
 
@@ -56,7 +56,7 @@ configure OSPdO to use a single {OpenStackShort} Controller node:
 .. Disable stonith:
 +
 ----
-$ stonith_resources=$(sudo pcs stonith status|grep Started|awk '{print $2}')
+stonith_resources=$(sudo pcs stonith status|grep Started|awk '{print $2}')
 for in in stonith_resources ;do CONTROLLER1_SSH sudo pcs stonith disable ;done
 ----
 .. Put non-Controller nodes in maintenance:
@@ -85,7 +85,7 @@ $CONTROLLER1_SSH sudo pcs cluster start
 .. Remove the OSPdO node network configuration policies from the other two nodes that are not running the Controller VM by placing a `nodeSelector` on the {OpenShiftShort} node that contains the Controller VM:
 +
 ----
-$ for i in br-ctlplane br-ex br-osp; do oc patch osnetconfig openstacknetconfig --type json -p '[{"op": "replace", "path": "/spec/attachConfigurations/'$i'/nodeNetworkConfigurationPolicy/nodeSelector", "value": {"kubernetes.io/hostname": "'$CONTROLLER_NODE'"}}]'; done
+for i in br-ctlplane br-ex br-osp; do oc patch osnetconfig openstacknetconfig --type json -p '[{"op": "replace", "path": "/spec/attachConfigurations/'$i'/nodeNetworkConfigurationPolicy/nodeSelector", "value": {"kubernetes.io/hostname": "'$CONTROLLER_NODE'"}}]'; done
 ----
 
 == Preparing RHOSO for adoption
@@ -100,21 +100,21 @@ When you deploy a {rhos_long} environment by using two Red Hat OpenShift Contain
 . Save the hostnames of the remaining two nodes to the `RHOSO_NODES` variable:
 +
 ----
-$ RHOSO_NODES=$(oc get nodes -o name | grep -v $CONTROLLER_NODE | sed 's#node/##g' | tr '\n' ' ')
+RHOSO_NODES=$(oc get nodes -o name | grep -v $CONTROLLER_NODE | sed 's#node/##g' | tr '\n' ' ')
 ----
 . Extract nodes to be used for OSP 18 installation and label nodes.
 +
 ----
-$ export RHOSO18_NODE1=$(echo "${RHOSO_NODES}" | cut -d ' ' -f 1)
-$ export RHOSO18_NODE2=$(echo "${RHOSO_NODES}" | cut -d ' ' -f 2)
-$ oc label nodes "${RHOSO18_NODE1}" type=openstack
-$ oc label nodes "${RHOSO18_NODE2}" type=openstack
+export RHOSO18_NODE1=$(echo "${RHOSO_NODES}" | cut -d ' ' -f 1)
+export RHOSO18_NODE2=$(echo "${RHOSO_NODES}" | cut -d ' ' -f 2)
+oc label nodes "${RHOSO18_NODE1}" type=openstack
+oc label nodes "${RHOSO18_NODE2}" type=openstack
 ----
 
 . Create a new namespace to use to install {rhos_acro}. You must install {rhos_acro} in a different namespace from OSPdO:
 +
 ----
-$ oc get namespace ${RHOSO18_NAMESPACE} 2>/dev/null || {
+oc get namespace ${RHOSO18_NAMESPACE} 2>/dev/null || {
     oc create namespace ${RHOSO18_NAMESPACE} || {
         echo "Failed to create namespace ${RHOSO18_NAMESPACE}"
         exit 1
@@ -128,7 +128,7 @@ $ oc get namespace ${RHOSO18_NAMESPACE} 2>/dev/null || {
 The node network configuration policies use the `nodeSelector` attribute to be constrained to `OSP18_NODE1/2`.  The new node network configuration policy mirrors the existing node network configuration policies.  In the following example, the subnets ranges are reused.  In addition, OSPdO’s use of bridges for the control and external interfaces is duplicated.
 +
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: nmstate.io/v1
 kind: NodeNetworkConfigurationPolicy
 metadata:
@@ -252,7 +252,7 @@ EOF
 . Apply a `NetworkAttachmentDefinition` custom resource for OpenStack 18 for each isolated network to attach the service pods to the networks:
 +
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
 metadata:
@@ -380,13 +380,13 @@ EOF
 . Ensure that the `OVNKubernetes IPForwarding` field is set to to `enabled`:
 +
 ----
-$ oc patch network.operator cluster -p '{"spec":{"defaultNetwork":{"ovnKubernetesConfig":{"gatewayConfig":{"ipForwarding": "Global"}}}}}' --type=merge
+oc patch network.operator cluster -p '{"spec":{"defaultNetwork":{"ovnKubernetesConfig":{"gatewayConfig":{"ipForwarding": "Global"}}}}}' --type=merge
 ----
 
 . Extract and save passwords from OSPdO:
 +
 ----
-$ oc get secret tripleo-passwords -n $OSPDO_NAMESPACE -o json | jq -r '.data["tripleo-overcloud-passwords.yaml"]' | base64 -d >"${PASSWORD_FILE}" || {
+oc get secret tripleo-passwords -n $OSPDO_NAMESPACE -o json | jq -r '.data["tripleo-overcloud-passwords.yaml"]' | base64 -d >"${PASSWORD_FILE}" || {
     echo "ERROR: Failed to extract passwords from OSPdO"
     exit 1
 }
@@ -395,7 +395,7 @@ $ oc get secret tripleo-passwords -n $OSPDO_NAMESPACE -o json | jq -r '.data["tr
 . Install the {rhos_acro} operators:
 +
 ----
-$ git clone https://github.com/openstack-k8s-operators/install_yamls.git
+git clone https://github.com/openstack-k8s-operators/install_yamls.git
 cd install_yamls
 BMO_SETUP=false NETWORK_ISOLATION=false NAMESPACE=${RHOSO18_NAMESPACE} make openstack
 BMO_SETUP=false NETWORK_ISOLATION=false make metallb
@@ -405,7 +405,7 @@ BMO_SETUP=false NETWORK_ISOLATION=false make metallb
 . Apply the `IPAddressPool` resource that matches the new OpenStack 18 deployment to configure which IPs can be used as virtual IPs (VIPs):
 +
 ----
-$ oc apply -f - <<EOF
+oc apply -f - <<EOF
 apiVersion: metallb.io/v1beta1
 kind: IPAddressPool
 ...
@@ -414,7 +414,7 @@ kind: IPAddressPool
 . Apply the `L2Advertisement` resource to define how the VIPs are announced:
 +
 ----
-$ cat << EOF | oc apply -f -
+cat << EOF | oc apply -f -
 apiVersion: metallb.io/v1beta1
 kind: L2Advertisement
 ----

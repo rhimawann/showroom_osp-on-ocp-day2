@@ -31,6 +31,7 @@ spec
 
 . Create a new file, for example, `glance_swift.patch`, and include the following content:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 spec:
   glance:
@@ -77,13 +78,15 @@ After the {object_storage}, and in particular `SwiftProxy`, is adopted, you can 
 
 . Verify that `SwiftProxy` is available:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get pod -l component=swift-proxy | grep Running
+oc get pod -l component=swift-proxy | grep Running
 swift-proxy-75cb47f65-92rxq   3/3     Running   0
 ----
 
 . Patch the `GlanceAPI` service that is deployed in the control plane:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file=glance_swift.patch
+oc patch openstackcontrolplane openstack --type=merge --patch-file=glance_swift.patch
 ----

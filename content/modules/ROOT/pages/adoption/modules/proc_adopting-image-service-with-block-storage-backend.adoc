@@ -33,6 +33,7 @@ spec
 
 . Create a new file, for example `glance_cinder.patch`, and include the following content:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 spec:
   glance:
@@ -81,13 +82,15 @@ After the {block_storage}, and in particular `CinderVolume`, is adopted, you can
 
 . Verify that `CinderVolume` is available:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get pod -l component=cinder-volume | grep Running
+oc get pod -l component=cinder-volume | grep Running
 cinder-volume-75cb47f65-92rxq   3/3     Running   0
 ----
 
 . Patch the `GlanceAPI` service that is deployed in the control plane:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file=glance_cinder.patch
+oc patch openstackcontrolplane openstack --type=merge --patch-file=glance_cinder.patch
 ----

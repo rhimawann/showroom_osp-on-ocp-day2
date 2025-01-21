@@ -18,6 +18,7 @@ Migrate your databases from the original {rhos_prev_long} ({OpenStackShort}) dep
 * Ensure that there is network routability between the original MariaDB and the MariaDB for the control plane.
 * Define the following shell variables. Replace the following example values with values that are correct for your environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 PODIFIED_MARIADB_IP=$(oc get svc --selector "mariadb/name=openstack" -ojsonpath='{.items[0].spec.clusterIP}')
 PODIFIED_CELL1_MARIADB_IP=$(oc get svc --selector "mariadb/name=openstack-cell1" -ojsonpath='{.items[0].spec.clusterIP}')
@@ -51,7 +52,7 @@ endif::[]
 
 . Create a temporary volume claim and a pod for the database data copy. Edit the volume claim storage request if necessary, to give it enough space for the overcloud databases:
 +
-[source,yaml]
+[source,yaml,role=execute]
 ----
 oc apply -f - <<EOF
 ---
@@ -100,20 +101,23 @@ EOF
 
 . Wait for the pod to be ready:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc wait --for condition=Ready pod/mariadb-copy-data --timeout=30s
+oc wait --for condition=Ready pod/mariadb-copy-data --timeout=30s
 ----
 
 .Procedure
 
 . Get the count of source databases with the `NOK` (not-OK) status:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc rsh mariadb-copy-data mysql -h "${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" -e "SHOW databases;"
+oc rsh mariadb-copy-data mysql -h "${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" -e "SHOW databases;"
 ----
 
 . Check that `mysqlcheck` had no errors:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 . ~/.source_cloud_exported_variables
 test -z "$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK"  || [ "$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK" = " " ] && echo "OK" || echo "CHECK FAILED"
@@ -121,10 +125,11 @@ test -z "$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK"  || [ "$PULL_OPENSTACK_CO
 
 . Test the connection to the control plane databases:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
     mysql -rsh "$PODIFIED_MARIADB_IP" -uroot -p"$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;'
-$ oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
+oc run mariadb-client --image $MARIADB_IMAGE -i --rm --restart=Never -- \
     mysql -rsh "$PODIFIED_CELL1_MARIADB_IP" -uroot -p"$PODIFIED_DB_ROOT_PASSWORD" -e 'SHOW databases;'
 ----
 +
@@ -133,8 +138,9 @@ You must transition {compute_service_first_ref} services that are imported later
 
 . Create a dump of the original databases:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc rsh mariadb-copy-data << EOF
+oc rsh mariadb-copy-data << EOF
   mysql -h"${SOURCE_MARIADB_IP}" -uroot -p"${SOURCE_DB_ROOT_PASSWORD}" \
   -N -e "show databases" | grep -E -v "schema|mysql|gnocchi|aodh" | \
   while read dbname; do
@@ -148,12 +154,13 @@ EOF
 
 . Restore the databases from `.sql` files into the control plane MariaDB:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
-$ oc rsh mariadb-copy-data << EOF
+oc rsh mariadb-copy-data << EOF
 endif::[]
 ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-$ oc rsh -n $OSPDO_NAMESPACE mariadb-copy-data << EOF
+oc rsh -n $OSPDO_NAMESPACE mariadb-copy-data << EOF
 endif::[]
   # db schemas to rename on import
   declare -A db_name_map
@@ -208,6 +215,7 @@ For more information, see xref:proc_retrieving-topology-specific-service-configu
 
 . Check that the databases are imported correctly:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 . ~/.source_cloud_exported_variables
 
@@ -249,9 +257,10 @@ diff -Z <(echo $novadb_svc_records) <(echo $PULL_OPENSTACK_CONFIGURATION_NOVA_CO
 [NOTE]
 Consider taking a snapshot of them before deleting.
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc delete pod mariadb-copy-data
-$ oc delete pvc mariadb-data
+oc delete pod mariadb-copy-data
+oc delete pvc mariadb-data
 ----
 
 [NOTE]

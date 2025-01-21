@@ -10,6 +10,7 @@ link:{defaultOCPURL}/networking/cluster-network-operator#nw-cluster-network-oper
 . Define a `NetworkAttachmentDefinition` CR for each isolated network.
 For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
@@ -37,6 +38,7 @@ Ensure that the interface name and IPAM range match the configuration that you u
 
 . Optional: When reusing existing IP ranges, you can exclude part of the range that is used in the existing deployment by using the `exclude` parameter in the `NetworkAttachmentDefinition` pool. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: k8s.cni.cncf.io/v1
 kind: NetworkAttachmentDefinition
@@ -72,6 +74,7 @@ spec:
 [NOTE]
 The load balancer IP addresses belong to the same IP range as the control plane services, and are managed by MetalLB. This pool should also be aligned with the {OpenStackShort} configuration.
 +
+[source,bash,role=execute,subs=attributes]
 ----
 - apiVersion: metallb.io/v1beta1
   kind: IPAddressPool
@@ -85,6 +88,7 @@ balancer IP addresses.
 
 . Optional: When reusing existing IP ranges, you can exclude part of the range by listing multiple entries in the `addresses` section of the `IPAddressPool`. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 - apiVersion: metallb.io/v1beta1
   kind: IPAddressPool

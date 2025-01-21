@@ -10,7 +10,7 @@ The recommended way to deploy {block_storage} volume back ends is to use a {bloc
 
 For example, you have an LVM and a Ceph back end and two entries in `cinderVolume`, and you cannot set global defaults for all volume services. You must define a service for each of them:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane

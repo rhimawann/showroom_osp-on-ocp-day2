@@ -13,8 +13,9 @@ Prepare the target {Ceph} nodes for the Ceph Monitor migration by performing the
 . SSH into the target node and enable the firewall rules that are required to
 reach a Ceph Monitor service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ for port in 3300 6789; {
+for port in 3300 6789; {
     ssh heat-admin@<target_node> sudo iptables -I INPUT \
     -p tcp -m tcp --dport $port -m conntrack --ctstate NEW \
     -j ACCEPT;
@@ -25,14 +26,16 @@ $ for port in 3300 6789; {
 
 . Check that the rules are properly applied to the target node and persist them:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo iptables-save
-$ sudo systemctl restart iptables
+sudo iptables-save
+sudo systemctl restart iptables
 ----
 
 . If `nftables` is used in the existing deployment, edit `/etc/nftables/tripleo-rules.nft`
 and add the following content:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # 110 ceph_mon {'dport': [6789, 3300, '9100']}
 add rule inet filter TRIPLEO_INPUT tcp dport { 6789,3300,9100 } ct state new counter accept comment "110 ceph_mon"
@@ -42,26 +45,30 @@ add rule inet filter TRIPLEO_INPUT tcp dport { 6789,3300,9100 } ct state new cou
 
 . Restart the `nftables` service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo systemctl restart nftables
+sudo systemctl restart nftables
 ----
 
 . Verify that the rules are applied:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo nft list ruleset | grep ceph_mon
+sudo nft list ruleset | grep ceph_mon
 ----
 
 . To migrate the existing Ceph Monitors to the target {Ceph} nodes, retrieve the {Ceph} mon spec from the first Ceph Monitor, or the first Controller node:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
-$ mkdir -p ${SPEC_DIR}
-$ sudo cephadm shell -- ceph orch ls --export mon > ${SPEC_DIR}/mon
+SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
+mkdir -p ${SPEC_DIR}
+sudo cephadm shell -- ceph orch ls --export mon > ${SPEC_DIR}/mon
 ----
 
 . Add the `label:mon` section to the `placement` section:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 service_type: mon
 service_id: mon
@@ -73,14 +80,16 @@ placement:
 
 . Apply the spec with `cephadm` by using the Ceph Orchestrator:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
-$ sudo cephadm shell -m ${SPEC_DIR}/mon -- ceph orch apply -i /mnt/mon
+SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
+sudo cephadm shell -m ${SPEC_DIR}/mon -- ceph orch apply -i /mnt/mon
 ----
 
 . Extend the `mon` label to the remaining {Ceph} target nodes to ensure that
 quorum is maintained during the migration process:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 for item in $(sudo cephadm shell --  ceph orch host ls --format json | jq -r '.[].hostname'); do
     sudo cephadm shell -- ceph orch host label add  $item mon;
@@ -96,8 +105,9 @@ Perform this step only once to avoid multiple iterations when multiple Ceph Moni
 . Check the status of the {CephCluster} and the Ceph Orchestrator daemons list.
 Ensure that Ceph Monitors are in a quorum and listed by the `ceph orch` command:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell -- ceph -s
+sudo cephadm shell -- ceph -s
   cluster:
     id:     f6ec3ebe-26f7-56c8-985d-eb974e8e08e3
     health: HEALTH_OK
@@ -114,8 +124,9 @@ $ sudo cephadm shell -- ceph -s
     pgs:     1 active+clean
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell -- ceph orch host ls
+sudo cephadm shell -- ceph orch host ls
 HOST              ADDR           LABELS          STATUS
 ceph-0        192.168.24.14  osd mon mgr _admin
 ceph-1        192.168.24.7   osd mon mgr _admin
@@ -132,9 +143,10 @@ node is decommissioned:
 
 .. Back up the content of `/etc/ceph` in the `ceph_client_backup` directory.
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ mkdir -p $HOME/ceph_client_backup
-$ sudo cp -R /etc/ceph/* $HOME/ceph_client_backup
+mkdir -p $HOME/ceph_client_backup
+sudo cp -R /etc/ceph/* $HOME/ceph_client_backup
 ----
 
 .. Edit `/etc/os-net-config/config.yaml` and add `- ip_netmask: 172.17.3.200`
@@ -144,26 +156,30 @@ $ sudo cp -R /etc/ceph/* $HOME/ceph_client_backup
 
 .. Save the file and refresh the `controller-0` network configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo os-net-config -c /etc/os-net-config/config.yaml
+sudo os-net-config -c /etc/os-net-config/config.yaml
 ----
 
 .. Verify that the IP address is present in the Controller node:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ip -o a | grep 172.17.3.200
+ip -o a | grep 172.17.3.200
 ----
 
 .. Ping the IP address and confirm that it is reachable:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ping -c 3 172.17.3.200
+ping -c 3 172.17.3.200
 ----
 
 .. Verify that you can interact with the {Ceph} cluster:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell -c $HOME/ceph_client_backup/ceph.conf -k $HOME/ceph_client_backup/ceph.client.admin.keyring -- ceph -s
+sudo cephadm shell -c $HOME/ceph_client_backup/ceph.conf -k $HOME/ceph_client_backup/ceph.client.admin.keyring -- ceph -s
 ----
 
 .Next steps

@@ -27,7 +27,7 @@ if you were to set a configuration at the top Block Storage service level (`spec
 template:`) then it would be applied to all the Block Storage services; for example to
 enable debug in all the Block Storage services you would do:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
@@ -45,7 +45,7 @@ spec:
 If you only want to set it for one of the Block Storage services, for example the
 scheduler, then you use the `cinderScheduler` section instead:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane

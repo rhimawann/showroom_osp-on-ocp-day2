@@ -8,6 +8,7 @@ The following procedure is an example of an environment with 3 {Ceph} nodes or C
 
 . Add the monitoring label to all the {CephCluster} or ComputeHCI nodes in the cluster:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 for item in $(sudo cephadm shell --  ceph orch host ls --format json | jq -r '.[].hostname'); do
     sudo cephadm shell -- ceph orch host label add  $item monitoring;
@@ -16,8 +17,9 @@ done
 
 . Verify that all the hosts on the target nodes have the monitoring label:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[tripleo-admin@controller-0 ~]$ sudo cephadm shell -- ceph orch host ls
+[tripleo-admin@controller-0 ~]sudo cephadm shell -- ceph orch host ls
 
 HOST                        ADDR           LABELS
 cephstorage-0.redhat.local  192.168.24.11  osd monitoring
@@ -30,8 +32,9 @@ controller-2.redhat.local   192.168.24.10  mon _admin mgr monitoring
 
 . Remove the labels from the Controller nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ for i in 0 1 2; do sudo cephadm shell -- ceph orch host label rm "controller-$i.redhat.local" monitoring; done
+for i in 0 1 2; do sudo cephadm shell -- ceph orch host label rm "controller-$i.redhat.local" monitoring; done
 
 Removed label monitoring from host controller-0.redhat.local
 Removed label monitoring from host controller-1.redhat.local
@@ -40,6 +43,7 @@ Removed label monitoring from host controller-2.redhat.local
 
 . Dump the current monitoring stack spec:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 function export_spec {
     local component="$1"
@@ -56,7 +60,7 @@ done
 
 . For each daemon, edit the current spec and replace the `placement.hosts:` section with the `placement.label:` section, for example:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 service_type: grafana
 service_name: grafana
@@ -72,6 +76,7 @@ This step also applies to Prometheus and Alertmanager specs.
 
 . Apply the new monitoring spec to relocate the monitoring stack daemons:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
 function migrate_daemon {
@@ -86,6 +91,7 @@ done
 
 . Verify that the daemons are deployed on the expected nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph orch ps | grep -iE "(prome|alert|grafa)"
 alertmanager.cephstorage-2  cephstorage-2.redhat.local  172.17.3.144:9093,9094
@@ -98,6 +104,7 @@ After you migrate the monitoring stack, you lose high availability. The monitori
 
 . Review the {Ceph} configuration to ensure that it aligns with the configuration on the target nodes. In particular, focus on the following configuration entries:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph config dump | grep -i dashboard
 ...
@@ -111,6 +118,7 @@ mgr  advanced  mgr/dashboard/controller-2.xpdgfl/server_addr  172.17.3.138
 
 . Verify that the `API_HOST/URL` of the `grafana`, `alertmanager` and `prometheus` services points to the IP addresses on the storage network of the node where each daemon is relocated:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph orch ps | grep -iE "(prome|alert|grafa)"
 alertmanager.cephstorage-0  cephstorage-0.redhat.local  172.17.3.83:9093,9094
@@ -124,6 +132,7 @@ prometheus.cephstorage-1    cephstorage-1.redhat.local  172.17.3.53:9092
 prometheus.cephstorage-2    cephstorage-2.redhat.local  172.17.3.144:9092
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph config dump
 ...

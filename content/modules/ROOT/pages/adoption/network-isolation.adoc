@@ -23,6 +23,13 @@ Change to the `files` directory:
 cd ~/labrepo/content/files
 ----
 
+Replace the UUID to the GUID of your environment:
+
+[source,bash,role=execute,subs=attributes]
+----
+find . -type f -exec sed -i 's/UUID/{guid}/g' {} +
+----
+
 Apply preconfigured yamls indivdually:
 
 [source,bash,role=execute]
@@ -42,10 +49,10 @@ oc get nncp -w
 .Sample Output
 [source,bash]
 ----
-NAME                              STATUS      REASON
-osp-enp1s0-worker-ocp4-worker1    Available   SuccessfullyConfigured
-osp-enp1s0-worker-ocp4-worker2    Available   SuccessfullyConfigured
-osp-enp1s0-worker-ocp4-worker3    Available   SuccessfullyConfigured
+NAME                                STATUS      REASON
+osp-multi-nic-worker-ocp4-worker1   Available   SuccessfullyConfigured
+osp-multi-nic-worker-ocp4-worker2   Available   SuccessfullyConfigured
+osp-multi-nic-worker-ocp4-worker3   Available   SuccessfullyConfigured
 ----
 
 Before proceeding configure a *nad* resource for each isolated network to attach a service pod to the network:

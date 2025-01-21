@@ -8,6 +8,7 @@ To help you manage the configuration for your {OpenStackPreviousInstaller} and {
 
 * Golang is installed and configured on your environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 dnf install -y golang-github-openstack-k8s-operators-os-diff
 ----
@@ -16,7 +17,7 @@ dnf install -y golang-github-openstack-k8s-operators-os-diff
 
 . Configure the `/etc/os-diff/os-diff.cfg` file and the `/etc/os-diff/ssh.config` file according to your environment. To allow os-diff to connect to your clouds and pull files from the services that you describe in the `config.yaml` file, you must set the following options in the `os-diff.cfg` file:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 [subs=+quotes]
 ----
 [Default]
@@ -45,7 +46,7 @@ ssh_cmd=""
 
 . If you use a host file to connect to your cloud, configure the `ssh.config` file to allow os-diff to access your {OpenStackShort} environment, for example:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 [subs=+quotes]
 ----
 Host *
@@ -83,14 +84,16 @@ Host crc
 
 . If you use an inventory file to connect to your cloud, generate the `ssh.config` file from your Ansible inventory, for example, `tripleo-ansible-inventory.yaml` file:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ os-diff configure -i tripleo-ansible-inventory.yaml -o ssh.config --yaml
+os-diff configure -i tripleo-ansible-inventory.yaml -o ssh.config --yaml
 ----
 
 .Verification
 
 * Test your connection:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ssh -F ssh.config standalone
+ssh -F ssh.config standalone
 ----

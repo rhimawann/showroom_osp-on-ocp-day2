@@ -10,20 +10,23 @@ reconfigure the failover settings.
 . Regenerate the following {Ceph} configuration keys to point to the right
   `mgr` container:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 mgr    advanced  mgr/dashboard/controller-0.ycokob/server_addr  172.17.3.33
 mgr    advanced  mgr/dashboard/controller-1.lmzpuc/server_addr  172.17.3.147
 mgr    advanced  mgr/dashboard/controller-2.xpdgfl/server_addr  172.17.3.138
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell
-$ ceph orch ps | awk '/mgr./ {print $1}'
+sudo cephadm shell
+ceph orch ps | awk '/mgr./ {print $1}'
 ----
 
 . For each retrieved `mgr` daemon, update the corresponding entry in the {Ceph}
   configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph config set mgr mgr/dashboard/<>/server_addr/<ip addr>
+ceph config set mgr mgr/dashboard/<>/server_addr/<ip addr>
 ----

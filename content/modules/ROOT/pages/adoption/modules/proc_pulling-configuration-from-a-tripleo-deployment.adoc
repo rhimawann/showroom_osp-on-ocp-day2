@@ -19,6 +19,7 @@ endif::[]
 
 . Update your ssh parameters according to your environment in the `os-diff.cfg`. Os-diff uses the ssh parameters to connect to your {OpenStackPreviousInstaller} node, and then query and download the configuration files:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 ssh_cmd=ssh -F ssh.config standalone
 container_engine=podman
@@ -30,13 +31,14 @@ Ensure that the ssh command you provide in `ssh_cmd` parameter is correct and in
 
 . Enable the services that you want to include in the `/etc/os-diff/config.yaml` file, and disable the services that you want to exclude from the file. Ensure that you have the correct permissions to edit the file:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ chown ospng:ospng /etc/os-diff/config.yaml
+chown ospng:ospng /etc/os-diff/config.yaml
 ----
 +
 The following example enables the default {identity_service_first_ref} to be included in the `/etc/os-diff/config.yaml` file:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 # service name and file location
 services:
@@ -71,6 +73,7 @@ Repeat this step for each {OpenStackShort} service that you want to disable or e
 
 . If you use non-containerized services, such as the `ovs-external-ids`, pull the configuration or the command output. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 services:
   ovs_external_ids:
@@ -100,12 +103,14 @@ You must correctly configure an SSH configuration file or equivalent for non-sta
 
 .. Compare the values:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ os-diff diff ovs_external_ids.json edpm.crd --crd --service ovs_external_ids
+os-diff diff ovs_external_ids.json edpm.crd --crd --service ovs_external_ids
 ----
 +
 For example, to check the `/etc/yum.conf` on every host, you must put the following statement in the `config.yaml` file. The following example uses a file called `yum_config`:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 services:
   yum_config:
@@ -129,16 +134,19 @@ The following command pulls all the configuration files that are included in the
 Note that when the `config.yaml` file is populated automatically you must provide the configuration paths manually for each service.
 ====
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # will only update the /etc/os-diff/config.yaml
 os-diff pull --update-only
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # will update the /etc/os-diff/config.yaml and pull configuration
 os-diff pull --update
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
 # will update the /etc/os-diff/config.yaml and pull configuration
 os-diff pull
@@ -146,6 +154,7 @@ os-diff pull
 +
 The configuration is pulled and stored by default in the following directory:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 /tmp/tripleo/
 ----
@@ -154,6 +163,7 @@ The configuration is pulled and stored by default in the following directory:
 
 * Verify that you have a directory for each service configuration in your local path:
 +
+[source,bash,role=execute,subs=attributes]
 ----
   ▾ tmp/
     ▾ tripleo/

@@ -12,6 +12,7 @@ To ensure that the latest network configuration is used during the data plane ad
 
 . Configure a `NetConfig` CR with your desired VLAN tags and IPAM configuration. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: network.openstack.org/v1beta1
 kind: NetConfig
@@ -50,6 +51,7 @@ spec:
 
 . Optional: In the `NetConfig` CR, list multiple ranges for the `allocationRanges` field to exclude some of the IP addresses, for example, to accommodate IP addresses that are already consumed by the adopted environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: network.openstack.org/v1beta1
 kind: NetConfig

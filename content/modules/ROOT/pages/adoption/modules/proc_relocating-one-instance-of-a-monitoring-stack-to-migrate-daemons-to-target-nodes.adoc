@@ -10,8 +10,9 @@ particular node.
 
 . Set each of your nodes to host a particular daemon instance, for example, if you have three target nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[tripleo-admin@controller-0 ~]$ sudo cephadm shell -- ceph orch host ls | grep -i cephstorage
+[tripleo-admin@controller-0 ~]sudo cephadm shell -- ceph orch host ls | grep -i cephstorage
 
 HOST                        ADDR           LABELS
 cephstorage-0.redhat.local  192.168.24.11  osd ---> grafana
@@ -21,6 +22,7 @@ cephstorage-2.redhat.local  192.168.24.47  osd ---> alertmanager
 
 . Add the appropriate labels to the target nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 declare -A target_nodes
 
@@ -35,8 +37,9 @@ done
 
 . Verify that the labels are properly applied to the target nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[tripleo-admin@controller-0 ~]$ sudo cephadm shell -- ceph orch host ls | grep -i cephstorage
+[tripleo-admin@controller-0 ~]sudo cephadm shell -- ceph orch host ls | grep -i cephstorage
 
 HOST                    	ADDR       	LABELS          	STATUS
 cephstorage-0.redhat.local  192.168.24.11  osd grafana
@@ -46,6 +49,7 @@ cephstorage-2.redhat.local  192.168.24.47  osd alertmanager
 
 . Dump the current monitoring stack spec:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 function export_spec {
     local component="$1"
@@ -62,7 +66,7 @@ done
 . For each daemon, edit the current spec and replace the placement/hosts section
 with the placement/label section, for example:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 service_type: grafana
 service_name: grafana
@@ -78,6 +82,7 @@ The same procedure applies to Prometheus and Alertmanager specs.
 
 . Apply the new monitoring spec to relocate the monitoring stack daemons:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 SPEC_DIR=${SPEC_DIR:-"$PWD/ceph_specs"}
 function migrate_daemon {
@@ -92,6 +97,7 @@ done
 
 . Verify that the daemons are deployed on the expected nodes:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph orch ps | grep -iE "(prome|alert|grafa)"
 alertmanager.cephstorage-2  cephstorage-2.redhat.local  172.17.3.144:9093,9094
@@ -111,6 +117,7 @@ verify that the {Ceph} configuration is aligned with the relocation you just mad
 In particular, focus on the following configuration entries:
 //kgilliga: If we're saying that customers should consider this aspect, is this step optional?
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph config dump
 ...
@@ -127,6 +134,7 @@ the IP addresses (on the storage network) of the node where each daemon has been
 relocated. This should be automatically addressed by cephadm and it shouldn’t
 require any manual action.
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph orch ps | grep -iE "(prome|alert|grafa)"
 alertmanager.cephstorage-0  cephstorage-0.redhat.local  172.17.3.83:9093,9094
@@ -140,6 +148,7 @@ prometheus.cephstorage-1    cephstorage-1.redhat.local  172.17.3.53:9092
 prometheus.cephstorage-2    cephstorage-2.redhat.local  172.17.3.144:9092
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
 [ceph: root@controller-0 /]# ceph config dump
 ...
@@ -159,19 +168,22 @@ limited.
 be regenerated to point to the right mgr container:
 //kgilliga: Is the assumption that customers have already done the RBD migration before doing this procedure? RBD migration comes before this chapter in the adoption guide.
 +
+[source,bash,role=execute,subs=attributes]
 ----
 mgr    advanced  mgr/dashboard/controller-0.ycokob/server_addr  172.17.3.33
 mgr    advanced  mgr/dashboard/controller-1.lmzpuc/server_addr  172.17.3.147
 mgr    advanced  mgr/dashboard/controller-2.xpdgfl/server_addr  172.17.3.138
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo cephadm shell
-$ ceph orch ps | awk '/mgr./ {print $1}'
+sudo cephadm shell
+ceph orch ps | awk '/mgr./ {print $1}'
 ----
 
 .. For each retrieved mgr, update the entry in the {Ceph} configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph config set mgr mgr/dashboard/<>/server_addr/<ip addr>
+ceph config set mgr mgr/dashboard/<>/server_addr/<ip addr>
 ----

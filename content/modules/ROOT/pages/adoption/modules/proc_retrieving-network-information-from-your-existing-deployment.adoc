@@ -17,6 +17,7 @@ deployment. After you retrieve your network configuration, you have the followin
 
 . Find the network configuration in the `network_data.yaml` file. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 - name: InternalApi
   mtu: 1500
@@ -39,6 +40,7 @@ deployment. After you retrieve your network configuration, you have the followin
 
 . Use the `tripleo-ansible-inventory.yaml` file to determine the list of IP addresses that are already consumed in the adopted environment. For each listed host in the file, make a note of the IP and VIP addresses that are consumed by the node. For example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 Standalone:
   hosts:

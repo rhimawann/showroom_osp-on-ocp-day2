@@ -18,7 +18,7 @@ configuration explanation.
 
 Example of what the quick and dirty configuration patch would look like:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
    spec:
      cinder:

@@ -13,22 +13,25 @@ IP address migration assumes that the target nodes are originally deployed by
 
 . Get the original Ceph Monitor IP addresses from `$HOME/ceph_client_backup/ceph.conf` file on the `mon_host` line, for example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 mon_host = [v2:172.17.3.60:3300/0,v1:172.17.3.60:6789/0] [v2:172.17.3.29:3300/0,v1:172.17.3.29:6789/0] [v2:172.17.3.53:3300/0,v1:172.17.3.53:6789/0]
 ----
 
 . Match the IP address retrieved in the previous step with the storage network IP addresses on the source node, and find the Ceph Monitor IP address:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[tripleo-admin@controller-0 ~]$ ip -o -4 a | grep 172.17.3
+[tripleo-admin@controller-0 ~]ip -o -4 a | grep 172.17.3
 9: vlan30    inet 172.17.3.60/24 brd 172.17.3.255 scope global vlan30\       valid_lft forever preferred_lft forever
 9: vlan30    inet 172.17.3.13/32 brd 172.17.3.255 scope global vlan30\       valid_lft forever preferred_lft forever
 ----
 
 . Confirm that the Ceph Monitor IP address is present in the `os-net-config` configuration that is located in the `/etc/os-net-config` directory on the source node:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[tripleo-admin@controller-0 ~]$ grep "172.17.3.60" /etc/os-net-config/config.yaml
+[tripleo-admin@controller-0 ~]grep "172.17.3.60" /etc/os-net-config/config.yaml
     - ip_netmask: 172.17.3.60/24
 ----
 
@@ -36,14 +39,16 @@ mon_host = [v2:172.17.3.60:3300/0,v1:172.17.3.60:6789/0] [v2:172.17.3.29:3300/0,
 
 . Save the file and refresh the node network configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo os-net-config -c /etc/os-net-config/config.yaml
+sudo os-net-config -c /etc/os-net-config/config.yaml
 ----
 
 . Verify that the IP address is not present in the source node anymore, for example:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[controller-0]$ ip -o a | grep 172.17.3.60
+[controller-0]ip -o a | grep 172.17.3.60
 ----
 
 . SSH into the target node, for example `cephstorage-0`, and add the IP address
@@ -54,21 +59,24 @@ add the `- ip_netmask: 172.17.3.60` line that you removed in the source node.
 
 . Save the file and refresh the node network configuration:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ sudo os-net-config -c /etc/os-net-config/config.yaml
+sudo os-net-config -c /etc/os-net-config/config.yaml
 ----
 
 . Verify that the IP address is present in the target node.
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ip -o a | grep 172.17.3.60
+ip -o a | grep 172.17.3.60
 ----
 
 . From the Ceph client node, `controller-0`, ping the IP address that is
   migrated to the target node and confirm that it is still reachable:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-[controller-0]$ ping -c 3 172.17.3.60
+[controller-0]ping -c 3 172.17.3.60
 ----
 
 .Next steps

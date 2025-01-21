@@ -24,8 +24,9 @@ endif::[]
 
 * Patch the `OpenStackControlPlane` CR to deploy the {networking_service}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch '
+oc patch openstackcontrolplane openstack --type=merge --patch '
 spec:
   neutron:
     enabled: true
@@ -54,6 +55,7 @@ spec:
 
 * Inspect the resulting {networking_service} pods:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 NEUTRON_API_POD=`oc get pods -l service=neutron | tail -n 1 | cut -f 1 -d' '`
 oc exec -t $NEUTRON_API_POD -c neutron-api -- cat /etc/neutron/neutron.conf
@@ -61,12 +63,14 @@ oc exec -t $NEUTRON_API_POD -c neutron-api -- cat /etc/neutron/neutron.conf
 
 * Ensure that the `Neutron API` service is registered in the {identity_service}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack service list | grep network
+openstack service list | grep network
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack endpoint list | grep network
+openstack endpoint list | grep network
 
 | 6a805bd6c9f54658ad2f24e5a0ae0ab6 | regionOne | neutron      | network      | True    | public    | http://neutron-public-openstack.apps-crc.testing  |
 | b943243e596847a9a317c8ce1800fa98 | regionOne | neutron      | network      | True    | internal  | http://neutron-internal.openstack.svc:9696        |
@@ -74,8 +78,9 @@ $ openstack endpoint list | grep network
 
 * Create sample resources so that you can test whether the user can create networks, subnets, ports, or routers:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack network create net
-$ openstack subnet create --network net --subnet-range 10.0.0.0/24 subnet
-$ openstack router create router
+openstack network create net
+openstack subnet create --network net --subnet-range 10.0.0.0/24 subnet
+openstack router create router
 ----

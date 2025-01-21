@@ -19,6 +19,7 @@ ifeval::["{build}" != "downstream"]
 * Define the `CONTROLLER1_SSH` environment variable if it link:stop_openstack_services.md#variables[hasn't been
 defined] already. Replace the following example values with values that are correct for your environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 CONTROLLER1_SSH="ssh -i <path to SSH key> root@<node IP>"
 ----
@@ -26,6 +27,7 @@ endif::[]
 ifeval::["{build}" != "upstream"]
 * The `CONTROLLER1_SSH` environment variable is defined and points to the {OpenStackShort} Controller node. Replace the following example values with values that are correct for your environment:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 CONTROLLER1_SSH="ssh -i <path to SSH key> root@<node IP>"
 ----
@@ -35,8 +37,9 @@ endif::[]
 
 . Copy the configuration file from {OpenStackShort} {rhos_prev_ver} for reference:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ CONTROLLER1_SSH cat /var/lib/config-data/puppet-generated/manila/etc/manila/manila.conf | awk '!/^ *#/ && NF' > ~/manila.conf
+CONTROLLER1_SSH cat /var/lib/config-data/puppet-generated/manila/etc/manila/manila.conf | awk '!/^ *#/ && NF' > ~/manila.conf
 ----
 
 . Review the configuration file for configuration changes that were made since {OpenStackShort} {rhos_prev_ver}. For more information on preparing this file for {rhos_long}, see xref:preparing-the-shared-file-systems-service-configuration_adopting-shared-file-systems[Guidelines for preparing the {rhos_component_storage_file} configuration].
@@ -44,9 +47,9 @@ $ CONTROLLER1_SSH cat /var/lib/config-data/puppet-generated/manila/etc/manila/ma
 
 . Create a patch file for the `OpenStackControlPlane` CR to deploy the {rhos_component_storage_file}. The following example `manila.patch` file uses native CephFS:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << __EOF__ > ~/manila.patch
+cat << __EOF__ > ~/manila.patch
 spec:
   manila:
     enabled: true
@@ -118,9 +121,9 @@ __EOF__
 +
 The following example patch file uses CephFS through NFS:
 +
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
-$ cat << __EOF__ > ~/manila.patch
+cat << __EOF__ > ~/manila.patch
 spec:
   manila:
     enabled: true
@@ -173,8 +176,9 @@ __EOF__
 
 . Patch the `OpenStackControlPlane` CR:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.patch>
+oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.patch>
 ----
 +
 * Replace `<manila.patch>` with the name of your patch file.
@@ -183,18 +187,21 @@ $ oc patch openstackcontrolplane openstack --type=merge --patch-file=~/<manila.p
 
 . Inspect the resulting {rhos_component_storage_file} pods:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ oc get pods -l service=manila
+oc get pods -l service=manila
 ----
 
 . Check that the Shared File Systems API service is registered in the {identity_service_first_ref}:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack service list | grep manila
+openstack service list | grep manila
 ----
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack endpoint list | grep manila
+openstack endpoint list | grep manila
 
 | 1164c70045d34b959e889846f9959c0e | regionOne | manila       | share        | True    | internal  | http://manila-internal.openstack.svc:8786/v1/%(project_id)s        |
 | 63e89296522d4b28a9af56586641590c | regionOne | manilav2     | sharev2      | True    | public    | https://manila-public-openstack.apps-crc.testing/v2                |
@@ -204,23 +211,26 @@ $ openstack endpoint list | grep manila
 
 . Test the health of the service:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack share service list
-$ openstack share pool list --detail
+openstack share service list
+openstack share pool list --detail
 ----
 
 . Check existing workloads:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack share list
-$ openstack share snapshot list
+openstack share list
+openstack share snapshot list
 ----
 ifeval::["{build}" != "downstream"]
 . You can create further resources:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ openstack share create cephfs 10 --snapshot mysharesnap --name myshareclone
-$ openstack share create nfs 10 --name mynfsshare
-$ openstack share export location list mynfsshare
+openstack share create cephfs 10 --snapshot mysharesnap --name myshareclone
+openstack share create nfs 10 --name mynfsshare
+openstack share export location list mynfsshare
 ----
 endif::[]

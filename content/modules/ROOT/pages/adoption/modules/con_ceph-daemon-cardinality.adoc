@@ -11,6 +11,7 @@ The amount of services that you can migrate depends on the amount of available n
 
 * The following scenario includes only RGW and RBD, without the {Ceph} dashboard:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 |    |                     |             |
 |----|---------------------|-------------|
@@ -21,6 +22,7 @@ The amount of services that you can migrate depends on the amount of available n
 
 * With the {Ceph} dashboard, but without {rhos_component_storage_file_first_ref}, at least 4 nodes are required. The {Ceph} dashboard has no failover:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 |     |                     |             |
 |-----|---------------------|-------------|
@@ -32,6 +34,7 @@ The amount of services that you can migrate depends on the amount of available n
 
 * With the {Ceph} dashboard and the {rhos_component_storage_file}, a minimum of 5 nodes are required, and the {Ceph} dashboard has no failover:
 +
+[source,bash,role=execute,subs=attributes]
 ----
 |     |                     |                         |
 |-----|---------------------|-------------------------|

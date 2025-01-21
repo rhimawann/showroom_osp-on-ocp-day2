@@ -35,15 +35,15 @@ affect all the {OpenStackShort} services.
 For example, you can add label `type: openstack` to any 3 {OpenShiftShort} nodes:
 
 ----
-$ oc label nodes worker0 type=openstack
-$ oc label nodes worker1 type=openstack
-$ oc label nodes worker2 type=openstack
+oc label nodes worker0 type=openstack
+oc label nodes worker1 type=openstack
+oc label nodes worker2 type=openstack
 ----
 
 And then in our `OpenStackControlPlane` you can use the label to place all the
 services in those 3 nodes:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
@@ -60,7 +60,7 @@ spec:
 You can use the selector for specific services. For example, you might want to place your the Block Storage service (cinder) volume and backup services on certain nodes if you are using FC and only have HBAs on a subset of
 nodes. The following example assumes that you have the label `fc_card: true`:
 
-[source,yaml]
+[source,bash,role=execute,subs=attributes]
 ----
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane

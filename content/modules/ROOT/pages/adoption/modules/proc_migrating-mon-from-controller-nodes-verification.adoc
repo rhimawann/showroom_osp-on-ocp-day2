@@ -8,8 +8,9 @@ After you finish migrating your Ceph Monitor daemons to the target nodes, verify
 
 . Verify that the {CephCluster} cluster is healthy:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ ceph -s
+ceph -s
   cluster:
     id:     f6ec3ebe-26f7-56c8-985d-eb974e8e08e3
     health: HEALTH_OK
@@ -21,6 +22,7 @@ $ ceph -s
   into the target nodes and verify that the Ceph Monitor daemons are bound to
   the expected IP and port:
 +
+[source,bash,role=execute,subs=attributes]
 ----
-$ netstat -tulpn | grep 3300
+netstat -tulpn | grep 3300
 ----
