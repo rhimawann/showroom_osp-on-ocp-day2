@@ -54,6 +54,7 @@ spec:
       - prefix: subscription_manager_
         secretRef:
           name: subscription-manager
+      ansibleVars:
          edpm_network_config_template: |
            ---
            {% set mtu_list = [ctlplane_mtu] %}
