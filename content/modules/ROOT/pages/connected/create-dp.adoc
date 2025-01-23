@@ -25,7 +25,7 @@ From the bastion login to the compute01 host:
 ssh -i /home/lab-user/.ssh/{uuid}key.pem cloud-user@compute01
 ----
 
-[source,bash,role=execute]
+[source,bash,role=execute,subs=attributes]
 ----
 sudo hostnamectl set-hostname edpm-compute-0.sandbox-{uuid}-ocp4-cluster.svc.cluster.local
 sudo nmcli co delete 'System eth0'

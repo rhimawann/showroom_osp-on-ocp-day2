@@ -1,7 +1,7 @@
 = Create the OpenStack Control Plane
 
 We will be using a preconfigured file (*files/osp-ng-ctlplane-deploy.yaml*) to create the control plane and at the same time enable the required services, configure the control plane network, and configure the service back ends.
-The bastion has a preconfigured NFS service that we will be using to store glance images and cinder volumes.
+The control plane we will be using the NFS server we installed in the previous section to store cinder volumes.
 
 == Prepare the secret to place the NFS server connection used by Cinder
 
