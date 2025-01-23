@@ -11,8 +11,7 @@ ssh {bastion_ssh_user_name}@{bastion_public_hostname} -p {bastion_ssh_port}
 +
 SSH password is `{bastion_ssh_password}`. The uuid of your lab is: `{guid}`
 
-If needed, you can navigate to the OpenShift console URL: {openshift_console_url}[{openshift_console_url
-}^] using user `admin` and password `{ocp_admin_password}`
+If needed, you can navigate to the OpenShift console URL: {openshift_cluster_console_url}[{openshift_cluster_console_url}^] using user `admin` and password `{KpdAM0JNSY9hvuH4}`
 
 == Prerequisites for Installation
 
