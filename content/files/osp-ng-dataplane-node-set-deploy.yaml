@@ -28,24 +28,24 @@ spec:
       edpm-compute-1:
         hostName: edpm-compute-1.sandbox-UUID-ocp4-cluster.svc.cluster.local
         ansible:
-          ansibleHost: 172.22.0.101
+          ansibleHost: 172.22.0.100
         networks:
         - name: ctlplane
           subnetName: subnet1
           defaultRoute: false
-          fixedIP: 172.22.0.101
+          fixedIP: 172.22.0.100
         - name: internalapi
           subnetName: subnet1
-          fixedIP: 172.17.0.101
+          fixedIP: 172.17.0.100
         - name: storage
           subnetName: subnet1
-          fixedIP: 172.18.0.101
+          fixedIP: 172.18.0.100
         - name: tenant
           subnetName: subnet1
-          fixedIP: 172.19.0.101
+          fixedIP: 172.19.0.100
         - name: external
           subnetName: subnet1
-          fixedIP: 172.21.0.110
+          fixedIP: 172.21.0.100
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     ansible:
