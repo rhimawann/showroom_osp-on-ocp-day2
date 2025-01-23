@@ -79,26 +79,25 @@ It should look like:
 .Sample Output
 ----
 NAME                                                              READY   STATUS    RESTARTS   AGE
-barbican-operator-controller-manager-7fb68ff6cb-8zhnf             2/2     Running   0          7m20s
-cinder-operator-controller-manager-c8f77fcfb-cjwl5                2/2     Running   0          7m4s
-designate-operator-controller-manager-78b49498cf-s24nj            2/2     Running   0          6m46s
-glance-operator-controller-manager-58996fbd7d-g9xvg               2/2     Running   0          6m38s
-heat-operator-controller-manager-74c6c75fd7-qnx2r                 2/2     Running   0          7m19s
-horizon-operator-controller-manager-76459c97c9-689qv              2/2     Running   0          6m45s
-infra-operator-controller-manager-77fccf5fc5-6k9zk                2/2     Running   0          7m15s
-ironic-operator-controller-manager-6bd9577485-26ldg               2/2     Running   0          6m8s
-keystone-operator-controller-manager-59b77787bb-cqxsq             2/2     Running   0          6m30s
-manila-operator-controller-manager-5c87bb85f4-pnr7p               2/2     Running   0          7m48s
-mariadb-operator-controller-manager-869fb6f6fd-5n8d6              2/2     Running   0          6m17s
-neutron-operator-controller-manager-75f674c89c-22mcx              2/2     Running   0          8m2s
-nova-operator-controller-manager-544c56f75b-s7c7s                 2/2     Running   0          7m55s
-octavia-operator-controller-manager-5b9c8db7d6-r4sg5              2/2     Running   0          8m7s
-openstack-ansibleee-operator-controller-manager-5dddc7ccb99kmmp   2/2     Running   0          6m54s
-openstack-baremetal-operator-controller-manager-77975546555v9m5   2/2     Running   0          7m47s
-openstack-operator-controller-manager-cfcf84546-4cbwb             2/2     Running   0          7m2s
-ovn-operator-controller-manager-6d77f744c4-g2lm8                  2/2     Running   0          6m10s
-placement-operator-controller-manager-84dc689f7c-trfxb            2/2     Running   0          6m47s
-rabbitmq-cluster-operator-7d6b597db7-mtknb                        1/1     Running   0          6m16s
-swift-operator-controller-manager-5fdb4c94d9-bp9l6                2/2     Running   0          6m22s
-telemetry-operator-controller-manager-564b55fd8-tzmcb             2/2     Running   0          8m11s
+barbican-operator-controller-manager-d6967ff8d-nnznr              2/2     Running   0          3d
+cinder-operator-controller-manager-845dc559c8-7fjz2               2/2     Running   0          3d
+designate-operator-controller-manager-6cdf7c69df-lqdjc            2/2     Running   0          3d
+glance-operator-controller-manager-86ddd9797-cgfnj                2/2     Running   0          3d
+heat-operator-controller-manager-58598d9cc5-mlk8t                 2/2     Running   0          3d
+horizon-operator-controller-manager-7dfb9f8c64-h7q26              2/2     Running   0          3d
+infra-operator-controller-manager-74f7f74cdf-69bqd                2/2     Running   0          3d
+ironic-operator-controller-manager-7cbbbff888-kvvxc               2/2     Running   0          3d
+keystone-operator-controller-manager-68f6bc7769-gpt2q             2/2     Running   0          3d
+manila-operator-controller-manager-7b974c64c5-j8scn               2/2     Running   0          3d
+mariadb-operator-controller-manager-7b9dd46bbf-x986p              2/2     Running   0          3d
+neutron-operator-controller-manager-7bd55db89f-9r7bp              2/2     Running   0          3d
+nova-operator-controller-manager-5d6dbd76c5-dj4vj                 2/2     Running   0          3d
+octavia-operator-controller-manager-7549fd44-jk9w9                2/2     Running   0          3d
+openstack-baremetal-operator-controller-manager-5655597bddnd9w7   2/2     Running   0          3d
+openstack-operator-controller-manager-84dd6d9877-nbzfw            2/2     Running   0          3d
+ovn-operator-controller-manager-7479894546-57b8b                  2/2     Running   0          3d
+placement-operator-controller-manager-57d864b49b-kn2s6            2/2     Running   0          3d
+rabbitmq-cluster-operator-8599cc8fbf-w858q                        1/1     Running   0          3d
+swift-operator-controller-manager-7d6f7cc6db-7h5dx                2/2     Running   0          3d
+telemetry-operator-controller-manager-6f7984877c-zzzq5            2/2     Running   0          3d
 ----

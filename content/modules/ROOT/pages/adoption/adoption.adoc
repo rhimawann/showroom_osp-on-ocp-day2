@@ -23,8 +23,6 @@ Adoption process:
 * xref:adoption-cp.adoc[Control plane Adoption]
 * xref:adoption-dp.adoc[Data plane Adoption]
 
-include::assemblies/assembly_rhoso-180-adoption-overview.adoc[leveloffset=+1]
-
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.
 

@@ -16,93 +16,24 @@ Apply the *network confguration*:
 oc apply -f osp-ng-dataplane-netconfig.yaml
 ----
 
-== Create VM for Dataplane
+== Login to the Compute and Verify
 
-Log out from the bastion so that we go back to the hypervisor machine:
+From the bastion login to the compute01 host:
 
-[source,bash,role=execute]
+[source,bash,role=execute,subs=attributes]
 ----
-logout
-----
-
-.Sample Output
-----
-[lab-user@hypervisor ~]#
-----
-
-Create the *RHEL compute* on lab-user (*hypervisor*) server:
-
-[source,bash,role=execute]
-----
-sudo -i
-cd /var/lib/libvirt/images
-cp rhel-9.4-x86_64-kvm.qcow2 rhel9-guest.qcow2
-qemu-img info rhel9-guest.qcow2
-qemu-img resize rhel9-guest.qcow2 +90G
-chown -R qemu:qemu rhel9-*.qcow2
-virt-customize -a rhel9-guest.qcow2 --run-command 'growpart /dev/sda 4'
-virt-customize -a rhel9-guest.qcow2 --run-command 'xfs_growfs /'
-virt-customize -a rhel9-guest.qcow2 --root-password password:redhat
-virt-customize -a rhel9-guest.qcow2 --run-command 'systemctl disable cloud-init'
-virt-customize -a /var/lib/libvirt/images/rhel9-guest.qcow2 --ssh-inject root:file:/root/.ssh/id_rsa.pub
-virt-customize -a /var/lib/libvirt/images/rhel9-guest.qcow2 --selinux-relabel
-qemu-img create -f qcow2 -F qcow2 -b /var/lib/libvirt/images/rhel9-guest.qcow2 /var/lib/libvirt/images/osp-compute-0.qcow2
-virt-install --virt-type kvm --ram 16384 --vcpus 4 --cpu=host-passthrough --os-variant rhel8.4 --disk path=/var/lib/libvirt/images/osp-compute-0.qcow2,device=disk,bus=virtio,format=qcow2 --network network:ocp4-provisioning --network network:ocp4-net --boot hd,network --noautoconsole --vnc --name osp-compute0 --noreboot
-virsh start osp-compute0
-----
-
-=== Login to the Compute and Verify
-
-Verify IP from 192.168.123.0/24
-
-[source,bash,role=execute]
-----
-watch virsh domifaddr osp-compute0 --source agent
-----
-
-.Sample Output
-[source,bash]
-----
-Every 2.0s: virsh domifaddr osp-compute0 --source agent                                                                                                 hypervisor: Wed Apr 17 07:03:13 2024
-
- Name       MAC address          Protocol     Address
--------------------------------------------------------------------------------
- lo         00:00:00:00:00:00    ipv4         127.0.0.1/8
- -          -                    ipv6         ::1/128
- eth0       52:54:00:c0:0a:26    ipv4         172.22.0.202/24
- -          -                    ipv6         fe80::16:d083:92f4:f201/64
- eth1       52:54:00:e5:ce:09    ipv4         192.168.123.61/24
- -          -                    ipv6         fe80::bfc0:e5db:a655:729f/64
-----
-
-(CTRL + C to continue)
-
-[source,bash,role=execute]
-----
-virsh domifaddr osp-compute0 --source agent
-----
-
-Use the IP assigned to `eth1` above in the next step.
-
-=== Configure Ethernet Devices on New Compute
-
-SSH to the new VM.
-There is no password.
-
-[source,bash,role=execute]
-----
-ssh root@192.168.123.61
+ssh -i /home/lab-user/.ssh/{uuid}key.pem cloud-user@compute01
 ----
 
 [source,bash,role=execute]
 ----
-sudo hostnamectl set-hostname edpm-compute-0.aio.example.com
-nmcli co delete 'Wired connection 1'
-nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 172.22.0.100/24 ipv4.dns "172.22.0.89"
-nmcli con up "static-eth0"
-nmcli co delete 'Wired connection 2'
-nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 192.168.123.61/24 ipv4.dns "192.168.123.100" ipv4.gateway "192.168.123.1"
-nmcli con up "static-eth1"
+sudo hostnamectl set-hostname edpm-compute-0.sandbox-{uuid}-ocp4-cluster.svc.cluster.local
+sudo nmcli co delete 'System eth0'
+sudo nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 10.0.2.2/24 ipv4.dns "172.30.0.10" ipv4.gateway "10.0.2.1"
+sudo nmcli con up "static-eth0"
+sudo nmcli co delete 'Wired connection 1'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.100/24 ipv4.dns "172.22.0.89"
+sudo nmcli con up "static-eth1"
 ----
 
 And log off VM
@@ -112,52 +43,13 @@ And log off VM
 logout
 ----
 
-Snapshot the Compute Server
-
-[source,bash,role=execute]
-----
-virsh snapshot-create-as osp-compute0 preprovisioned
-----
-
-Set SSH key
-
-[source,bash,role=execute]
-----
-sudo -i
-scp /root/.ssh/id_rsa root@192.168.123.100:/root/.ssh/id_rsa_compute
-scp /root/.ssh/id_rsa.pub root@192.168.123.100:/root/.ssh/id_rsa_compute.pub
-----
-
-WARNING: This might error initially because of unknown hosts file.
-Retry to make sure both files are copied.
-
 === Finish the Dataplane
 
-Connect to the *bastion* server (Remember that bastion password is *redhat*):
+From the bastion server, create Secret for ansible connection and nova migration of virtual machines
 
 [source,bash,role=execute]
 ----
-sudo -i
-ssh root@192.168.123.100
-----
-
-.Sample Output
-----
-[root@ocp4-bastion ~] #
-----
-
-Change to Lab Repo
-
-[source,bash,role=execute]
-----
-cd ~/labrepo/content/files
-----
-
-Create Secret for ansible connection and nova migration of virtual machines
-
-[source,bash,role=execute]
-----
-oc create secret generic dataplane-ansible-ssh-private-key-secret --save-config --dry-run=client --from-file=authorized_keys=/root/.ssh/id_rsa_compute.pub --from-file=ssh-privatekey=/root/.ssh/id_rsa_compute --from-file=ssh-publickey=/root/.ssh/id_rsa_compute.pub -n openstack -o yaml | oc apply -f-
+oc create secret generic dataplane-ansible-ssh-private-key-secret --save-config --dry-run=client --from-file=authorized_keys=/home/lab-user/.ssh/{uuid}key.pub --from-file=ssh-privatekey=/home/lab-user/.ssh/{uuid}key.pem --from-file=ssh-publickey=/home/lab-user/.ssh/{uuid}key.pub -n openstack -o yaml | oc apply -f-
 ssh-keygen -f ./id -t ecdsa-sha2-nistp521 -N ''
 oc create secret generic nova-migration-ssh-key --from-file=ssh-privatekey=id --from-file=ssh-publickey=id.pub -n openstack -o yaml | oc apply -f-
 ----

@@ -2,12 +2,17 @@
 
 == Access Your Lab Environment
 
-During this lab you will be instructed to ssh to your hypervisor at IP address `{bastion_public_hostname}`.
-Use username `{bastion_ssh_user_name}` and password `{bastion_ssh_password}`. The uuid of your lab is: `{guid}`
+. Access to the bastion executing the following command: 
++
+[source,bash,role=execute]
+----
+ssh {bastion_ssh_user_name}@{bastion_public_hostname} -p {bastion_ssh_port} 
+----
++
+SSH password is `{bastion_ssh_password}`. The uuid of your lab is: `{guid}`
 
-Once logged in the hypervisor you can access to the bastion at IP address `192.168.123.100` as `root` using password `redhat`.
-
-If needed, you can navigate to the OpenShift console URL: {ocp_console_url}[{ocp_console_url}^] using user `admin` and password `{ocp_admin_password}`
+If needed, you can navigate to the OpenShift console URL: {openshift_console_url}[{openshift_console_url
+}^] using user `admin` and password `{ocp_admin_password}`
 
 == Prerequisites for Installation
 
@@ -28,22 +33,7 @@ There are three operators that are required to be installed before you can insta
 
 ==== Accessing the Cluster
 
-From the hypervisor, log in to the bastion
-
-[source,bash,role=execute]
-----
-sudo -i
-ssh root@192.168.123.100
-----
-
-Password is `redhat`.
-
-.Sample Output
-----
-[root@ocp4-bastion ~]
-----
-
-Make sure you can reach out to the OpenShift cluster, for instance, by listing the nodes in your cluster:
+From the bastion, execute:
 
 [source,bash,role=execute]
 ----
@@ -52,13 +42,10 @@ oc get nodes
 
 .Sample Output
 ----
-NAME                           STATUS   ROLES                  AGE   VERSION
-ocp4-master1.aio.example.com   Ready    control-plane,master   26h   v1.25.16+9946c63
-ocp4-master2.aio.example.com   Ready    control-plane,master   26h   v1.25.16+9946c63
-ocp4-master3.aio.example.com   Ready    control-plane,master   26h   v1.25.16+9946c63
-ocp4-worker1.aio.example.com   Ready    worker                 25h   v1.25.16+9946c63
-ocp4-worker2.aio.example.com   Ready    worker                 25h   v1.25.16+9946c63
-ocp4-worker3.aio.example.com   Ready    worker                 25h   v1.25.16+9946c63
+NAME                            STATUS   ROLES                         AGE     VERSION
+control-plane-cluster-x55dt-1   Ready    control-plane,master,worker   3d19h   v1.29.10+67d3387
+control-plane-cluster-x55dt-2   Ready    control-plane,master,worker   3d19h   v1.29.10+67d3387
+control-plane-cluster-x55dt-3   Ready    control-plane,master,worker   3d19h   v1.29.10+67d3387
 ----
 
 ==== NMState Operator
@@ -265,80 +252,7 @@ oc get daemonset -n metallb-system speaker
 
 ==== Cert-Manager Operator
 
-Create the *cert-manager-operator* Operator namespace:
-
-[source,bash,role=execute]
-----
-cat << EOF | oc apply -f -
-apiVersion: v1
-kind: Namespace
-metadata:
-    name: cert-manager-operator
-    labels:
-      pod-security.kubernetes.io/enforce: privileged
-      security.openshift.io/scc.podSecurityLabelSync: "false"
-EOF
-----
-
-Create the *OperatorGroup*:
-
-[source,bash,role=execute]
-----
-cat << EOF | oc apply -f -
-apiVersion: operators.coreos.com/v1
-kind: OperatorGroup
-metadata:
-  name: cert-manager-operator
-  namespace: cert-manager-operator
-spec:
-  targetNamespaces:
-  - cert-manager-operator
-  upgradeStrategy: Default
-EOF
-----
-
-Confirm the OperatorGroup is installed in the namespace:
-
-[source,bash,role=execute]
-----
-oc get operatorgroup -n cert-manager-operator
-----
-
-Subscribe to the *cert-manager* Operator:
-
-[source,bash,role=execute]
-----
-cat << EOF | oc apply -f -
-apiVersion: operators.coreos.com/v1alpha1
-kind: Subscription
-metadata:
-  labels:
-    operators.coreos.com/openshift-cert-manager-operator.cert-manager-operator: ""
-  name: openshift-cert-manager-operator
-  namespace: cert-manager-operator
-spec:
-  channel: stable-v1
-  installPlanApproval: Automatic
-  name: openshift-cert-manager-operator
-  source: redhat-operators
-  sourceNamespace: openshift-marketplace
-EOF
-----
-
-Confirm the *cert-manager* installplan is in the namespace:
-
-[source,bash,role=execute]
-----
-oc get installplan -n cert-manager-operator
-----
-
-Confirm the *cert-manager* operator is installed:
-
-[source,bash,role=execute]
-----
-oc get clusterserviceversion -n cert-manager-operator \
- -o custom-columns=Name:.metadata.name,Phase:.status.phase
-----
+The *cert-manager-operator* is already installed in this environment:
 
 Verify that cert-manager pods are up and running by entering the following command:
 
