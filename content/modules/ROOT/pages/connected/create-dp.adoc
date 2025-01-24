@@ -27,7 +27,7 @@ ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute01
 
 [source,bash,role=execute,subs=attributes]
 ----
-sudo hostnamectl set-hostname edpm-compute-0.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+sudo hostnamectl set-hostname edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
 sudo nmcli co delete 'System eth0'
 sudo nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 10.0.2.2/24 ipv4.dns "172.30.0.10" ipv4.gateway "10.0.2.1"
 sudo nmcli con up "static-eth0"
