@@ -248,6 +248,8 @@ spec:
           replicas: 1
       ovnController:
         networkAttachment: tenant
+        nicMappings:
+         datacentre: enp7s0
   placement:
     apiOverride:
       route: {}
