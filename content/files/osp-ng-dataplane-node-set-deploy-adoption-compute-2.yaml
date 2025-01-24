@@ -136,7 +136,7 @@ spec:
          neutron_public_interface_name: eth0
 
          # edpm ovn-controller configuratio
-         edpm_ovn_bridge_mappings: datacentre:br-ex
+         edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
          edpm_ovn_bridge: br-int
          edpm_ovn_encap_type: geneve
          ovn_monitor_all: true

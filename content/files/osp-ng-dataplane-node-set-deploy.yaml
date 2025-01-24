@@ -104,7 +104,7 @@ spec:
           # These vars are for the network config templates themselves and are
           # considered EDPM network defaults (for all computes).
          neutron_physical_bridge_name: br-ex
-         edpm_ovn_bridge_mappings: datacentre:br-ex
+         edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
          ctlplane_host_routes: []
          ctlplane_subnet_cidr: 24
          dns_search_domains: sandbox-UUID-ocp4-cluster.svc.cluster.local
