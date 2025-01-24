@@ -2,16 +2,23 @@
 
 == Access Your Lab Environment
 
-. Access the bastion by executing the following command:
+. Access to the bastion executing the following command: 
 +
-[source,bash,role=execute]
+[source,bash,role=execute,subs=attributes]
 ----
-ssh {bastion_ssh_user_name}@{bastion_public_hostname} -p {bastion_ssh_port}
+ssh {bastion_ssh_user_name}@{bastion_public_hostname} -p {bastion_ssh_port} 
 ----
 +
-The SSH password is `{bastion_ssh_password}`. The UUID of your lab is: `{guid}`.
+SSH password is `{bastion_ssh_password}`. The uuid of your lab is: `{guid}`
+. Optionally copy your public SSH key to the bastion allowing you to authenticate with the server without entering a password every time you connect: 
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh-copy-id -p {bastion_ssh_port} {bastion_ssh_user_name}@{bastion_public_hostname} 
+----
++
 
-If needed, you can navigate to the OpenShift console URL: {openshift_cluster_console_url}[{openshift_cluster_console_url}^] using the user `admin` and password `{KpdAM0JNSY9hvuH4}`.
+If needed, you can navigate to the OpenShift console URL: {openshift_cluster_console_url}[{openshift_cluster_console_url}^] using user `admin` and password `{openshift_cluster_admin_password}`
 
 == RHOSP 17.1 Installation
 
