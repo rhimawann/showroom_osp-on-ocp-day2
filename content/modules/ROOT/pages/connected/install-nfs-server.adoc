@@ -6,7 +6,7 @@ From the bastion, connect to the *NFS server* host and configure the networking:
 
 [source,bash,role=execute,subs=attributes]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@nfsserver
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@nfsserver
 sudo -i
 mkdir -p /nfs/cinder
 mkdir -p /nfs/glance
