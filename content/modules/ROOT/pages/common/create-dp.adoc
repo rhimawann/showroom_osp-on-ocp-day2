@@ -1,0 +1,137 @@
+= Configure the Data Plane
+
+Using a preconfigured yaml file(*files/osp-ng-dataplane-netconfig.yaml*) we will configure the topology for each data plane network.
+
+Change directory to the files:
+
+[source,bash,role=execute]
+----
+cd ~/labrepo/content/files
+----
+
+Apply the *network confguration*:
+
+[source,bash,role=execute]
+----
+oc apply -f osp-ng-dataplane-netconfig.yaml
+----
+
+== Login to the Compute and Verify
+
+From the bastion login to the compute01 host:
+
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute01
+----
+
+[source,bash,role=execute,subs=attributes]
+----
+sudo hostnamectl set-hostname edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+sudo nmcli co delete 'System eth0'
+sudo nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 10.0.2.2/24 ipv4.dns "172.30.0.10" ipv4.gateway "10.0.2.1"
+sudo nmcli con up "static-eth0"
+sudo nmcli co delete 'Wired connection 1'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.100/24 ipv4.dns "172.22.0.89"
+sudo nmcli con up "static-eth1"
+----
+
+And log off VM
+
+[source,bash,role=execute]
+----
+logout
+----
+
+=== Finish the Dataplane
+
+From the bastion server, create Secret for ansible connection and nova migration of virtual machines
+
+[source,bash,role=execute,subs=attributes]
+----
+oc create secret generic dataplane-ansible-ssh-private-key-secret --save-config --dry-run=client --from-file=authorized_keys=/home/lab-user/.ssh/{guid}key.pub --from-file=ssh-privatekey=/home/lab-user/.ssh/{guid}key.pem --from-file=ssh-publickey=/home/lab-user/.ssh/{guid}key.pub -n openstack -o yaml | oc apply -f-
+ssh-keygen -f ./id -t ecdsa-sha2-nistp521 -N ''
+oc create secret generic nova-migration-ssh-key --from-file=ssh-privatekey=id --from-file=ssh-publickey=id.pub -n openstack -o yaml | oc apply -f-
+----
+
+Create a secret for the subscription manager and a secret for the Red Hat registry:
+
+[source,bash,role=execute]
+----
+echo -n "your_username" | base64
+echo -n "your_password" | base64
+----
+
+[source,bash,role=execute]
+----
+oc apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: subscription-manager
+data:
+  username: <base64 encoded subscription-manager username>
+  password: <base64 encoded subscription-manager password>
+EOF
+----
+
+Create a secret for the subscription manager and a secret for the Red Hat registry:
+
+[source,bash,role=execute]
+----
+oc create secret generic redhat-registry --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<username>": "<password>"}}'
+----
+
+Deploy the Dataplane
+
+[source,bash,role=execute]
+----
+oc apply -f osp-ng-dataplane-node-set-deploy.yaml
+oc apply -f osp-ng-dataplane-deployment.yaml
+----
+
+You can view the Ansible logs while the deployment executes:
+
+[source,bash,role=execute]
+----
+oc logs -l app=openstackansibleee -f --max-log-requests 10
+----
+
+.Sample Output
+----
+(...)
+PLAY RECAP *********************************************************************
+edpm-compute-0             : ok=53   changed=26   unreachable=0    failed=0    skipped=54   rescued=0    ignored=0
+----
+
+Ctrl-C to exit.
+
+Verify that the data plane is deployed.
+
+NOTE: This takes several minutes.
+
+[source,bash,role=execute]
+----
+oc get openstackdataplanedeployment
+----
+
+Repeat the query until you see the following:
+
+.Sample Output
+----
+NAME                  STATUS   MESSAGE
+openstack-edpm-ipam   True     Setup Complete
+----
+
+[source,bash,role=execute]
+----
+oc get openstackdataplanenodeset
+----
+
+Repeat the query until you see the following:
+
+.Sample Output
+----
+NAME                  STATUS   MESSAGE
+openstack-edpm-ipam   True     NodeSet Ready
+----
