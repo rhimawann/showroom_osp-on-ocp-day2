@@ -7,3 +7,4 @@ spec:
     - openstack-edpm-compute-1
   servicesOverride:
     - update
+    - nova
