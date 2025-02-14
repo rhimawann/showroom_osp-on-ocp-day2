@@ -8,5 +8,3 @@ spec:
     - openstack-edpm-compute-1
   servicesOverride: 
   - reboot-os
-  ansibleExtraVars: 
-    edpm_reboot_strategy: force

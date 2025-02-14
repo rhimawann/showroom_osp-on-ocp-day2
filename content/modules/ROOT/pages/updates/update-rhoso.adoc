@@ -223,6 +223,54 @@ You can reboot your Compute nodes any time after you complete the minor update. 
 
 To ensure minimal downtime of instances in your Red Hat OpenStack Services on OpenShift (RHOSO) environment, you should migrate the instances from the Compute node that you need to reboot.
 
+. Confirm which updated nodes need a reboot. Create an OpenStackDataplaneDeployment to check the nodes:
++
+[source,bash,role=execute]
+----
+cat openstack-edpm-reboot-check.yaml
+----
+
+[source,bash,subs=attributes]
+----
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-compute-1-reboot-check
+  namespace: openstack
+spec:
+  nodeSets:
+    - openstack-edpm-compute-1
+  servicesOverride: 
+  - reboot-os
+----
+
+. Apply the *openstack-edpm-compute-1-reboot.yaml* OpenStackDataPlaneDeployment:
++
+[source,bash,role=execute]
+----
+oc create -f openstack-edpm-reboot.check.yaml
+----
+. Verify that the *openstack-edpm-compute-1-reboot* deployment completed:
++
+[source,bash]
+----
+oc get openstackdataplanedeployment
+NAME                                    STATUS   MESSAGE
+openstack-edpm-deployment-ipam-reboot-check   True     Setup complete
+----
+
+. Check the logs of the deployment that include the Compute node to check:
++
+[source,bash,role=execute]
+----
+oc logs jobs/reboot-os-openstack-edpm-compute-1-check-reboot-openstack-edpm
+----
+. Sample output
+[source,bash]
+----
+Reboot is required but was not started. Edpm_reboot_strategy is set to never or this is already deployed machine. Reboot has to be planned. To start reboot set edpm_reboot_strategy to force.
+----
+
 . Review and understand the *OpenStackDataPlaneDeployment* to reboot the nodes:
 +
 [source,bash,role=execute]
@@ -244,8 +292,6 @@ spec:
   - reboot-os
   ansibleExtraVars: 
     edpm_reboot_strategy: force
-  ansibleLimit: 
-    - edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
 ----
 
 . Apply the *openstack-edpm-compute-1-reboot.yaml* OpenStackDataPlaneDeployment:
