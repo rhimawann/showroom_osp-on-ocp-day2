@@ -36,7 +36,7 @@ Copy the SSH keys to the *all-in-one* host:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-scp -i /home/lab-user/.ssh/{guid}key.pem /home/lab-user/.ssh/{guid}key.pem.* cloud-user@allinone:/home/cloud-user/.ssh/
+scp -i /home/lab-user/.ssh/{guid}key.pem /home/lab-user/.ssh/{guid}key.* cloud-user@allinone:/home/cloud-user/.ssh/
 ----
 
 === Install the NFS Server on the NFS Server Node
