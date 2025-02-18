@@ -36,7 +36,7 @@ Copy the SSH keys to the *all-in-one* host:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-scp -i /home/lab-user/.ssh/key.pem /home/lab-user/.ssh/key.pem.* cloud-user@allinone:/home/cloud-user/.ssh/
+scp -i /home/lab-user/.ssh/{guid}key.pem /home/lab-user/.ssh/{guid}key.pem.* cloud-user@allinone:/home/cloud-user/.ssh/
 ----
 
 === Install the NFS Server on the NFS Server Node
@@ -47,7 +47,7 @@ From the bastion, connect to the *nfs-server* host and configure the networking:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@nfsserver
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@nfsserver
 sudo -i
 mkdir -p /nfs/cinder
 mkdir -p /nfs/glance
@@ -76,9 +76,9 @@ From the bastion, connect to the *all-in-one* host and configure the networking:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@allinone
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone
 eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/key.pem
+ssh-add ~/.ssh/{guid}key.pem
 sudo hostnamectl set-hostname standalone.localdomain
 sudo nmcli co delete 'Wired connection 2'
 sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.15/24
@@ -103,7 +103,7 @@ From the bastion, connect to the *compute02* host and configure the networking:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@compute02
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute02
 sudo hostnamectl set-hostname compute02.localdomain
 sudo nmcli co delete 'Wired connection 2'
 sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
@@ -128,7 +128,7 @@ From the bastion, connect to the *all-in-one* host:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@allinone
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone
 ----
 +
 Subscribe the host with the subscription:
@@ -170,8 +170,8 @@ Execute the *openstack_compute_prepare.sh* script and copy the generated files t
 [source,bash,role=execute,subs=attributes]
 ----
 sh openstack_compute_prepare.sh
-scp -i /home/cloud-user/.ssh/key.pem oslo.yaml cloud-user@172.22.0.110:
-scp -i /home/cloud-user/.ssh/key.pem passwords.yaml cloud-user@172.22.0.110:
+scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.110:
+scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.110:
 ----
 
 . Install the Compute Node
@@ -180,7 +180,7 @@ From the bastion, connect to the *compute02* host:
 +
 [source,bash,role=execute]
 ----
-ssh -i /home/lab-user/.ssh/key.pem cloud-user@compute02
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute02
 ----
 +
 Execute the *openstack_compute.sh* script to install *compute02*:
