@@ -21,7 +21,10 @@ Adoption process:
 
 * xref:migrating-databases.adoc[Migrating DBs]
 * xref:adoption-cp.adoc[Control plane Adoption]
+
+In the dataplane adoption you have 2 choices:
 * xref:adoption-dp.adoc[Data plane Adoption]
+* xref:adoption-dp-recovery.adoc[Data plane Adoption showing how to recover a failure during the adoption of a Compute Node]
 
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.

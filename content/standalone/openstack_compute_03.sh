@@ -24,5 +24,4 @@ ENV_ARGS+=" -e $HOME/extra-host-file-entries.json"
 ENV_ARGS+=" -e $HOME/oslo.yaml"
 
 sudo ${CMD} ${CMD_ARGS} ${ENV_ARGS}
-sudo systemctl restart tripleo_ovn_controller.service
-sudo systemctl restart tripleo_ovn_metadata_agent.service
+sudo systemctl restart tripleo_ovn*

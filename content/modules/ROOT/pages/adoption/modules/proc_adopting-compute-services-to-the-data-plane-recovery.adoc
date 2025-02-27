@@ -78,7 +78,7 @@ oc create secret generic dataplane-ansible-ssh-private-key-secret \
 ----
 +
 ifeval::["{build}" == "downstream"]
-* Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key. /TODO
+* Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key.
 endif::[]
 
 . Generate an ssh key-pair `nova-migration-ssh-key` secret:
@@ -132,15 +132,26 @@ oc create secret generic subscription-manager \
 * Replace `<subscription_manager_username>` with the applicable user name.
 * Replace `<subscription_manager_password>` with the applicable password.
 
+. Create a secret for the Red Hat registry:
++
+----
+$ oc create secret generic redhat-registry \
+--from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
+----
++
+* Replace `<registry_username>` with the applicable user name.
+* Replace `<registry_password>` with the applicable password.
+endif::[]
 
 . Deploy the `OpenStackDataPlaneNodeSet` CR:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute.yaml
+oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
+oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-3.yaml
 ----
 
-* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* file. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
+* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* file and *osp-ng-dataplane-adoption-compute-3.yaml* files. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
 
 . Run the pre-adoption validation:
 
@@ -235,7 +246,8 @@ metadata:
   name: tripleo-cleanup
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - openstack-edpm-compute-set-2
+  - openstack-edpm-compute-set-3
   servicesOverride:
   - tripleo-cleanup
 EOF
@@ -249,10 +261,11 @@ cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-compute-set-adoption
+  name: openstack-edpm-compute
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - openstack-edpm-compute-set-2
+  - openstack-edpm-compute-set-3
 EOF
 ----
 +
@@ -275,7 +288,7 @@ oc logs -l app=openstackansibleee -f --max-log-requests 20
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc wait --for condition=Ready osdpns/openstack-edpm-compute-set-adoption --timeout=30m
+oc wait --for condition=Ready osdpns/openstack-edpm-compute-2-adoption --timeout=30m
 ----
 
 . Verify that the {networking_first_ref} agents are running:
