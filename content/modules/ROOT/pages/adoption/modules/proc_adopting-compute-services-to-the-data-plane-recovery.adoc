@@ -1,6 +1,6 @@
 [id="adopting-compute-services-to-the-data-plane_{context}"]
 
-= Adopting Compute services to the {rhos_acro} data plane
+= Adopting Compute services to the {rhos_acro} data plane with a failed Compute Node
 
 Adopt your Compute (nova) services to the {rhos_long} data plane.
 
@@ -18,14 +18,19 @@ oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
 ----
 +
 
+* Get the libvirt secret password:
++
+[source,bash,role=execute]
+----
+LIBVIRT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' LibvirtTLSPassword:' | awk -F ': ' '{ print $2; }')
+LIBVIRT_PASSWORD_BASE64=$(echo -n "$LIBVIRT_PASSWORD" | base64)
+----
++
+
 * Create the libvirt secret:
 +
-[source,bash,role=execute,subs=attributes]
+[source,yaml]
 ----
-declare -A TRIPLEO_PASSWORDS
-TRIPLEO_PASSWORDS[default]="$HOME/overcloud-passwords.yaml"
-LIBVIRT_PASSWORD=$(cat ${TRIPLEO_PASSWORDS[default]} | grep ' LibvirtTLSPassword:' | awk -F ': ' '{ print $2; }')
-LIBVIRT_PASSWORD_BASE64=$(echo -n "$LIBVIRT_PASSWORD" | base64)
 oc apply -f - <<EOF
 apiVersion: v1
 kind: Secret
@@ -52,8 +57,6 @@ computes=(
   ["compute03.localdomain"]="172.22.0.112"
 )
 ----
-+
-** Replace `["compute02.localdomain"]="172.22.0.110"` with the name and IP address of the {compute_service} node.
 
 .Procedure
 
@@ -70,15 +73,15 @@ endif::[]
 oc create secret generic dataplane-ansible-ssh-private-key-secret \
 --save-config \
 --dry-run=client \
---from-file=authorized_keys=/home/lab-user/.ssh/{guid}.pub \
---from-file=ssh-privatekey=/home/lab-user/.ssh/{guid}.pem \
---from-file=ssh-publickey=/home/lab-user/.ssh/{guid}.pub \
+--from-file=authorized_keys=/home/lab-user/.ssh/{guid}key.pub \
+--from-file=ssh-privatekey=/home/lab-user/.ssh/{guid}key.pem \
+--from-file=ssh-publickey=/home/lab-user/.ssh/{guid}key.pub \
 -n openstack \
 -o yaml | oc apply -f-
 ----
 +
 ifeval::["{build}" == "downstream"]
-* Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key.
+* Replace `/home/lab-user/.ssh/{guid}key.pem` with the path to your SSH key.
 endif::[]
 
 . Generate an ssh key-pair `nova-migration-ssh-key` secret:
@@ -120,13 +123,19 @@ The secret `nova-cell<X>-compute-config` auto-generates for each
 +
 The resources in the `ConfigMap` contain cell-specific configurations.
 
-ifeval::["{build}" == "downstream"]
 . Create a secret for the subscription manager:
 +
-[source,bash,role=execute,subs=attributes]
+[source,yaml,role=execute]
 ----
-oc create secret generic subscription-manager \
---from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
+oc apply -f - <<EOF
+apiVersion: v1
+kind: Secret
+metadata:
+  name: subscription-manager
+data:
+  username: <base64 encoded subscription-manager username>
+  password: <base64 encoded subscription-manager password>
+EOF
 ----
 +
 * Replace `<subscription_manager_username>` with the applicable user name.
@@ -141,9 +150,8 @@ $ oc create secret generic redhat-registry \
 +
 * Replace `<registry_username>` with the applicable user name.
 * Replace `<registry_password>` with the applicable password.
-endif::[]
 
-. Deploy the `OpenStackDataPlaneNodeSet` CR:
+. Create the `OpenStackDataPlaneNodeSet` CRs corresponding to compute02 and compute03:
 +
 [source,bash,role=execute,subs=attributes]
 ----
@@ -180,7 +188,8 @@ metadata:
   name: openstack-pre-adoption
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - openstack-edpm-compute-set-2
+  - openstack-edpm-compute-set-3
   servicesOverride:
   - pre-adoption-validation
 EOF

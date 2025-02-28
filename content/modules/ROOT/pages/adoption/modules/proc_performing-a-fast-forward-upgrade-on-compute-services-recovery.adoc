@@ -149,7 +149,7 @@ ${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnosti
 ----
 ${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test SHUTOFF" && ${BASH_ALIASES[openstack]} server start test || echo PASS
 ${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test ACTIVE" && \
-  ${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnostics test --fit-width -f json | jq -r '.state' | grep running || echo FAIL
+${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnostics test --fit-width -f json | jq -r '.state' | grep running || echo FAIL
 ----
 
 [NOTE]

@@ -1,0 +1,22 @@
+[id="force_compute03-error_{context}"]
+
+= Preparing compute03 to fail
+
+In this chapter we will misconfigure the DNS configuration so that the adoption process will fail while downloading the packages.
+
+.Procedure
+
+* From the bastion, ssh to the compute03 node:
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
+----
++
+Truncate the resolv.conf:
++
+[source,bash,role=execute,subs=attributes]
+----
+sudo cp /etc/resolv.conf /root/resolv.conf.bck
+sudo truncate -s 0 /etc/resolv.conf
+----

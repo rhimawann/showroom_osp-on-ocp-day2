@@ -23,6 +23,7 @@ Adoption process:
 * xref:adoption-cp.adoc[Control plane Adoption]
 
 In the dataplane adoption you have 2 choices:
+
 * xref:adoption-dp.adoc[Data plane Adoption]
 * xref:adoption-dp-recovery.adoc[Data plane Adoption showing how to recover a failure during the adoption of a Compute Node]
 

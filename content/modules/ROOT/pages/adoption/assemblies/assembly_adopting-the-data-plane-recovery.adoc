@@ -4,7 +4,7 @@ ifdef::context[:parent-context: {context}]
 
 :context: data-plane
 
-= Adopting the data plane
+= Adopting the data plane recovering a Compute failed to adopt
 
 Adopting the {rhos_long} data plane involves the following steps:
 
@@ -17,6 +17,8 @@ Adopting the {rhos_long} data plane involves the following steps:
 After the {rhos_acro} control plane manages the newly deployed data plane, you must not re-enable services on the {OpenStackShort} {rhos_prev_ver} control plane and data plane. If you re-enable services, workloads are managed by two control planes or two data planes, resulting in data corruption, loss of control of existing workloads, inability to start new workloads, or other issues.
 
 include::../modules/proc_stopping-infrastructure-management-and-compute-services.adoc[leveloffset=+1]
+
+include::../modules/proc_force_compute03-error.adoc[leveloffset=+1]
 
 include::../modules/proc_adopting-compute-services-to-the-data-plane-recovery.adoc[leveloffset=+1]
 

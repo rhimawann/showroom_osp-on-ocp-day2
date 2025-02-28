@@ -197,8 +197,8 @@ Execute the *openstack_compute_prepare.sh* script and copy the generated files t
 sh openstack_compute_prepare.sh
 scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.110:
 scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.110:
-scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.111:
-scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.111:
+scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.112:
+scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.112:
 ----
 
 . Install the Compute Node 2
@@ -225,7 +225,7 @@ sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms \
 sudo dnf -y update
 sudo dnf -y install python3-tripleoclient python-jinja2 git
 git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/standalone/* /home/cloud-user/.
+cp -n labrepo/content/standalone/* /home/cloud-user/
 sh openstack_compute_02.sh
 ----
 
@@ -233,12 +233,12 @@ sh openstack_compute_02.sh
 +
 From the bastion, connect to the *compute03* host:
 +
-[source,bash,role=execute]
+[source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
 ----
 +
-Execute the *openstack_compute.sh* script to install *compute02*:
+Execute the *openstack_compute.sh* script to install *compute03*:
 +
 [source,bash,role=execute]
 ----
@@ -253,7 +253,7 @@ sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms \
 sudo dnf -y update
 sudo dnf -y install python3-tripleoclient python-jinja2 git
 git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/standalone/* /home/cloud-user/.
+cp -n labrepo/content/standalone/* /home/cloud-user/
 sh openstack_compute_03.sh
 ----
 

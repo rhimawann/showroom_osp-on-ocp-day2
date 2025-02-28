@@ -16,7 +16,7 @@ ifeval::["{build}" != "downstream"]
 EDPM_PRIVATEKEY_PATH="~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa"
 endif::[]
 ifeval::["{build}" == "downstream"]
-EDPM_PRIVATEKEY_PATH="/home/lab-user/.ssh/{guid}.pem"
+EDPM_PRIVATEKEY_PATH="/home/lab-user/.ssh/{guid}key.pem"
 endif::[]
 declare -A computes
 computes=(
