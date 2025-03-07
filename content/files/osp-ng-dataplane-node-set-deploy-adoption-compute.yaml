@@ -74,20 +74,12 @@ spec:
     ansible:
       ansibleUser: cloud-user
       ansibleVarsFrom:
-      - secretRef:
+      - prefix: subscription_manager_
+        secretRef:
           name: subscription-manager
       - secretRef:
           name: redhat-registry
       ansibleVars:
-         rhc_release: 9.2
-         rhc_repositories:
-             - {name: "*", state: disabled}
-             - {name: "rhel-9-for-x86_64-baseos-eus-rpms", state: enabled}
-             - {name: "rhel-9-for-x86_64-appstream-eus-rpms", state: enabled}
-             - {name: "rhel-9-for-x86_64-highavailability-eus-rpms", state: enabled}
-             - {name: "rhoso-18.0-for-rhel-9-x86_64-rpms", state: enabled}
-             - {name: "fast-datapath-for-rhel-9-x86_64-rpms", state: enabled}
-             - {name: "rhceph-7-tools-for-rhel-9-x86_64-rpms", state: enabled}
          edpm_network_config_template: |
            ---
            {% set mtu_list = [ctlplane_mtu] %}
@@ -187,5 +179,9 @@ spec:
 
          edpm_bootstrap_release_version_package: []
          edpm_bootstrap_command: |
+           subscription-manager register --username "{{ subscription_manager_username }}" --password "{{ subscription_manager_password }}"
+           sudo subscription-manager release --set=9.4
+           sudo subscription-manager repos --disable=*
+           sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms --enable=rhel-9-for-x86_64-appstream-eus-rpms --enable=rhel-9-for-x86_64-highavailability-eus-rpms --enable=fast-datapath-for-rhel-9-x86_64-rpms --enable=rhoso-18.0-for-rhel-9-x86_64-rpms --enable=rhceph-7-tools-for-rhel-9-x86_64-rpms
            dnf -y upgrade openstack-selinux
            rm -f /run/virtlogd.pid
