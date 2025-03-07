@@ -18,14 +18,19 @@ oc apply -f osp-ng-dataplane-netconfig-adoption.yaml
 ----
 +
 
+* Get the libvirt secret password:
++
+[source,bash,role=execute]
+----
+LIBVIRT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' LibvirtTLSPassword:' | awk -F ': ' '{ print $2; }')
+LIBVIRT_PASSWORD_BASE64=$(echo -n "$LIBVIRT_PASSWORD" | base64)
+----
++
+
 * Create the libvirt secret:
 +
-[source,bash,role=execute,subs=attributes]
+[source,yaml,role=execute]
 ----
-declare -A TRIPLEO_PASSWORDS
-TRIPLEO_PASSWORDS[default]="$HOME/overcloud-passwords.yaml"
-LIBVIRT_PASSWORD=$(cat ${TRIPLEO_PASSWORDS[default]} | grep ' LibvirtTLSPassword:' | awk -F ': ' '{ print $2; }')
-LIBVIRT_PASSWORD_BASE64=$(echo -n "$LIBVIRT_PASSWORD" | base64)
 oc apply -f - <<EOF
 apiVersion: v1
 kind: Secret
@@ -122,19 +127,12 @@ The resources in the `ConfigMap` contain cell-specific configurations.
 +
 [source,yaml,role=execute]
 ----
-oc apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: subscription-manager
-data:
-  username: <base64 encoded subscription-manager username>
-  password: <base64 encoded subscription-manager password>
-EOF
+oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
-* Replace `<subscription_manager_username>` with the applicable user name.
-* Replace `<subscription_manager_password>` with the applicable password.
+* Replace `<subscription_manager_username>` with the applicable user name in base64 encoding.
+* Replace `<subscription_manager_password>` with the applicable password in base64 encoding.
 
 . Create a secret for the Red Hat registry:
 +
@@ -143,8 +141,8 @@ $ oc create secret generic redhat-registry \
 --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
-* Replace `<registry_username>` with the applicable user name.
-* Replace `<registry_password>` with the applicable password.
+* Replace `<registry_username>` with the applicable user name in base64 encoding.
+* Replace `<registry_password>` with the applicable password in base64 encoding
 
 
 . Create the `OpenStackDataPlaneNodeSet` CR:
@@ -183,7 +181,7 @@ metadata:
   name: openstack-pre-adoption
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - compute
   servicesOverride:
   - pre-adoption-validation
 EOF
@@ -249,7 +247,7 @@ metadata:
   name: tripleo-cleanup
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - compute
   servicesOverride:
   - tripleo-cleanup
 EOF
@@ -263,10 +261,10 @@ cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-compute-set-adoption
+  name: compute-adoption
 spec:
   nodeSets:
-  - openstack-edpm-compute-set
+  - compute
 EOF
 ----
 +
@@ -289,7 +287,7 @@ oc logs -l app=openstackansibleee -f --max-log-requests 20
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc wait --for condition=Ready osdpns/openstack-edpm-compute-set-adoption --timeout=30m
+oc wait --for condition=Ready osdpns/compute-adoption --timeout=30m
 ----
 
 . Verify that the {networking_first_ref} agents are running:

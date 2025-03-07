@@ -216,6 +216,22 @@ echo "$PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES"
     mysql -rsh "$SOURCE_MARIADB_IP" -uroot -p"$SOURCE_DB_ROOT_PASSWORD" nova_api -e \
     "DELETE FROM nova.services WHERE id=5;")
 ----
+
+. Get the hostnames after deleting the standalone compute:
++
+[source,bash,role=execute,subs=attributes]
+----
+ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
+export PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES=$(oc run mariadb-client ${MARIADB_CLIENT_ANNOTATIONS} -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+endif::[]
+ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+export PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES=$(oc run mariadb-client --overrides="$RUN_OVERRIDES" -n $OSPDO_NAMESPACE -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+endif::[]
+    mysql -rsh "$SOURCE_MARIADB_IP" -uroot -p"$SOURCE_DB_ROOT_PASSWORD" nova_api -e \
+    "select host from nova.services where services.binary='nova-compute';")
+echo "$PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES"
+----
+
 . Get the list of the mapped {compute_service} cells:
 +
 [source,bash,role=execute,subs=attributes]

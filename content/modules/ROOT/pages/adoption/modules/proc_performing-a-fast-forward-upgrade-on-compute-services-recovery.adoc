@@ -94,7 +94,8 @@ metadata:
   namespace: openstack
 spec:
   nodeSets:
-    - openstack-edpm-compute-set
+    - compute-2
+    - compute-3
   servicesOverride:
     - nova
 EOF
@@ -118,8 +119,6 @@ oc exec -it nova-cell0-conductor-0 -- nova-manage db online_data_migrations
 oc exec -it nova-cell1-conductor-0 -- nova-manage db online_data_migrations
 ----
 
-.Verification
-
 . Discover the Compute hosts in the cell:
 +
 [source,bash,role=execute,subs=attributes]
@@ -127,29 +126,31 @@ oc exec -it nova-cell1-conductor-0 -- nova-manage db online_data_migrations
 oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
 ----
 
+.Verification
+
 . Verify if the existing test VM instance is running:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnostics test-server 2>&1 || echo FAIL
+openstack server --os-compute-api-version 2.48 show --diagnostics test-server 2>&1 || echo FAIL
 ----
 
 . Verify if the Compute services can stop the existing test VM instance:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test ACTIVE" && ${BASH_ALIASES[openstack]} server stop test || echo PASS
-${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test SHUTOFF" || echo FAIL
-${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnostics test 2>&1 || echo PASS
+openstack server list -c Name -c Status -f value | grep -qF "test ACTIVE" && openstack server stop test || echo PASS
+openstack server list -c Name -c Status -f value | grep -qF "test SHUTOFF" || echo FAIL
+openstack server --os-compute-api-version 2.48 show --diagnostics test 2>&1 || echo PASS
 ----
 
 . Verify if the Compute services can start the existing test VM instance:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test SHUTOFF" && ${BASH_ALIASES[openstack]} server start test || echo PASS
-${BASH_ALIASES[openstack]} server list -c Name -c Status -f value | grep -qF "test ACTIVE" && \
-${BASH_ALIASES[openstack]} server --os-compute-api-version 2.48 show --diagnostics test --fit-width -f json | jq -r '.state' | grep running || echo FAIL
+openstack server list -c Name -c Status -f value | grep -qF "test SHUTOFF" && openstack server start test || echo PASS
+openstack server list -c Name -c Status -f value | grep -qF "test ACTIVE" && \
+openstack server --os-compute-api-version 2.48 show --diagnostics test --fit-width -f json | jq -r '.state' | grep running || echo FAIL
 ----
 
 [NOTE]

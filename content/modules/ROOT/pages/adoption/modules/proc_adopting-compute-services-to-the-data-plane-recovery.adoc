@@ -127,19 +127,14 @@ The resources in the `ConfigMap` contain cell-specific configurations.
 +
 [source,yaml,role=execute]
 ----
-oc apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: subscription-manager
-data:
-  username: <base64 encoded subscription-manager username>
-  password: <base64 encoded subscription-manager password>
-EOF
+oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
+oc create secret generic subscription-manager-2 \
+--from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
-* Replace `<subscription_manager_username>` with the applicable user name.
-* Replace `<subscription_manager_password>` with the applicable password.
+* Replace `<subscription_manager_username>` with the applicable user name in base64 encoding.
+* Replace `<subscription_manager_password>` with the applicable password in base64 encoding.
 
 . Create a secret for the Red Hat registry:
 +
@@ -148,8 +143,8 @@ $ oc create secret generic redhat-registry \
 --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
-* Replace `<registry_username>` with the applicable user name.
-* Replace `<registry_password>` with the applicable password.
+* Replace `<registry_username>` with the applicable user name in base64 encoding.
+* Replace `<registry_password>` with the applicable password in base64 encoding
 
 . Create the `OpenStackDataPlaneNodeSet` CRs corresponding to compute02 and compute03:
 +
@@ -188,8 +183,8 @@ metadata:
   name: openstack-pre-adoption
 spec:
   nodeSets:
-  - openstack-edpm-compute-set-2
-  - openstack-edpm-compute-set-3
+  - compute-2
+  - compute-3
   servicesOverride:
   - pre-adoption-validation
 EOF
@@ -255,8 +250,8 @@ metadata:
   name: tripleo-cleanup
 spec:
   nodeSets:
-  - openstack-edpm-compute-set-2
-  - openstack-edpm-compute-set-3
+  - compute-2
+  - compute-3
   servicesOverride:
   - tripleo-cleanup
 EOF
@@ -273,9 +268,93 @@ metadata:
   name: openstack-edpm-compute
 spec:
   nodeSets:
-  - openstack-edpm-compute-set-2
-  - openstack-edpm-compute-set-3
+  - compute-2
+  - compute-3
 EOF
+----
+
+. You should see that *compute02* jobs are progressing, however *compute03* fails in the bootstrap service
++
+[source,bash,role=execute,subs=attributes]
+----
+oc get jobs -n openstack
+----
+
+----
+NAME                                                              COMPLETIONS   DURATION   AGE
+bootstrap-openstack-edpm-compute-compute-2     1/1           78s        5m37s
+bootstrap-openstack-edpm-compute-compute-3     0/1           5m37s      5m37s
+configure-network-openstack-edpm-compute-openstack-edpm-compute   1/1           48s        98s
+configure-os-openstack-edpm-compute-compute    0/1           9s         9s
+download-cache-openstack-edpm-compute-openstack-edpm-compute-se   1/1           2m41s      4m19s
+install-os-openstack-edpm-compute-compute-2    1/1           35s        44s
+keystone-cron-29012581                                            1/1           5s         143m
+keystone-cron-29012641                                            1/1           5s         83m
+keystone-cron-29012701                                            1/1           5s         23m
+pre-adoption-validation-openstack-pre-adoption-openstack-edpm-c   1/1           23s        6h27m
+tripleo-cleanup-tripleo-cleanup-compute        1/1           4m57s      6h26m
+validate-network-openstack-edpm-compute-openstack-edpm-compute    1/1           6s         50s
+----
+. If we check the *compute03* logs, there are errors to download the RPM packages
++
+[source,bash,role=execute,subs=attributes]
+----
+oc logs job/bootstrap-openstack-edpm-compute-compute-3 -n openstack
+----
+----
+TASK [osp.edpm.edpm_bootstrap : Install required packages to bootstrap EDPM] ***
+task path: /usr/share/ansible/collections/ansible_collections/osp/edpm/roles/edpm_bootstrap/tasks/packages.yml:43
+FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (5 retries left).
+FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (4 retries left).
+FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (3 retries left).
+FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (2 retries left).
+FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (1 retries left).
+fatal: [compute03]: FAILED! => {"ansible_facts": {"pkg_mgr": "dnf"}, "attempts": 5, "changed": false, "failed_when_result": true, "msg": "Failed to download metadata for repo 'rhel-9-for-x86_64-baseos-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried", "rc": 1, "results": []}
+
+NO MORE HOSTS LEFT *************************************************************
+
+NO MORE HOSTS LEFT *************************************************************
+
+PLAY RECAP *********************************************************************
+compute03                  : ok=14   changed=3    unreachable=0    failed=1    skipped=5    rescued=0    ignored=0
+----
+. Connect to the *compute03*:
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
+----
+. Revert back the DNS configuration:
++
+[source,bash,role=execute,subs=attributes]
+----
+sudo cp /root/resolv.conf.bck /etc/resolv.conf
+----
+. Delete the facts.d folder as it's used to mark the execution of bootstrap_command as completed. By deleting the bootstrap command can be reexecuted:
++
+[source,bash,role=execute,subs=attributes]
+----
+sudo rm -rf /etc/ansible/facts.d
+----
+. Create a new OpenStackDataPlaneDeployment adding only the *compute-3* nodeset corresponding to the *compute03*
++
+[source,bash,role=execute,subs=attributes]
+----
+cat << EOF | oc apply -f -
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-edpm-compute-recover-3
+spec:
+  nodeSets:
+  - compute-3
+EOF
+----
+. You should see that now *compute03* jobs are progressing
++
+[source,bash,role=execute,subs=attributes]
+----
+oc get jobs -n openstack
 ----
 +
 
@@ -290,14 +369,14 @@ watch oc get pod -l app=openstackansibleee
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc logs -l app=openstackansibleee -f --max-log-requests 20
+oc logs -l app=openstackansibleee -f --max-log-requests 30
 ----
 
 . Wait for the data plane node set to reach the `Ready` status:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc wait --for condition=Ready osdpns/openstack-edpm-compute-2-adoption --timeout=30m
+oc wait --for condition=Ready osdpns/openstack-edpm-compute-recover-3 --timeout=30m
 ----
 
 . Verify that the {networking_first_ref} agents are running:

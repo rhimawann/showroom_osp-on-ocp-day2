@@ -38,7 +38,7 @@ EOF
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc wait --for jsonpath="{.status.phase}"=Succeeded csv --namespace=openshift-operators -l operators.coreos.com/cluster-observability-operator.openshift-operators
+oc get clusterserviceversion -n openshift-operators  -o custom-columns=Name:.metadata.name,Phase:.status.phase
 ----
 
 . Patch the `OpenStackControlPlane` CR to deploy Ceilometer services:
