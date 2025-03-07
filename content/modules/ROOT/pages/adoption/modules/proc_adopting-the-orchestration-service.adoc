@@ -21,32 +21,24 @@ endif::[]
 
 . Retrieve the existing `auth_encryption_key` and `service` passwords. You use these passwords to patch the `osp-secret`. In the following example, the `auth_encryption_key` is used as `HeatAuthEncryptionKey` and the `service` password is used as `HeatPassword`:
 +
-[source,bash]
+[source,bash,role=execute]
 ----
-grep -E 'HeatPassword|HeatAuth|HeatStackDomainAdmin' ~/tripleo-standalone-passwords.yaml
-  HeatAuthEncryptionKey: BYJkXWIcFrybDDIx3kolIdyXCQt19GsM
-  HeatPassword: rsk4PSmajvqL2FnFoAhjKbLvU
-  HeatStackDomainAdminPassword: gcw9mMDo3r9AcZ1v2bWKlP7oF
-----
+HEAT_AUTH_ENCRYPTION_KEY_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatAuthEncryptionKey:' | awk -F ': ' '{ print $2; }')
+HEAT_AUTH_ENCRYPTION_KEY_BASE64=$(echo -n "$HEAT_AUTH_ENCRYPTION_KEY_PASSWORD" | base64)
+HEAT_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatPassword:' | awk -F ': ' '{ print $2; }')
+HEAT_PASSWORD_BASE64=$(echo -n "$HEAT_PASSWORD" | base64)
+HEAT_STACK_DOMAIN_ADMIN_PASSWORD=$(cat ~/tripleo-standalone-passwords.yaml | grep ' HeatStackDomainAdminPassword:' | awk -F ': ' '{ print $2; }')
+HEAT_STACK_DOMAIN_ADMIN_PASSWORD_BASE64=$(echo -n "$HEAT_STACK_DOMAIN_ADMIN_PASSWORD" | base64)
 
-. Encode the password to Base64 format:
-+
-----
-echo BYJkXWIcFrybDDIx3kolIdyXCQt19GsM | base64
-UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK
-echo rsk4PSmajvqL2FnFoAhjKbLvU | base64
-cnNrNFBTbWFqdnFMMkZuRm9BaGpLYkx2VQo=
-echo gcw9mMDo3r9AcZ1v2bWKlP7oF | base64
-Z2N3OW1NRG8zcjlBY1oxdjJiV0tsUDdvRgo=
 ----
 
 . Patch the `osp-secret` to update the `HeatAuthEncryptionKey` and `HeatPassword` parameters. These values must match the values in the {OpenStackPreviousInstaller} {orchestration} configuration:
 +
-[source,bash]
+[source,bash,role=execute]
 ----
-oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatAuthEncryptionKey" ,"value" : "UTYwSGo4UHFickROdTJkRENieUlRRTJkaWJwUVVQZzIK"}]'
-oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatPassword" ,"value" : "cnNrNFBTbWFqdnFMMkZuRm9BaGpLYkx2VQo="}]'
-oc patch secret osp-secret --type='json' -p='[{"op" : "replace" ,"path" : "/data/HeatStackDomainAdminPassword" ,"value" : "Z2N3OW1NRG8zcjlBY1oxdjJiV0tsUDdvRgo="}]'
+oc patch secret osp-secret --type='json' -p="[{'op': 'replace', 'path': '/data/HeatAuthEncryptionKey', 'value': '$HEAT_AUTH_ENCRYPTION_KEY_BASE64'}]"
+oc patch secret osp-secret --type='json' -p="[{'op': 'replace', 'path': '/data/HeatPassword', 'value': '$HEAT_PASSWORD_BASE64'}]"
+oc patch secret osp-secret --type='json' -p="[{'op': 'replace', 'path': '/data/HeatStackDomainAdminPassword', 'value': '$HEAT_STACK_DOMAIN_ADMIN_PASSWORD_BASE64'}]"
 ----
 
 . Patch the `OpenStackControlPlane` CR to deploy the {orchestration}:

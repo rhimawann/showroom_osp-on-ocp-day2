@@ -47,7 +47,7 @@ In the *bastion host* Copy the overcloud-passwords from the all-in-one node to t
 +
 [source,bash,role=execute,subs=attributes]
 ----
-scp -i /home/lab-user/.ssh/{guid}.pem cloud-user@allinone:/home/cloud-user/tripleo-standalone-passwords.yaml ~/.
+scp -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone:/home/cloud-user/tripleo-standalone-passwords.yaml ~/.
 ----
 +
 .Prerequisites
@@ -62,7 +62,7 @@ CONTROLLER1_SSH="ssh -i ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@1
 MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podified
 endif::[]
 ifeval::["{build}" == "downstream"]
-CONTROLLER1_SSH="ssh -i /home/lab-user/.ssh/{guid}.pem cloud-user@allinone"
+CONTROLLER1_SSH="ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone"
 MARIADB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-mariadb-rhel9:18.0
 endif::[]
 SOURCE_MARIADB_IP=172.17.0.16
@@ -206,16 +206,32 @@ endif::[]
     mysql -rsh "$SOURCE_MARIADB_IP" -uroot -p"$SOURCE_DB_ROOT_PASSWORD" nova_api -e \
     "select host from nova.services where services.binary='nova-compute';")
 echo "$PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES"
+----
 
 . Delete the standalone compute:
 +
-----
 [source,bash,role=execute,subs=attributes]
 ----
-$(oc run mariadb-client ${MARIADB_CLIENT_ANNOTATIONS} -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+(oc run mariadb-client ${MARIADB_CLIENT_ANNOTATIONS} -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
     mysql -rsh "$SOURCE_MARIADB_IP" -uroot -p"$SOURCE_DB_ROOT_PASSWORD" nova_api -e \
     "DELETE FROM nova.services WHERE id=5;")
 ----
+
+. Get the hostnames after deleting the standalone compute:
++
+[source,bash,role=execute,subs=attributes]
+----
+ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
+export PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES=$(oc run mariadb-client ${MARIADB_CLIENT_ANNOTATIONS} -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+endif::[]
+ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+export PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES=$(oc run mariadb-client --overrides="$RUN_OVERRIDES" -n $OSPDO_NAMESPACE -q --image ${MARIADB_IMAGE} -i --rm --restart=Never -- \
+endif::[]
+    mysql -rsh "$SOURCE_MARIADB_IP" -uroot -p"$SOURCE_DB_ROOT_PASSWORD" nova_api -e \
+    "select host from nova.services where services.binary='nova-compute';")
+echo "$PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES"
+----
+
 . Get the list of the mapped {compute_service} cells:
 +
 [source,bash,role=execute,subs=attributes]

@@ -1,0 +1,38 @@
+parameter_defaults:
+  BarbicanSimpleCryptoGlobalDefault: true
+  CloudName: compute03.localdomain
+  Debug: true
+  DeploymentUser: cloud-user
+  NtpServer: pool.ntp.org
+  # needed for vip & pacemaker
+  KernelIpNonLocalBind: 1
+  DockerInsecureRegistryAddress:
+  - 172.22.0.110:8787
+  NeutronPublicInterface: eth1
+  # domain name used by the host
+  NeutronDnsDomain: localdomain
+  # re-use ctlplane bridge for public net
+  NeutronBridgeMappings: datacentre:br-ex
+  NeutronPhysicalBridge: br-ex
+  NeutronFlatNetworks: datacentre
+  StandaloneEnableRoutedNetworks: false
+  StandaloneHomeDir: /home/cloud-user
+  InterfaceLocalMtu: 1500
+  # Needed if running in a VM
+  ValidateGatewaysIcmp: false
+  ValidateControllersIcmp: false
+  OctaviaAmphoraSshKeyFile: /root/.ssh/id_ecdsa.pub
+  OctaviaGenerateCerts: true
+  OctaviaLogOffload: true
+  OctaviaForwardAllLogs: true
+  StandaloneNetworkConfigTemplate: /home/cloud-user/standalone_net_config_compute_03.j2
+  ServiceNetMap:
+    IronicNetwork: baremetal
+    IronicInspectorNetwork: baremetal
+  IronicInspectorSubnets:
+  - ip_range: 172.20.1.190,172.20.1.199
+    netmask: 255.255.255.0
+    gateway: 172.20.1.1
+    tag: baremetal
+  IronicInspectorInterface: br-baremetal
+  IronicCleaningDiskErase: metadata

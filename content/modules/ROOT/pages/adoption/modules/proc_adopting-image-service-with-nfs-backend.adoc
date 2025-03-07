@@ -15,11 +15,11 @@ Adopt the {image_service_first_ref} that you deployed with an NFS back end. To c
 +
 ----
 
-**GlanceBackend**: file
+GlanceBackend: file
 
-**GlanceNfsEnabled**: true
+GlanceNfsEnabled: true
 
-**GlanceNfsShare**: 172.18.0.13:/nfs/glance
+GlanceNfsShare: 172.18.0.13:/nfs/glance
 
 ----
 +

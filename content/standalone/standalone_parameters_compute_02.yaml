@@ -25,7 +25,7 @@ parameter_defaults:
   OctaviaGenerateCerts: true
   OctaviaLogOffload: true
   OctaviaForwardAllLogs: true
-  StandaloneNetworkConfigTemplate: /home/cloud-user/standalone_net_config_compute.j2
+  StandaloneNetworkConfigTemplate: /home/cloud-user/standalone_net_config_compute_02.j2
   ServiceNetMap:
     IronicNetwork: baremetal
     IronicInspectorNetwork: baremetal

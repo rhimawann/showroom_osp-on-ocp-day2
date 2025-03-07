@@ -147,7 +147,7 @@ be disabled:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-cd labrepo/content/files/
+cd /home/lab-user/labrepo/content/files
 oc apply -f osp-ng-ctlplane-deploy-backend.yaml
 ----
 

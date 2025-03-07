@@ -16,19 +16,15 @@ ifeval::["{build}" != "downstream"]
 EDPM_PRIVATEKEY_PATH="~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa"
 endif::[]
 ifeval::["{build}" == "downstream"]
-EDPM_PRIVATEKEY_PATH="/home/lab-user/.ssh/{guid}.pem"
+EDPM_PRIVATEKEY_PATH="/home/lab-user/.ssh/{guid}key.pem"
 endif::[]
 declare -A computes
 computes=(
   ["compute02.localdomain"]="172.22.0.110"
-  # ...
+  ["compute03.localdomain"]="172.22.0.112"
 )
 ----
 +
-** Replace `["standalone.localdomain"]="172.22.0.110"` with the name and IP address of the Compute node.
-ifeval::["{build}" == "downstream"]
-** Replace `/home/lab-user/.ssh/{guid}.pem` with the path to your SSH key. /TODO
-endif::[]
 
 .Procedure
 

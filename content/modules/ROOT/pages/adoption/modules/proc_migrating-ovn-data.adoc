@@ -36,20 +36,10 @@ grep -rI 'ovn_[ns]b_conn' /var/lib/config-data/puppet-generated/
 SOURCE_OVSDB_IP is 172.17.0.15
 
 .Procedure
-+
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-. Get the {OpenShiftShort} master node that contains the {OpenStackShort} Controller:
-+
-[source,bash,role=execute,subs=attributes]
-----
-oc get vmi -n $<ospdo_namespace> -o jsonpath='{.items[0].metadata.labels.kubevirt\.io/nodeName}'
-----
-+
-* Replace `<ospdo_namespace>` with your OSPdO namespace.
-endif::[]
+
 . Prepare a temporary `PersistentVolume` claim and the helper pod for the OVN backup. Adjust the storage requests for a large database, if needed:
 +
-[source,bash,role=execute,subs=attributes]
+[source,yaml,role=execute]
 ----
 oc apply -f - <<EOF
 ---
@@ -67,7 +57,7 @@ spec:
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+ifeval::["{build_variant}" == "ospdo"]
   namespace: $OSPDO_NAMESPACE
 endif::[]
   name: ovn-data
@@ -85,20 +75,20 @@ metadata:
   name: ovn-copy-data
   annotations:
     openshift.io/scc: anyuid
-ifeval::["{OpenStackPreviousInstaller}" != "director_operator"]
+ifeval::["{build_variant}" != "ospdo"]
     k8s.v1.cni.cncf.io/networks: internalapi
 endif::[]
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+ifeval::["{build_variant}" == "ospdo"]
   '[{"name": "internalapi-static", "namespace": $<ospdo_namespace>, "ips": ["<internalapi-static-ips>"]}]'
 endif::[]
   labels:
     app: adoption
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
+ifeval::["{build_variant}" == "ospdo"]
   namespace: $OSPDO_NAMESPACE
 endif::[]
 spec:
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-  nodeName: '{{ <ocp_node_holding_controller> }}'
+ifeval::["{build_variant}" == "ospdo"]
+  nodeName: '{{ <ocp_node_holding_controller> }}' <1>
 endif::[]
   containers:
   - image: $OVSDB_IMAGE
@@ -126,10 +116,6 @@ endif::[]
       secretName: ovn-data-cert
 EOF
 ----
-ifeval::["{OpenStackPreviousInstaller}" == "director_operator"]
-+
-* Replace `<ocp_node_holding_controller>` with the {OpenStackShort} node that contains the Controller.
-endif::[]
 
 . Wait for the pod to be ready:
 +

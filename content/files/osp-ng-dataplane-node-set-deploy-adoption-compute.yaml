@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneNodeSet
 metadata:
-  name: compute-2
+  name: compute2-3-set
 spec:
   tlsEnabled: false
   env:
@@ -48,6 +48,27 @@ spec:
         - name: external
           subnetName: subnet1
           fixedIP: 172.21.0.110
+      edpm-compute-3:
+        hostName: compute03.localdomain
+        ansible:
+          ansibleHost: 172.22.0.112
+        networks:
+        - name: ctlplane
+          subnetName: subnet1
+          defaultRoute: false
+          fixedIP: 172.22.0.112
+        - name: internalapi
+          subnetName: subnet1
+          fixedIP: 172.17.0.112
+        - name: storage
+          subnetName: subnet1
+          fixedIP: 172.18.0.112
+        - name: tenant
+          subnetName: subnet1
+          fixedIP: 172.19.0.112
+        - name: external
+          subnetName: subnet1
+          fixedIP: 172.21.0.112
   nodeTemplate:
     ansibleSSHPrivateKeySecret: dataplane-ansible-ssh-private-key-secret
     ansible:
@@ -157,7 +178,6 @@ spec:
          - openvswitch3.1
 
          edpm_bootstrap_release_version_package: []
-
          edpm_bootstrap_command: |
            subscription-manager register --username "{{ subscription_manager_username }}" --password "{{ subscription_manager_password }}"
            sudo subscription-manager release --set=9.4

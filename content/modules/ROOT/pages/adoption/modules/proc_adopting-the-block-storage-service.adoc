@@ -71,13 +71,6 @@ spec:
           - cinder-nfs-config
 EOF
 ----
-. Wait for Cinder control plane services' CRs to become ready:
-+
-[source,bash,role=execute,subs=attributes]
-----
-oc wait --for condition=Ready --timeout=300s Cinder/cinder
-----
-
 . Apply the configuration:
 +
 [source,bash,role=execute,subs=attributes]
@@ -85,12 +78,21 @@ oc wait --for condition=Ready --timeout=300s Cinder/cinder
 oc patch openstackcontrolplane openstack --type=merge --patch-file=cinder_nfs_patch.yaml
 ----
 
+. Wait for Cinder control plane services' CRs to become ready:
++
+[source,bash,role=execute,subs=attributes]
+----
+oc wait --for condition=Ready --timeout=300s Cinder/cinder
+----
+
 . Retrieve the list of the previous scheduler and backup services:
 +
 [source,bash,role=execute,subs=attributes]
 ----
 openstack volume service list
-
+----
+. Sample Output
+----
 +------------------+-------------------------+------+---------+-------+----------------------------+
 | Binary           | Host                    | Zone | Status  | State | Updated At                 |
 +------------------+-------------------------+------+---------+-------+----------------------------+

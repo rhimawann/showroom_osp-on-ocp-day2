@@ -54,7 +54,7 @@ mkdir -p /nfs/glance
 chmod 777 /nfs/cinder
 chmod 777 /nfs/glance
 
-cat <<\EOF > /etc/exports
+cat << EOF > /etc/exports
 /nfs/cinder *(rw,sync,no_root_squash)
 /nfs/glance *(rw,sync,no_root_squash)
 EOF
@@ -97,7 +97,7 @@ sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0
 sudo nmcli con up "static-eth5"
 ----
 
-. Configure the Compute Node
+. Configure the Compute Node 2
 +
 From the bastion, connect to the *compute02* host and configure the networking:
 +
@@ -119,6 +119,31 @@ sudo nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0
 sudo nmcli con up "static-eth4"
 sudo nmcli co delete 'Wired connection 6'
 sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.110/24
+sudo nmcli con up "static-eth5"
+----
+
+. Configure the Compute Node 3
++
+From the bastion, connect to the *compute03* host and configure the networking:
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
+sudo hostnamectl set-hostname compute03.localdomain
+sudo nmcli co delete 'Wired connection 2'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.112/24
+sudo nmcli con up "static-eth1"
+sudo nmcli co delete 'Wired connection 3'
+sudo nmcli con add con-name "static-eth2" ifname eth2 type ethernet ip4 172.17.0.112/24
+sudo nmcli con up "static-eth2"
+sudo nmcli co delete 'Wired connection 4'
+sudo nmcli con add con-name "static-eth3" ifname eth3 type ethernet ip4 172.18.0.112/24
+sudo nmcli con up "static-eth3"
+sudo nmcli co delete 'Wired connection 5'
+sudo nmcli con add con-name "static-eth4" ifname eth4 type ethernet ip4 172.19.0.112/24
+sudo nmcli con up "static-eth4"
+sudo nmcli co delete 'Wired connection 6'
+sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.112/24
 sudo nmcli con up "static-eth5"
 ----
 
@@ -172,9 +197,11 @@ Execute the *openstack_compute_prepare.sh* script and copy the generated files t
 sh openstack_compute_prepare.sh
 scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.110:
 scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.110:
+scp -i /home/cloud-user/.ssh/{guid}key.pem oslo.yaml cloud-user@172.22.0.112:
+scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.112:
 ----
 
-. Install the Compute Node
+. Install the Compute Node 2
 +
 From the bastion, connect to the *compute02* host:
 +
@@ -198,11 +225,42 @@ sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms \
 sudo dnf -y update
 sudo dnf -y install python3-tripleoclient python-jinja2 git
 git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
-cp labrepo/content/standalone/* /home/cloud-user/.
-sh openstack_compute.sh
+cp -n labrepo/content/standalone/* /home/cloud-user/
+sh openstack_compute_02.sh
 ----
 
-. Discover the *compute02* Host
+. Install the Compute Node 3
++
+From the bastion, connect to the *compute03* host:
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
+----
++
+Execute the *openstack_compute.sh* script to install *compute03*:
++
+[source,bash,role=execute]
+----
+sudo subscription-manager register --username $RHN_user --password $RHN_password
+sudo subscription-manager release --set=9.2
+sudo subscription-manager repos --disable=*
+sudo subscription-manager repos --enable=rhel-9-for-x86_64-baseos-eus-rpms \
+--enable=rhel-9-for-x86_64-appstream-eus-rpms \
+--enable=rhel-9-for-x86_64-highavailability-eus-rpms \
+--enable=openstack-17.1-for-rhel-9-x86_64-rpms \
+--enable=fast-datapath-for-rhel-9-x86_64-rpms
+sudo dnf -y update
+sudo dnf -y install python3-tripleoclient python-jinja2 git
+git clone https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2.git labrepo
+cp -n labrepo/content/standalone/* /home/cloud-user/
+sh openstack_compute_03.sh
+----
+
+[Note]
+You can run openstack_compute_02.sh and openstack_compute_03.sh on paralel to gain execution time.
+
+. Discover the computes Host
 +
 From the *all-in-one* host, execute:
 +
@@ -249,15 +307,15 @@ openstack router set vrouter --external-gateway public
 openstack router add subnet vrouter private-net
 
 openstack server create \
-    --flavor tiny --key-name default --network private --security-group basic \
-    --image cirros test-server
-openstack floating ip create public
+    --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute02.localdomain \
+    --image cirros test-server-compute-02
+openstack floating ip create public --floating-ip-addres 172.21.0.200
 
 openstack server create \
-    --flavor tiny --key-name default --network private --security-group basic \
-    --image cirros test-server-2
-openstack floating ip create public
+    --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute03.localdomain \
+    --image cirros test-server-compute-03
+openstack floating ip create public --floating-ip-addres 172.21.0.201
 
-openstack server add floating ip test-server $(openstack floating ip list -c "Floating IP Address" -f value)
-openstack server add floating ip test-server-2 $(openstack floating ip list -c "Floating IP Address" -f value)
+openstack server add floating ip test-server-compute-02 172.21.0.200
+openstack server add floating ip test-server-compute-03 172.21.0.201
 ----
