@@ -1,7 +1,7 @@
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-compute-recover-3
+  name: adoption-recover-3
 spec:
   nodeSets:
-    - openstack-edpm-compute-set-3
+    - compute-3
