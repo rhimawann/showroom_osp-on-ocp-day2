@@ -101,7 +101,6 @@ oc exec -it openstackclient -- openstack service list -c Name -c Type
 | nova       | compute        |
 | neutron    | network        |
 +------------+----------------+
-[source,bash,role=execute,subs=attributes]
 ----
 +
 [source,bash,role=execute,subs=attributes]
