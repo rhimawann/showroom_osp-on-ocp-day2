@@ -22,7 +22,7 @@ spec:
         - 172.30.0.10
       replicas: 1
   cinder:
-    enabled: false
+    enabled: true
     apiOverride:
       route: {}
     template:
