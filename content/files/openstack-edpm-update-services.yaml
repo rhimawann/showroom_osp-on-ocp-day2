@@ -6,5 +6,5 @@ spec:
   nodeSets:
     - openstack-edpm-compute-1
   servicesOverride:
-    - nova
+    - telemetry
     - update

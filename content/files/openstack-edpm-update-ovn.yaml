@@ -6,4 +6,5 @@ spec:
   nodeSets:
     - openstack-edpm-compute-1
   servicesOverride:
+    - configure-os
     - ovn

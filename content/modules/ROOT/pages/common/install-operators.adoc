@@ -59,6 +59,13 @@ oc patch installplan <install-plan-id>  \
 oc get operators openstack-operator.openstack-operators
 ----
 
+. Initialize the operator:
++
+[source,bash,role=execute]
+----
+oc apply -f osp-ng-openstack-operator-init.yaml
+----
+
 . Review the pods in the **openstack-operators** namespace:
 +
 [source,bash,role=execute]

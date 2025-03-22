@@ -61,6 +61,12 @@ oc patch installplan <installplan-name> -n openstack-operators --type merge --pa
 ----
 This will approve the Operator update, and OpenShift will proceed with the update of the OpenStack Operators.
 
+Initialize the operator (just needed to move to FR2):
+[source,bash,role=execute]
+----
+oc apply -f osp-ng-openstack-operator-init.yaml
+----
+
 ### Explore the file OpenStackDataPlaneNodeSet to update OVN service
 
 In the bastion terminal, make sure that you are in lab yamls directory:
@@ -84,6 +90,7 @@ spec:
   nodeSets:
     - openstack-edpm-compute-1
   servicesOverride:
+    - configure-os
     - ovn
 ----
 
