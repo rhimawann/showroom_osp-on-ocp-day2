@@ -317,9 +317,13 @@ export DNS_SERVER=172.30.0.10
 openstack flavor create --ram 512 --disk 1 --vcpu 1 --public tiny
 curl -O -L https://github.com/cirros-dev/cirros/releases/download/0.6.2/cirros-0.6.2-x86_64-disk.img
 openstack image create cirros --container-format bare --disk-format qcow2 --public --file cirros-0.6.2-x86_64-disk.img
-
+----
+[source,bash,role=execute]
+----
 ssh-keygen -m PEM -t rsa -b 2048 -f ~/.ssh/id_rsa_pem
-
+----
+[source,bash,role=execute]
+----
 openstack keypair create --public-key ~/.ssh/id_rsa_pem.pub default
 openstack security group create basic
 openstack security group rule create basic --protocol tcp --dst-port 22:22 --remote-ip 0.0.0.0/0
