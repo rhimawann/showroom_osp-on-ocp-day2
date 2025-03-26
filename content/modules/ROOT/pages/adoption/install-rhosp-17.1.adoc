@@ -43,12 +43,24 @@ scp -i /home/lab-user/.ssh/{guid}key.pem /home/lab-user/.ssh/{guid}key.* cloud-u
 
 . Configure the NFS server for Glance and Cinder:
 +
-From the bastion, connect to the *nfs-server* host and configure the networking:
+From the bastion, connect to the *nfs-server* host.:
 +
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@nfsserver
+----
++
+Escalate to root:
++
+[source,bash,role=execute,subs=attributes]
+----
 sudo -i
+----
++
+Configure the networking and enable the nfs-server:
++
+[source,bash,role=execute,subs=attributes]
+----
 mkdir -p /nfs/cinder
 mkdir -p /nfs/glance
 chmod 777 /nfs/cinder
@@ -66,17 +78,24 @@ nmcli con up "static-eth1"
 systemctl start nfs-server
 systemctl enable nfs-server
 logout
+logout
 ----
 
 === Install the RHOSP 17.1 Controller
 
 . Configure the Standalone Controller
 +
-From the bastion, connect to the *all-in-one* host and configure the networking:
+From the bastion, connect to the *all-in-one* host:
 +
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone
+----
++
+Configure networking:
++
+[source,bash,role=execute,subs=attributes]
+----
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/{guid}key.pem
 sudo hostnamectl set-hostname standalone.localdomain
@@ -95,6 +114,7 @@ sudo nmcli con up "static-eth4"
 sudo nmcli co delete 'Wired connection 6'
 sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.15/24
 sudo nmcli con up "static-eth5"
+logout
 ----
 
 . Configure the Compute Node 2
@@ -104,6 +124,12 @@ From the bastion, connect to the *compute02* host and configure the networking:
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute02
+----
++
+Configure networking:
++
+[source,bash,role=execute,subs=attributes]
+----
 sudo hostnamectl set-hostname compute02.localdomain
 sudo nmcli co delete 'Wired connection 2'
 sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.110/24
@@ -120,6 +146,7 @@ sudo nmcli con up "static-eth4"
 sudo nmcli co delete 'Wired connection 6'
 sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.110/24
 sudo nmcli con up "static-eth5"
+logout
 ----
 
 . Configure the Compute Node 3
@@ -129,6 +156,12 @@ From the bastion, connect to the *compute03* host and configure the networking:
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute03
+----
++
+Configure networking:
++
+[source,bash,role=execute,subs=attributes]
+----
 sudo hostnamectl set-hostname compute03.localdomain
 sudo nmcli co delete 'Wired connection 2'
 sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.112/24
@@ -145,6 +178,7 @@ sudo nmcli con up "static-eth4"
 sudo nmcli co delete 'Wired connection 6'
 sudo nmcli con add con-name "static-eth5" ifname eth5 type ethernet ip4 172.21.0.112/24
 sudo nmcli con up "static-eth5"
+logout
 ----
 
 . Install RHOSP 17.1 Standalone Controller
@@ -205,7 +239,7 @@ scp -i /home/cloud-user/.ssh/{guid}key.pem passwords.yaml cloud-user@172.22.0.11
 +
 From the bastion, connect to the *compute02* host:
 +
-[source,bash,role=execute]
+[source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute02
 ----
