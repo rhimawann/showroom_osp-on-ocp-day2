@@ -45,7 +45,7 @@ spec:
       - secretRef:
           name: redhat-registry
       ansibleVars:
-         rhc_release: 9.2
+         rhc_release: 9.4
          rhc_repositories:
              - {name: "*", state: disabled}
              - {name: "rhel-9-for-x86_64-baseos-eus-rpms", state: enabled}
