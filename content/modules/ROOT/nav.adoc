@@ -8,7 +8,7 @@
 ** xref:adoption/adoption-cp.adoc[Control plane Adoption]
 ** xref:adoption/adoption-dp.adoc[Data plane Adoption]
 ** xref:adoption/adoption-dp-recovery.adoc[Data plane Adoption recovering a Compute failed]
-** xref:adoption/add-additional-compute.adoc[Data plane Adoption recovering a Compute failed]
+** xref:adoption/add-additional-compute.adoc[Add a Compute Nodes after the adoption]
 * xref:connected/connected.adoc[Install the Red Hat OpenStack Service on OpenShift - Connected Environment]
 ** xref:connected/prereqs.adoc[Perform Prerequisite Operations]
 ** xref:connected/install-operators.adoc[Install the Red Hat OpenStack Platform Service Operators]
