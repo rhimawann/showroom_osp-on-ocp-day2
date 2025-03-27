@@ -100,6 +100,34 @@ spec:
     - nova
 EOF
 ----
+
+. Or use the next *OpenStackDataplneDeployment* if you have removed *compute03* of your deployment:
++
+[source,bash,role=execute,subs=attributes]
+----
+cat << EOF | oc apply -f -
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nova-extra-config
+  namespace: openstack
+data:
+  20-nova-compute-cell1-workarounds.conf: |
+    [workarounds]
+    disable_compute_service_check_for_ffu=false
+---
+apiVersion: dataplane.openstack.org/v1beta1
+kind: OpenStackDataPlaneDeployment
+metadata:
+  name: openstack-nova-compute-ffu
+  namespace: openstack
+spec:
+  nodeSets:
+    - compute-2
+  servicesOverride:
+    - nova
+EOF
+----
 +
 [NOTE]
 The service included in the `servicesOverride` key must match the name of the service that you included in the `OpenStackDataPlaneNodeSet` CR. For example, if you use a custom service called `nova-custom`, ensure that you add it to the `servicesOverride` key.
@@ -132,7 +160,7 @@ oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
 +
 [source,bash,role=execute,subs=attributes]
 ----
-openstack server --os-compute-api-version 2.48 show --diagnostics test-server 2>&1 || echo FAIL
+openstack server --os-compute-api-version 2.48 show --diagnostics test-server-compute-02 2>&1 || echo FAIL
 ----
 
 . Verify if the Compute services can stop the existing test VM instance:
@@ -148,9 +176,9 @@ openstack server --os-compute-api-version 2.48 show --diagnostics test 2>&1 || e
 +
 [source,bash,role=execute,subs=attributes]
 ----
-openstack server list -c Name -c Status -f value | grep -qF "test SHUTOFF" && openstack server start test || echo PASS
-openstack server list -c Name -c Status -f value | grep -qF "test ACTIVE" && \
-openstack server --os-compute-api-version 2.48 show --diagnostics test --fit-width -f json | jq -r '.state' | grep running || echo FAIL
+openstack server list -c Name -c Status -f value | grep -qF "test-server-compute-02 SHUTOFF" && openstack server start test || echo PASS
+openstack server list -c Name -c Status -f value | grep -qF "test-server-compute-02 ACTIVE" && \
+openstack server --os-compute-api-version 2.48 show --diagnostics test-server-compute-02 --fit-width -f json | jq -r '.state' | grep running || echo FAIL
 ----
 
 [NOTE]

@@ -17,11 +17,11 @@ Migrate the data in the OVN databases from the original {rhos_prev_long} deploym
 ----
 ifeval::["{build}" != "downstream"]
 STORAGE_CLASS_NAME=ocs-external-storagecluster-ceph-rbd
-OVSDB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-ovn-base-rhel9:18.0
+OVSDB_IMAGE=registry.redhat.io/rhoso/openstack-ovn-base-rhel9:18.0
 endif::[]
 ifeval::["{build}" == "downstream"]
 STORAGE_CLASS=ocs-external-storagecluster-ceph-rbd
-OVSDB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-ovn-base-rhel9:18.0
+OVSDB_IMAGE=registry.redhat.io/rhoso/openstack-ovn-base-rhel9:18.0
 endif::[]
 SOURCE_OVSDB_IP=172.17.0.15 # For IPv4
 ----

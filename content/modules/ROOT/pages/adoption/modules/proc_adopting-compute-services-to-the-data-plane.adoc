@@ -131,18 +131,19 @@ oc create secret generic subscription-manager \
 --from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
-* Replace `<subscription_manager_username>` with the applicable user name in base64 encoding.
-* Replace `<subscription_manager_password>` with the applicable password in base64 encoding.
+* Replace `<subscription_manager_username>` with the applicable user name.
+* Replace `<subscription_manager_password>` with the applicable password.
 
 . Create a secret for the Red Hat registry:
 +
+[source,yaml,role=execute]
 ----
-$ oc create secret generic redhat-registry \
+oc create secret generic redhat-registry \
 --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
-* Replace `<registry_username>` with the applicable user name in base64 encoding.
-* Replace `<registry_password>` with the applicable password in base64 encoding
+* Replace `<registry_username>` with the applicable user name.
+* Replace `<registry_password>` with the applicable password.
 
 
 . Create the `OpenStackDataPlaneNodeSet` CR:
@@ -152,7 +153,7 @@ $ oc create secret generic redhat-registry \
 oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute.yaml
 ----
 
-* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* file. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
+* Take some time to go through the *osp-ng-dataplane-node-set-deploy-adoption-compute.yaml* file. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
 
 . Run the pre-adoption validation:
 
@@ -247,7 +248,7 @@ metadata:
   name: tripleo-cleanup
 spec:
   nodeSets:
-  - compute
+  - compute2-3-set
   servicesOverride:
   - tripleo-cleanup
 EOF
@@ -264,7 +265,7 @@ metadata:
   name: compute-adoption
 spec:
   nodeSets:
-  - compute
+  - compute2-3-set
 EOF
 ----
 +

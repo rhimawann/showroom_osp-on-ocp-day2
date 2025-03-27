@@ -129,22 +129,21 @@ The resources in the `ConfigMap` contain cell-specific configurations.
 ----
 oc create secret generic subscription-manager \
 --from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
-oc create secret generic subscription-manager-2 \
---from-literal rhc_auth='{"login": {"username": "<subscription_manager_username>", "password": "<subscription_manager_password>"}}'
 ----
 +
-* Replace `<subscription_manager_username>` with the applicable user name in base64 encoding.
-* Replace `<subscription_manager_password>` with the applicable password in base64 encoding.
+* Replace `<subscription_manager_username>` with the applicable user name.
+* Replace `<subscription_manager_password>` with the applicable password.
 
 . Create a secret for the Red Hat registry:
 +
+[source,yaml,role=execute]
 ----
-$ oc create secret generic redhat-registry \
+oc create secret generic redhat-registry \
 --from-literal edpm_container_registry_logins='{"registry.redhat.io": {"<registry_username>": "<registry_password>"}}'
 ----
 +
-* Replace `<registry_username>` with the applicable user name in base64 encoding.
-* Replace `<registry_password>` with the applicable password in base64 encoding
+* Replace `<registry_username>` with the applicable user name.
+* Replace `<registry_password>` with the applicable password.
 
 . Create the `OpenStackDataPlaneNodeSet` CRs corresponding to compute02 and compute03:
 +
@@ -154,7 +153,7 @@ oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
 oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-3.yaml
 ----
 
-* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* file and *osp-ng-dataplane-adoption-compute-3.yaml* files. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
+* Take some time to go through the *osp-ng-dataplane-adoption-compute-*.yaml* files and *osp-ng-dataplane-adoption-compute-3.yaml* files. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
 
 . Run the pre-adoption validation:
 
@@ -265,7 +264,7 @@ cat << EOF | oc apply -f -
 apiVersion: dataplane.openstack.org/v1beta1
 kind: OpenStackDataPlaneDeployment
 metadata:
-  name: openstack-edpm-compute
+  name: compute-adoption
 spec:
   nodeSets:
   - compute-2
@@ -273,7 +272,7 @@ spec:
 EOF
 ----
 
-. You should see that *compute02* jobs are progressing, however *compute03* fails in the bootstrap service
+. You should see that *compute02* jobs are progressing, however *compute03* fails in the redhat service that takes care of the subscription
 +
 [source,bash,role=execute,subs=attributes]
 ----
@@ -281,44 +280,35 @@ oc get jobs -n openstack
 ----
 
 ----
-NAME                                                              COMPLETIONS   DURATION   AGE
-bootstrap-openstack-edpm-compute-compute-2     1/1           78s        5m37s
-bootstrap-openstack-edpm-compute-compute-3     0/1           5m37s      5m37s
-configure-network-openstack-edpm-compute-openstack-edpm-compute   1/1           48s        98s
-configure-os-openstack-edpm-compute-compute    0/1           9s         9s
-download-cache-openstack-edpm-compute-openstack-edpm-compute-se   1/1           2m41s      4m19s
-install-os-openstack-edpm-compute-compute-2    1/1           35s        44s
-keystone-cron-29012581                                            1/1           5s         143m
-keystone-cron-29012641                                            1/1           5s         83m
-keystone-cron-29012701                                            1/1           5s         23m
-pre-adoption-validation-openstack-pre-adoption-openstack-edpm-c   1/1           23s        6h27m
-tripleo-cleanup-tripleo-cleanup-compute        1/1           4m57s      6h26m
-validate-network-openstack-edpm-compute-openstack-edpm-compute    1/1           6s         50s
+NAME                                   COMPLETIONS   DURATION   AGE
+bootstrap-compute-adoption-compute-2   0/1           29s        29s
+keystone-cron-29050201                 1/1           6s         8m38s
+redhat-compute-adoption-compute-2      1/1           3m14s      3m43s
+redhat-compute-adoption-compute-3      0/1           3m43s      3m43s
 ----
 . If we check the *compute03* logs, there are errors to download the RPM packages
 +
 [source,bash,role=execute,subs=attributes]
 ----
-oc logs job/bootstrap-openstack-edpm-compute-compute-3 -n openstack
+oc logs job/redhat-compute-adoption-compute-3 -n openstack
 ----
 ----
-TASK [osp.edpm.edpm_bootstrap : Install required packages to bootstrap EDPM] ***
-task path: /usr/share/ansible/collections/ansible_collections/osp/edpm/roles/edpm_bootstrap/tasks/packages.yml:43
-FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (5 retries left).
-FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (4 retries left).
-FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (3 retries left).
-FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (2 retries left).
-FAILED - RETRYING: [compute03]: Install required packages to bootstrap EDPM (1 retries left).
-fatal: [compute03]: FAILED! => {"ansible_facts": {"pkg_mgr": "dnf"}, "attempts": 5, "changed": false, "failed_when_result": true, "msg": "Failed to download metadata for repo 'rhel-9-for-x86_64-baseos-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried", "rc": 1, "results": []}
+TASK [redhat.rhel_system_roles.rhc : Handle system subscription] ***************
+task path: /usr/share/ansible/collections/ansible_collections/redhat/rhel_system_roles/roles/rhc/tasks/main.yml:15
+included: /usr/share/ansible/collections/ansible_collections/redhat/rhel_system_roles/roles/rhc/tasks/subscription-manager.yml for compute03
+
+TASK [redhat.rhel_system_roles.rhc : Ensure required packages are installed] ***
+task path: /usr/share/ansible/collections/ansible_collections/redhat/rhel_system_roles/roles/rhc/tasks/subscription-manager.yml:3
+fatal: [compute03]: FAILED! => {"changed": false, "msg": "Failed to download metadata for repo 'openstack-17.1-for-rhel-9-x86_64-rpms': Cannot download repomd.xml: Cannot download repodata/repomd.xml: All mirrors were tried", "rc": 1, "results": []}
 
 NO MORE HOSTS LEFT *************************************************************
 
 NO MORE HOSTS LEFT *************************************************************
 
 PLAY RECAP *********************************************************************
-compute03                  : ok=14   changed=3    unreachable=0    failed=1    skipped=5    rescued=0    ignored=0
+compute03                  : ok=5    changed=0    unreachable=0    failed=1    skipped=3    rescued=0    ignored=0
 ----
-. Connect to the *compute03*:
+. If you want to recover the *compute03* connect to the *compute03*:
 +
 [source,bash,role=execute,subs=attributes]
 ----
@@ -356,7 +346,6 @@ EOF
 ----
 oc get jobs -n openstack
 ----
-+
 
 .Verification
 
@@ -391,7 +380,34 @@ oc exec openstackclient -- openstack network agent list
 | 10482583-2130-5b0d-958f-3430da21b929 | OVN Metadata agent           | standalone.localdomain |                   | :-)   | UP    | neutron-ovn-metadata-agent |
 | a4f1b584-16f1-4937-b2b0-28102a3f6eaa | OVN Controller agent         | standalone.localdomain |                   | :-)   | UP    | ovn-controller             |
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
+----
 
++
+. If you do not want to recover the *compute03* but to remove the *compute03* from your cloud, in the bastion, list the compute services:
++
+[source,bash,role=execute,subs=attributes]
+----
+alias openstack="oc exec -t openstackclient -- openstack"
+openstack compute service list
+----
+----
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+| ID                                   | Binary         | Host                   | Zone     | Status  | State | Updated At                 |
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+| a1419dda-fff2-4da6-8e01-94b20ffe5ecd | nova-conductor | nova-cell0-conductor-0 | internal | enabled | up    | 2025-03-26T20:53:04.000000 |
+| ce2371aa-a0d6-4e17-b7ca-0a2eb54b4aef | nova-scheduler | nova-scheduler-0       | internal | enabled | up    | 2025-03-26T20:53:06.000000 |
+| cdb3c0b1-ccd0-43de-a2b2-754b10e5627b | nova-compute   | compute02.localdomain  | nova     | enabled | up    | 2025-03-26T20:53:06.000000 |
+| 092f5d2d-f4fb-48c2-8f55-fa83ceaa9f7a | nova-compute   | compute03.localdomain  | nova     | enabled | down  | 2025-03-26T16:59:12.000000 |
+| 5db4c90e-3cbb-4ba6-890d-5487e8e0b7fc | nova-conductor | nova-cell1-conductor-0 | internal | enabled | up    | 2025-03-26T20:53:12.000000 |
++--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
+----
+
+. Delete the *compute03* compute service:
++
+[source,bash,subs=attributes]
+----
+openstack compute service delete <UUID_of_compute03>
+oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot -p$PODIFIED_DB_ROOT_PASSWORD     -e "DELETE FROM nova.services WHERE uuid=<UUID_of_compute03>";"
 ----
 
 .Next steps

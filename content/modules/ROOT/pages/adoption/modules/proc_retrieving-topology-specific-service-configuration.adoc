@@ -63,7 +63,7 @@ MARIADB_IMAGE=quay.io/podified-antelope-centos9/openstack-mariadb:current-podifi
 endif::[]
 ifeval::["{build}" == "downstream"]
 CONTROLLER1_SSH="ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone"
-MARIADB_IMAGE=registry.redhat.io/rhosp-dev-preview/openstack-mariadb-rhel9:18.0
+MARIADB_IMAGE=registry.redhat.io/rhoso/openstack-mariadb-rhel9:18.0
 endif::[]
 SOURCE_MARIADB_IP=172.17.0.16
 ifeval::["{build}" != "downstream"]

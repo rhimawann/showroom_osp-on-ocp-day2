@@ -1,0 +1,84 @@
+= Add additional compute after adoption
+
+== Login to the Compute and configure networking
+
+From the bastion login to the compute01 host:
+
+[source,bash,role=execute,subs=attributes]
+----
+ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute01
+----
+
+[source,bash,role=execute,subs=attributes]
+----
+sudo hostnamectl set-hostname edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+sudo nmcli co delete 'System eth0'
+sudo nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 10.0.2.2/24 ipv4.dns "172.30.0.10" ipv4.gateway "10.0.2.1"
+sudo nmcli con up "static-eth0"
+sudo nmcli co delete 'Wired connection 1'
+sudo nmcli con add con-name "static-eth1" ifname eth1 type ethernet ip4 172.22.0.100/24 ipv4.dns "172.22.0.89"
+sudo nmcli con up "static-eth1"
+----
+
+And log off VM
+
+[source,bash,role=execute]
+----
+logout
+----
+
+=== Finish the Dataplane
+
+Deploy the *compute01* host
+
+[source,bash,role=execute]
+----
+oc apply -f osp-ng-dataplane-node-set-deploy.yaml
+oc apply -f osp-ng-dataplane-deployment.yaml
+----
+
+You can view the Ansible logs while the deployment executes:
+
+[source,bash,role=execute]
+----
+oc logs -l app=openstackansibleee -f --max-log-requests 10
+----
+
+.Sample Output
+----
+(...)
+PLAY RECAP *********************************************************************
+openstack-edpm-compute-1           : ok=53   changed=26   unreachable=0    failed=0    skipped=54   rescued=0    ignored=0
+----
+
+Ctrl-C to exit.
+
+Verify that the data plane is deployed.
+
+NOTE: This takes several minutes.
+
+[source,bash,role=execute]
+----
+oc get openstackdataplanedeployment
+----
+
+Repeat the query until you see the following:
+
+.Sample Output
+----
+NAME                  STATUS   MESSAGE
+openstack-edpm-compute-1   True     Setup Complete
+----
+
+[source,bash,role=execute]
+----
+oc get openstackdataplanenodeset
+----
+
+Repeat the query until you see the following:
+
+.Sample Output
+----
+NAME                  STATUS   MESSAGE
+openstack-edpm-compute-1   True     NodeSet Ready
+----

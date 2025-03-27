@@ -10,7 +10,6 @@ spec:
     - name: ANSIBLE_VERBOSITY
       value: "2"
   services:
-    - redhat
     - bootstrap
     - download-cache
     - configure-network
@@ -21,10 +20,10 @@ spec:
     - run-os
     - reboot-os
     - install-certs
-    - libvirt
-    - nova
     - ovn
     - neutron-metadata
+    - libvirt
+    - nova
     - telemetry
   preProvisioned: true
   nodes:
