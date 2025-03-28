@@ -8,7 +8,9 @@ In this lab, you will use the following infrastructure:
 
 * A 3 OCP controller/workers combo nodes 4.16 OCP cluster
 * A bastion host to access to the OCP environment
-* A RHEL 9.4 virtualised compute host
+* 2 RHEL 9.2 virtualised compute host to install RHOSP 17.1
+* A NFS server that needs to be configured
+* A RHEL 9.4 virtualised compute host to be added optionally to the the upgraded RHOSO 18.0
 
 Pre-requisites before adoption process:
 

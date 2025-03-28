@@ -2,8 +2,9 @@
 
 In this lab, you will use the following infrastructure:
 
-* A 3 OCP controller + 3 OCP workers nodes 4.16 OCP cluster
+* 3 OCP compact controller/worker 4.16 OCP cluster
 * A bastion host to access to the OCP environment
+* A NFS server that needs to be configured
 * A RHEL 9.4 virtualised compute host
 
 In this lab, you will cover the following topics:
