@@ -1,0 +1,11 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - openstack-ipaddresspools.yaml
+  - openstack-l2advertisement.yaml
+  - openstack-net-attach-def.yaml
+  - openstack_netconfig.yaml
+  - openstack-nncp-w1.yaml
+  - openstack-nncp-w2.yaml
+  - openstack-nncp-w3.yaml
