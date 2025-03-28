@@ -1,0 +1,43 @@
+# Install and discover RHOSO using Gitops ArgoCD
+
+Welcome to the Red Hat OpenStack Services on OpenShift (RHOSO) lab instructions.
+These instructions will guide you through the installation of the next generation of Red Hat's OpenStack product onto an existing OpenShift Cluster utilizing a bastion host and a single host for the data plane.
+
+In this lab, you will use the following infrastructure:
+
+* A 3 OCP controller/worker 4.16 OCP cluster
+* A bastion host to access to the OCP environment
+* A RHEL 9.4 virtualised compute host
+
+In this lab, you will cover the following topics:
+
+* xref:prereqs-gitops.adoc[Install the Operators prerequisites using OpenShift gitops]
+* xref:install-operators-gitops.adoc[Install the Red Hat OpenStack Platform Service Operators using OpenShift gitops]
+* xref:secure.adoc[Configure Secure Access for OpenStack Services]
+* xref:install-nfs-server.adoc[Install NFS server]
+* xref:deploy-control-plane-gitops.adoc[Deploy RHOSO control plane using OpenShift gitops]
+* xref:deploy-data-plane-gitops.adoc[Deploy RHOSO data plane using OpenShift gitops]
+* xref:access-gitops.adoc[Access OpenStack]
+
+Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
+For some steps you may also need to edit some of the commands from the  instructions.
+
+== Fork the lab repo
+
+Fork the github repo https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2 into your github personal space. 
+
+In the next chapter we will refer to this repo as the variable: $YOUR_REPO_URL
+
+Example:
+
+Replace $YOUR_REPO_URL by 'https://github.com/$your_github_id/showroom_osp-on-ocp-day2.git'
+
+Clone your your own forked repo in the bastion:
+
+[source,bash,role=execute]
+----
+git clone $YOUR_REPO_URL labrepo
+cd labrepo
+----
+
+*Be sure to review all commands carefully both for functionality and syntax!*
