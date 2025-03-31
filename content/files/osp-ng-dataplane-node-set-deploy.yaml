@@ -8,6 +8,23 @@ spec:
       value: "True"
     - name: ANSIBLE_VERBOSITY
       value: "2"
+  services:
+    - redhat
+    - download-cache
+    - bootstrap
+    - configure-network
+    - validate-network
+    - install-os
+    - configure-os
+    - ssh-known-hosts
+    - run-os
+    - reboot-os
+    - install-certs
+    - ovn
+    - neutron-metadata
+    - libvirt
+    - nova
+    - telemetry
   networkAttachments:
     - ctlplane
   preProvisioned: true
