@@ -11,7 +11,7 @@ ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute01
 
 [source,bash,role=execute,subs=attributes]
 ----
-sudo hostnamectl set-hostname edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+sudo hostnamectl set-hostname compute01.localdomain
 sudo nmcli co delete 'System eth0'
 sudo nmcli con add con-name "static-eth0" ifname eth0 type ethernet ip4 10.0.2.2/24 ipv4.dns "172.30.0.10" ipv4.gateway "10.0.2.1"
 sudo nmcli con up "static-eth0"
@@ -33,8 +33,8 @@ Deploy the *compute01* host
 
 [source,bash,role=execute]
 ----
-oc apply -f osp-ng-dataplane-node-set-deploy.yaml
-oc apply -f osp-ng-dataplane-deployment.yaml
+oc apply -f osp-ng-dataplane-node-set-deploy-compute-1.yaml
+oc apply -f osp-ng-dataplane-deployment-compute-1.yaml
 ----
 
 You can view the Ansible logs while the deployment executes:
@@ -48,7 +48,7 @@ oc logs -l app=openstackansibleee -f --max-log-requests 10
 ----
 (...)
 PLAY RECAP *********************************************************************
-openstack-edpm-compute-1           : ok=53   changed=26   unreachable=0    failed=0    skipped=54   rescued=0    ignored=0
+compute-1           : ok=53   changed=26   unreachable=0    failed=0    skipped=54   rescued=0    ignored=0
 ----
 
 Ctrl-C to exit.
@@ -67,7 +67,7 @@ Repeat the query until you see the following:
 .Sample Output
 ----
 NAME                  STATUS   MESSAGE
-openstack-edpm-compute-1   True     Setup Complete
+compute-1   True     Setup Complete
 ----
 
 [source,bash,role=execute]
@@ -80,5 +80,14 @@ Repeat the query until you see the following:
 .Sample Output
 ----
 NAME                  STATUS   MESSAGE
-openstack-edpm-compute-1   True     NodeSet Ready
+compute-1-deployment  True     NodeSet Ready
+----
+
+=== Discover the new compute 
+
+Map the Compute nodes to the Compute cell that they are connected to:
+
+[source,bash,role=execute]
+----
+oc rsh nova-cell0-conductor-0 nova-manage cell_v2 discover_hosts --verbose
 ----

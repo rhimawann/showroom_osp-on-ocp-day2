@@ -30,14 +30,9 @@ openstack image list -c ID -c Status |grep -E '\| .+ing \|'
 * Collect the services topology-specific configuration. For more information, see xref:proc_retrieving-topology-specific-service-configuration_migrating-databases[Retrieving topology-specific service configuration].
 * Define the following shell variables. The values are examples and refer to a single node standalone {OpenStackPreviousInstaller} deployment. Replace these example values with values that are correct for your environment:
 +
-[subs=+quotes,role=execute,subs=attributes]
+[source,subs=+quotes,role=execute,subs=attributes]
 ----
-ifeval::["{build}" != "downstream"]
-CONTROLLER1_SSH="ssh -i ~/install_yamls/out/edpm/ansibleee-ssh-key-id_rsa root@192.168.122.100"
-endif::[]
-ifeval::["{build}" == "downstream"]
 CONTROLLER1_SSH="ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@allinone"
-endif::[]
 ----
 
 .Procedure

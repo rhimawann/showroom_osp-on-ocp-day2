@@ -29,7 +29,7 @@ LIBVIRT_PASSWORD_BASE64=$(echo -n "$LIBVIRT_PASSWORD" | base64)
 
 * Create the libvirt secret:
 +
-[source,yaml]
+[source,yaml,role=execute]
 ----
 oc apply -f - <<EOF
 apiVersion: v1
@@ -153,7 +153,7 @@ oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-2.yaml
 oc apply -f osp-ng-dataplane-node-set-deploy-adoption-compute-3.yaml
 ----
 
-* Take some time to go through the *osp-ng-dataplane-adoption-compute-*.yaml* files and *osp-ng-dataplane-adoption-compute-3.yaml* files. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
+* Take some time to go through the *osp-ng-dataplane-adoption-compute-2.yaml* and *osp-ng-dataplane-adoption-compute-3.yaml* files. We have configured the edpm_ovn_bridge_mappings with "datacentre:br-ex"
 
 . Run the pre-adoption validation:
 
@@ -383,7 +383,7 @@ oc exec openstackclient -- openstack network agent list
 ----
 
 +
-. If you do not want to recover the *compute03* but to remove the *compute03* from your cloud, in the bastion, list the compute services:
+If you do not want to recover the *compute03* but to remove the *compute03* from your cloud, in the bastion, list the compute services:
 +
 [source,bash,role=execute,subs=attributes]
 ----

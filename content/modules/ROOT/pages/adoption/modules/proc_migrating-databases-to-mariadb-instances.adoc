@@ -248,7 +248,7 @@ grep -qE " $(awk '{print $1}' <<<$default) cell1$" <<<$changed && echo "OK" || e
 
 # ensure the registered Compute service name has not changed
 novadb_svc_records=$(oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot "-p$PODIFIED_DB_ROOT_PASSWORD" \
-  nova_cell1 -e "select host from services where services.binary='nova-compute' order by host asc;")
+  nova_cell1 -e "select host from services where services.binary='nova-compute' and deleted=0 order by host asc;")
 diff -Z <(echo $novadb_svc_records) <(echo $PULL_OPENSTACK_CONFIGURATION_NOVA_COMPUTE_HOSTNAMES) && echo "OK" || echo "CHECK FAILED"
 ----
 

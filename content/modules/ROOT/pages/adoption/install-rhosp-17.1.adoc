@@ -318,10 +318,15 @@ openstack flavor create --ram 512 --disk 1 --vcpu 1 --public tiny
 curl -O -L https://github.com/cirros-dev/cirros/releases/download/0.6.2/cirros-0.6.2-x86_64-disk.img
 openstack image create cirros --container-format bare --disk-format qcow2 --public --file cirros-0.6.2-x86_64-disk.img
 ----
+. Create and inject ssh key
++
+
 [source,bash,role=execute]
 ----
 ssh-keygen -m PEM -t rsa -b 2048 -f ~/.ssh/id_rsa_pem
 ----
+. Create the remainining openstack resources
++
 [source,bash,role=execute]
 ----
 openstack keypair create --public-key ~/.ssh/id_rsa_pem.pub default
@@ -347,13 +352,13 @@ openstack router add subnet vrouter private-net
 openstack server create \
     --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute02.localdomain \
     --image cirros test-server-compute-02
-openstack floating ip create public --floating-ip-addres 172.21.0.200
+openstack floating ip create public --floating-ip-addres 172.21.0.201
 
 openstack server create \
     --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute03.localdomain \
     --image cirros test-server-compute-03
-openstack floating ip create public --floating-ip-addres 172.21.0.201
+openstack floating ip create public --floating-ip-addres 172.21.0.202
 
-openstack server add floating ip test-server-compute-02 172.21.0.200
-openstack server add floating ip test-server-compute-03 172.21.0.201
+openstack server add floating ip test-server-compute-02 172.21.0.201
+openstack server add floating ip test-server-compute-03 172.21.0.202
 ----

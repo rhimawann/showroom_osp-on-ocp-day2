@@ -31,10 +31,10 @@ spec:
   preProvisioned: true
   nodes:
       edpm-compute-1:
-        hostName: edpm-compute-1.sandbox-UUID-ocp4-cluster.svc.cluster.local
+        hostName: compute01.localdomain
         ansible:
           ansibleHost: 172.22.0.100
-          fqdn_internal_api: edpm-compute-1.sandbox-UUID-ocp4-cluster.svc.cluster.local
+          fqdn_internal_api: compute01.localdomain
         networks:
         - name: ctlplane
           subnetName: subnet1
@@ -133,7 +133,7 @@ spec:
          edpm_ovn_bridge_mappings: ["datacentre:br-ex"]
          ctlplane_host_routes: []
          ctlplane_subnet_cidr: 24
-         dns_search_domains: sandbox-UUID-ocp4-cluster.svc.cluster.local
+         dns_search_domains: localdomain
          ctlplane_mtu: 1500
          external_mtu: 1500
          external_cidr: '24'

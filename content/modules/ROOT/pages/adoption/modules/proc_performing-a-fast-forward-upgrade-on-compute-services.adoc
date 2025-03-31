@@ -15,7 +15,7 @@ You must upgrade the Compute services from {rhos_prev_long} {rhos_prev_ver} to {
 [source,bash,role=execute,subs=attributes]
 ----
 oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot -p$PODIFIED_DB_ROOT_PASSWORD \
-    -e "select a.version from nova_cell1.services a join nova_cell1.services b where a.version!=b.version and a.binary='nova-compute';"
+    -e "select a.version from nova_cell1.services a join nova_cell1.services b where a.version!=b.version and a.binary='nova-compute' and a.deleted=0;"
 ----
 +
 [NOTE]
