@@ -4,7 +4,6 @@ metadata:
   name: compute-1
 spec:
   tlsEnabled: false
-spec:
   env:
     - name: ANSIBLE_FORCE_COLOR
       value: "True"
