@@ -308,6 +308,9 @@ NO MORE HOSTS LEFT *************************************************************
 PLAY RECAP *********************************************************************
 compute03                  : ok=5    changed=0    unreachable=0    failed=1    skipped=3    rescued=0    ignored=0
 ----
+
+== Option1: Recover compute03 
+
 . If you want to recover the *compute03* connect to the *compute03*:
 +
 [source,bash,role=execute,subs=attributes]
@@ -382,6 +385,8 @@ oc exec openstackclient -- openstack network agent list
 +--------------------------------------+------------------------------+------------------------+-------------------+-------+-------+----------------------------+
 ----
 
+== Option2: Remove compute03 from your deployment
+
 +
 If you do not want to recover the *compute03* but to remove the *compute03* from your cloud, in the bastion, list the compute services:
 +
@@ -402,12 +407,18 @@ openstack compute service list
 +--------------------------------------+----------------+------------------------+----------+---------+-------+----------------------------+
 ----
 
+. Delete the VM hosted in the *compute03* :
++
+[source,bash,subs=attributes]
+----
+openstack server delete test-server-compute-03
+----
+
 . Delete the *compute03* compute service:
 +
 [source,bash,subs=attributes]
 ----
-openstack compute service delete <UUID_of_compute03>
-oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot -p$PODIFIED_DB_ROOT_PASSWORD     -e "DELETE FROM nova.services WHERE uuid=<UUID_of_compute03>";"
+openstack compute service delete UUID_of_compute03
 ----
 
 .Next steps

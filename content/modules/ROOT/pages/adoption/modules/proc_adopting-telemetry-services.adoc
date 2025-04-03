@@ -56,10 +56,14 @@ spec:
         enabled: true
         secret: osp-secret
         serviceUser: ceilometer
+      logging:
+        enabled: false
+        port: 10514
+        cloNamespace: openshift-logging
 '
 ----
 
-. Enable the metrics storage back end:
+. Optional - Enable the metrics storage back end:
 +
 [source,bash,role=execute,subs=attributes]
 ----
@@ -131,23 +135,5 @@ spec:
                     - image.size
           enabled: true
           secret: osp-secret
-'
-----
-
-.Next steps
-
-. Optional: Patch the `OpenStackControlPlane` CR to include `logging`:
-+
-[source,bash,role=execute,subs=attributes]
-----
-oc patch openstackcontrolplane openstack --type=merge --patch '
-spec:
-  telemetry:
-    template:
-      logging:
-      enabled: true
-      ipaddr: 172.17.0.89
-      port: 10514
-      cloNamespace: openshift-logging
 '
 ----

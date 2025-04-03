@@ -22,6 +22,10 @@ If needed, you can navigate to the OpenShift console URL: {openshift_cluster_con
 
 == RHOSP 17.1 Installation
 
+[WARNING]
+
+This installation method for RHOSP 17.1 is not supported and is intended for lab or testing purposes only.
+
 . Clone the Files Repository
 +
 In the bastion terminal, clone the repository and change to the directory containing the files that will be used later in the lab:

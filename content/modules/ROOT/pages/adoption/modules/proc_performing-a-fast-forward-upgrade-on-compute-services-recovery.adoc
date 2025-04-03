@@ -1,6 +1,6 @@
 [id="performing-a-fast-forward-upgrade-on-compute-services_{context}"]
 
-= Performing a fast-forward upgrade on Compute services
+= Performing a fast-forward upgrade on Compute service
 
 You must upgrade the Compute services from {rhos_prev_long} {rhos_prev_ver} to {rhos_long} {rhos_curr_ver} on the control plane and data plane by completing the following tasks:
 
@@ -10,20 +10,20 @@ You must upgrade the Compute services from {rhos_prev_long} {rhos_prev_ver} to {
 
 .Procedure
 
-. Wait for cell1 Compute data plane services version to update:
-+
-[source,bash,role=execute,subs=attributes]
-----
-oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot -p$PODIFIED_DB_ROOT_PASSWORD \
-    -e "select a.version from nova_cell1.services a join nova_cell1.services b where a.version!=b.version and a.binary='nova-compute' and a.deleted=0;"
-----
-+
-[NOTE]
-====
-The query returns an empty result when the update is completed. No downtime is expected for virtual machine workloads.
-
-Review any errors in the nova Compute agent logs on the data plane, and the `nova-conductor` journal records on the control plane.
-====
+#. Wait for cell1 Compute data plane services version to update:
+#+
+#[source,bash,role=execute,subs=attributes]
+#----
+#oc exec openstack-cell1-galera-0 -c galera -- mysql -rs -uroot -p$PODIFIED_DB_ROOT_PASSWORD \
+#    -e "select a.version from nova_cell1.services a join nova_cell1.services b where a.version!=b.version and a.binary='nova-compute' and a.deleted=0;"
+#----
+#+
+#[NOTE]
+#====
+#The query returns an empty result when the update is completed. No downtime is expected for virtual machine workloads.
+#
+#Review any errors in the nova Compute agent logs on the data plane, and the `nova-conductor` journal records on the control plane.
+#====
 
 . Patch the `OpenStackControlPlane` CR to remove the pre-fast-forward upgrade workarounds from the Compute control plane services:
 +
@@ -72,6 +72,8 @@ oc wait --for condition=Ready --timeout=300s Nova/nova
 
 . Complete the steps in xref:adopting-compute-services-to-the-data-plane_data-plane[Adopting Compute services to the {rhos_acro} data plane].
 
+== Option 1: *compute03* was recovered in cluster
+
 . Remove the pre-fast-forward upgrade workarounds from the Compute data plane services:
 +
 [source,bash,role=execute,subs=attributes]
@@ -100,6 +102,8 @@ spec:
     - nova
 EOF
 ----
+
+== Option 2: *compute03* was remoted from your cluster
 
 . Or use the next *OpenStackDataplneDeployment* if you have removed *compute03* of your deployment:
 +
