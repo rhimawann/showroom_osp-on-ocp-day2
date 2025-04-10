@@ -9,9 +9,15 @@ From the bastion, connect to the *NFS server* host and configure the networking:
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@nfsserver
 ----
 
-[source,bash,role=execute,subs=attributes]
+Escalate to root:
+
+[source,bash,role=execute]
 ----
 sudo -i
+----
+
+[source,bash,role=execute,subs=attributes]
+----
 mkdir -p /nfs/cinder
 mkdir -p /nfs/glance
 chmod 777 /nfs/cinder

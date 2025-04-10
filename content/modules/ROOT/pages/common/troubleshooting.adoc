@@ -44,7 +44,7 @@ oc get openstackcontrolplane -n openstack
 .Sample Output
 ----
 NAME                                 STATUS   MESSAGE
-openstack-galera-network-isolation   True     Setup complete
+openstack-control-plane   True     Setup complete
 ----
 
 

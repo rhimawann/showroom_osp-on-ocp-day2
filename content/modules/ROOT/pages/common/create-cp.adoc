@@ -5,6 +5,8 @@ The control plane we will be using the NFS server we installed in the previous s
 
 == Prepare the secret to place the NFS server connection used by Cinder
 
+In the bastion:
+
 [source,bash,role=execute]
 ----
 oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
@@ -21,15 +23,15 @@ Wait until the OpenStack control plane deployment is completed:
 
 [source,bash,role=execute]
 ----
-oc get openstackcontrolplane -n openstack
+oc get openstackcontrolplane -n openstack -w
 ----
 
 WARNING: This can take several minutes.
 
-Repeat the query until MESSAGE is Setup complete
+Type Control + C, to exit the wait command when you see message "Setup Complete"
 
 .Sample Output
 ----
 NAME                                 STATUS   MESSAGE
-openstack-galera-network-isolation   True     Setup complete
+openstack-control-plane   True     Setup complete
 ----

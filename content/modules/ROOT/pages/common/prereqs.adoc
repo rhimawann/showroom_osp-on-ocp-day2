@@ -125,8 +125,10 @@ Repeat this command until you see the desired output:
 
 [source,bash,role=execute]
 ----
-oc get clusterserviceversion -n openshift-nmstate  -o custom-columns=Name:.metadata.name,Phase:.status.phase
+oc get clusterserviceversion -n openshift-nmstate  -o custom-columns=Name:.metadata.name,Phase:.status.phase -w
 ----
+
+Click Control + C when you see that the operator has moved to Succeded state
 
 .Sample Output
 ----
@@ -219,10 +221,16 @@ Confirm the *metallb* operator is installed:
 [source,bash,role=execute]
 ----
 oc get clusterserviceversion -n metallb-system \
- -o custom-columns=Name:.metadata.name,Phase:.status.phase
+ -o custom-columns=Name:.metadata.name,Phase:.status.phase -w
 ----
 
-Repeat the query until the Phase is Succeeded.
+Type Control + C when you see that the operator has moved to Succeded state
+
+.Sample Output
+----
+Name                                              Phase
+metallb-operator.v4.16.0-202502260004              Succeeded
+----
 
 Create a single instance of a *metallb* resource:
 

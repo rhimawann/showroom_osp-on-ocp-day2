@@ -1,7 +1,7 @@
 apiVersion: core.openstack.org/v1beta1
 kind: OpenStackControlPlane
 metadata:
-  name: openstack-galera-network-isolation
+  name: openstack-control-plane
 spec:
   secret: osp-secret
   storageClass: ocs-external-storagecluster-ceph-rbd
@@ -150,6 +150,7 @@ spec:
       networkAttachments:
       - internalapi
   horizon:
+    enabled: true
     apiOverride:
       route: {}
     template:

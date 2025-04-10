@@ -1,6 +1,6 @@
 = Access OpenStack
 
-From the *bastion server* access the Control Plane:
+From the *bastion server* access the openstackclient pod:
 
 [source,bash,role=execute]
 ----
@@ -11,7 +11,6 @@ On Control Plane verify OpenStack Services:
 
 [source,bash,role=execute]
 ----
-cd /home/cloud-admin
 openstack compute service list
 ----
 
@@ -76,7 +75,7 @@ curl -O -L https://github.com/cirros-dev/cirros/releases/download/0.6.2/cirros-0
 openstack image create cirros --container-format bare --disk-format qcow2 --public --file cirros-0.6.2-x86_64-disk.img
 ----
 
-Generate a keypair:
+Generate a keypair (Type ENTER 2 times):
 [source,bash,role=execute]
 ----
 ssh-keygen -m PEM -t rsa -b 2048 -f ~/.ssh/id_rsa_pem
@@ -114,60 +113,35 @@ Create the Server and a Floating IP
 openstack server create \
     --flavor tiny --key-name default --network private --security-group basic \
     --image cirros test-server
-openstack floating ip create public
+openstack floating ip create public --floating-ip-addres 172.21.0.205
 ----
 
 Add the floating IP above to the new VM in the next step.
 
 [source,bash,role=execute]
 ----
-openstack server add floating ip test-server $(openstack floating ip list -c "Floating IP Address" -f value)
+openstack server add floating ip test-server 172.21.0.205
 exit
 ----
 
-From the bastion login to the compute01 host, and access to the VM:
+From the bastion login to the compute01 host, and access to the VM, (password is gocubsgo):
 
 [source,bash,role=execute,subs=attributes]
 ----
 ssh -i /home/lab-user/.ssh/{guid}key.pem cloud-user@compute01
-ssh cirros@<FLOATING_IP> (password is gocubsgo)
 ----
-
+[source,bash,role=execute]
+----
+ssh cirros@172.21.0.205
+----
 [source,bash,role=execute]
 ----
 exit
 ----
 
-== Optional: Enable Horizon
+== Access Horizon
 
-From the Bastion:
-
-[source,bash,role=execute]
-----
-oc patch openstackcontrolplanes/openstack-galera-network-isolation -p='[{"op": "replace", "path": "/spec/horizon/enabled", "value": true}]' --type json
-oc patch openstackcontrolplane/openstack-galera-network-isolation -p '{"spec": {"horizon": {"template": {"customServiceConfig": "USE_X_FORWARDED_HOST = False" }}}}' --type=merge
-----
-
-Check that the horizon pods are running after enabling it:
-
-[source,bash,role=execute]
-----
-oc get pods -n openstack
-----
-
-.Sample Output:
-
-[source,bash,role=execute]
-----
-[...]
-glance-default-single-0                                           3/3     Running             0          7h3m
-horizon-5dbc7bd48c-hfxvw                                          0/1     Terminating         0          3s
-horizon-6bc6f585c5-c8bhn                                          0/1     ContainerCreating   0          2s
-horizon-84f6cc96d7-zhc4k                                          0/1     ContainerCreating   0          3s
-[...]
-----
-
-Get the Route
+From the Bastion, get the Route
 
 [source,bash,role=execute]
 ----
@@ -180,4 +154,4 @@ echo $ROUTE
 https://horizon-openstack.apps.86dgb.dynamic.redhatworkshops.io
 ----
 
-Click the url and log in as username `admin` password `openstack`
+Navigate to the url and log in as username `admin` password `openstack`

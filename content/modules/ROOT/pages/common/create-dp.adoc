@@ -16,7 +16,7 @@ Apply the *network confguration*:
 oc apply -f osp-ng-dataplane-netconfig.yaml
 ----
 
-== Login to the Compute and Verify
+== Login to the Compute and configure the control plane IP statically
 
 From the bastion login to the compute01 host:
 
@@ -58,21 +58,9 @@ Create a secret for the subscription manager and a secret for the Red Hat regist
 
 [source,bash,role=execute]
 ----
-echo -n "your_username" | base64
-echo -n "your_password" | base64
-----
+oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "your_username", "password": "your_password"}}'
 
-[source,bash,role=execute]
-----
-oc apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: subscription-manager
-data:
-  username: <base64 encoded subscription-manager username>
-  password: <base64 encoded subscription-manager password>
-EOF
 ----
 
 Create a secret for the subscription manager and a secret for the Red Hat registry:
@@ -110,13 +98,39 @@ edpm-compute-0             : ok=53   changed=26   unreachable=0    failed=0    s
 
 Ctrl-C to exit.
 
+You can check the Ansible EE jobs while the deployment executes:
+
+[source,bash,role=execute]
+----
+oc get jobs -n openstack
+----
+
+.Sample Output
+----
+NAME                                                              COMPLETIONS   DURATION   AGE
+bootstrap-openstack-edpm-compute-1-openstack-edpm-compute-1       1/1           2m3s       10m
+configure-network-openstack-edpm-compute-1-openstack-edpm-compu   1/1           87s        8m55s
+configure-os-openstack-edpm-compute-1-openstack-edpm-compute-1    1/1           40s        6m42s
+download-cache-openstack-edpm-compute-1-openstack-edpm-compute    1/1           3m25s      14m
+install-certs-openstack-edpm-compute-1-openstack-edpm-compute-1   1/1           32s        4m17s
+install-os-openstack-edpm-compute-1-openstack-edpm-compute-1      1/1           39s        7m21s
+keystone-cron-29029561                                            1/1           7s         7m57s
+libvirt-openstack-edpm-compute-1-openstack-edpm-compute-1         0/1           2m5s       2m5s
+neutron-metadata-openstack-edpm-compute-1-openstack-edpm-comput   1/1           45s        2m50s
+ovn-openstack-edpm-compute-1-openstack-edpm-compute-1             1/1           54s        3m44s
+reboot-os-openstack-edpm-compute-1-openstack-edpm-compute-1       1/1           76s        5m33s
+run-os-openstack-edpm-compute-1-openstack-edpm-compute-1          1/1           20s        5m53s
+ssh-known-hosts-openstack-edpm-compute-1                          1/1           9s         6m2s
+validate-network-openstack-edpm-compute-1-openstack-edpm-comput   1/1           7s         7m280s
+----
+
 Verify that the data plane is deployed.
 
 NOTE: This takes several minutes.
 
 [source,bash,role=execute]
 ----
-oc get openstackdataplanedeployment
+oc get openstackdataplanedeployment -n openstack
 ----
 
 Repeat the query until you see the following:
@@ -124,18 +138,18 @@ Repeat the query until you see the following:
 .Sample Output
 ----
 NAME                  STATUS   MESSAGE
-openstack-edpm-ipam   True     Setup Complete
+openstack-edpm-compute-1   ["openstack-edpm-compute-1"]   True     Setup Complete
 ----
 
 [source,bash,role=execute]
 ----
-oc get openstackdataplanenodeset
+oc get openstackdataplanenodeset -n openstack
 ----
 
 Repeat the query until you see the following:
 
 .Sample Output
 ----
-NAME                  STATUS   MESSAGE
-openstack-edpm-ipam   True     NodeSet Ready
+NAME                       STATUS   MESSAGE
+openstack-edpm-compute-1   True     NodeSet Ready
 ----
