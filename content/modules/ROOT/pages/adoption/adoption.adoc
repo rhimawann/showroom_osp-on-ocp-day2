@@ -30,6 +30,7 @@ In the dataplane adoption you have 2 choices:
 * xref:adoption-dp-recovery.adoc[Data plane Adoption showing how to recover a failure during the adoption of a Compute Node]
 
 Finally, after the update you can add an additional compute node:
+
 * xref:add-additional-compute.adoc[Add additional compute Node after adoption]
 
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
