@@ -26,28 +26,16 @@ oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
 
 == Create secret for the subcription manager credentials
 
-Create a secret for the subscription manager and a secret for the Red Hat registry:
+Create a secret for the subscription manager:
 
 [source,bash,role=execute]
 ----
-echo -n "your_username" | base64
-echo -n "your_password" | base64
-----
-
-[source,bash,role=execute]
-----
-oc apply -f - <<EOF
-apiVersion: v1
-kind: Secret
-metadata:
-  name: subscription-manager
-data:
-  username: <base64 encoded subscription-manager username>
-  password: <base64 encoded subscription-manager password>
+oc create secret generic subscription-manager \
+--from-literal rhc_auth='{"login": {"username": "your_username", "password": "your_password"}}'
 EOF
 ----
 
-Create a secret for the subscription manager and a secret for the Red Hat registry:
+Create a secret for the Red Hat registry:
 
 [IMPORTANT]
 

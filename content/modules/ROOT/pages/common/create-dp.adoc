@@ -60,7 +60,6 @@ Create a secret for the subscription manager and a secret for the Red Hat regist
 ----
 oc create secret generic subscription-manager \
 --from-literal rhc_auth='{"login": {"username": "your_username", "password": "your_password"}}'
-
 ----
 
 Create a secret for the subscription manager and a secret for the Red Hat registry:

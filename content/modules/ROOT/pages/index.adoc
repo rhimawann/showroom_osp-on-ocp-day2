@@ -5,8 +5,8 @@ These instructions will guide you through the installation of the next generatio
 
 You have four installation options: 
 
-* xref:adoption/adoption.adoc[Upgrade a RHOSP 17.1 to RHOSO 18 using the adoption mechanism]
 * xref:connected/connected.adoc[Install RHOSO using CDN - Connected environment]
+* xref:adoption/adoption.adoc[Upgrade a RHOSP 17.1 to RHOSO 18 using the adoption mechanism]
 * xref:updates/updates.adoc[Install a previous version of RHOSO to update it to the latest]
 
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.

@@ -24,7 +24,7 @@ components:
   - https://github.com/openstack-gitops/rhoso-gitops/base/initialize/gitops/components/annotations?ref=main
 
 resources:
-  - https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2/content/files/manifests/base?ref=main
+  - https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2/content/files/manifests/base/controlplane/?ref=main
 EOF
 ----
 
@@ -34,7 +34,7 @@ Validate the base configuration can be generated with *kustomize build*:
 kustomize build environments/base
 ----
 
-== Creating the Environment Overlay
+== Creating the Control plane Environment Overlay
 
 === Configuring OpenShift Networking for RHOS
 
@@ -44,33 +44,33 @@ Create an environment directory to store the managed cluster overlay configurati
 
 [source,bash,role=execute]
 ----
-mkdir -p environments/shift1
+mkdir -p environments/demo-env/controlplane/
 ----
 
-Create the *kustomization.yaml* for the shift1 environment overlay configuration:
+Create the *kustomization.yaml* for the demo-env environment overlay configuration:
 
 [source,bash,role=execute]
 ----
-cat > environments/shift1/kustomization.yaml <<EOF
+cat > environments/demo-env/controlplane/kustomization.yaml <<EOF
 apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base
+  - ../base/controlplane
 EOF
 ----
 
 Validate the base configuration can be generated with *kustomize build*:
 [source,bash,role=execute]
 ----
-kustomize build environments/shift1
+kustomize build environments/demo-env
 ----
 
 ==== Patching the NodeNetworkConfigurationPolicy
 
 Update the NodeNetworkConfigurationPolicy manifests in our base configuration, including updating the nodeSelector hostname. For more information about the NodeNetworkConfigurationPolicy manifest and retrieving the OpenShift worker nodes, see
 Use the information provided by the procedure in the Preparing RHOCP with isolated network interfaces guide for the patches being added to the kustomization.yaml configuration.
-In our worked example, all changes will be applied to the environments/shift1/kustomization.yaml file unless stated otherwise.
+In our worked example, all changes will be applied to the environments/demo-env/kustomization.yaml file unless stated otherwise.
 
 Create a kustomization patch to update the nodeSelector hostnames and NodeNetworkConfigurationPolicy object name:
 
@@ -78,7 +78,7 @@ Edit the *kustomization.yaml* created in the previous step:
 
 [source,bash,role=execute]
 ----
-vim environments/shift1/kustomization.yaml
+vim environments/demo-env/controlplane/kustomization.yaml
 ----
 
 And add the patches, for example to match nnpc of every worker to the the hostname of our cluster: 
@@ -89,7 +89,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base
+  - ../base/controlplane
 
 patches:
   - target:
@@ -136,19 +136,19 @@ patches:
 Validate the base configuration can be generated with *kustomize build*:
 [source,bash,role=execute]
 ----
-kustomize build environments/shift1
+kustomize build environments/demo-env/controlplane/
 ----
 
 Commit the files created and push it to your github repo:
 [source,bash,role=execute]
 ----
 git add .
-git commit -m "Base and shift1 environment"
+git commit -m "Base and demo-env environment controlplane"
 git push origin
 ----
 
 
-== Deploying the overlay using a GitOps Application
+== Deploying the control plane overlay using a GitOps Application
 
 Deploy the RHOSO control plane using a GitOps Application which will be deployed using sync-waves, resulting in the automated deployment of the environment on OpenShift.
 
@@ -163,20 +163,20 @@ Create the Application manifest:
 
 [source,bash,role=execute]
 ----
-cat > applications/rhoso/application-environment-shift1.yaml <<EOF
+cat > applications/rhoso/application-environment-demo-env-controlplane.yaml <<EOF
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
   finalizers:
   - resources-finalizer.argocd.argoproj.io
-  name: environment-rhoso-shift1
+  name: environment-rhoso-demo-env-controlplane
   namespace: openshift-gitops
 spec:
   destination:
     server: https://kubernetes.default.svc
   project: default
   source:
-    path: content/files/manifests/environments/shift1
+    path: content/files/manifests/environments/demo-env/controlplane/
     repoURL: https://github.com/$your_github_id/showroom_osp-on-ocp-day2.git
     targetRevision: HEAD
   syncPolicy:
@@ -188,19 +188,19 @@ Deploy the RHOSO control plane with the GitOps Application:
 
 [source,bash,role=execute]
 ----
-oc create --save-config -f applications/rhoso/application-environment-shift1.yaml
+oc create --save-config -f applications/rhoso/application-environment-demo-env-controlplane.yaml
 ----
 
 Wait for the Application to deploy successfully:
 
 [source,bash,role=execute]
 ----
-oc wait --timeout=600s -nopenshift-gitops applications.argoproj.io/environment-rhoso-shift1 --for jsonpath='{.status.health.status}'=Healthy
+oc wait --timeout=600s -nopenshift-gitops applications.argoproj.io/environment-rhoso-demo-env-controlplane --for jsonpath='{.status.health.status}'=Healthy
 ----
 
 Wait for the Application to deploy successfully:
 
 [source,bash,role=execute]
 ----
-oc get -n openshift-gitops application.argoproj.io environment-rhoso-shift1
+oc get -n openshift-gitops application.argoproj.io environment-rhoso-demo-env-controlplane
 ----
