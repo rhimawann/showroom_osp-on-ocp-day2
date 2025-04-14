@@ -26,7 +26,6 @@ Some prerequisites needed to install Red Hat OpenStack Services on OpenShift (RH
 
 * An operational OpenShift cluster which supports Multus CNI
 * oc command line tool on your workstation (bastion host)
-* k9s command line tool on your workstation (bastion host)
 * podman command line tool on your workstation (bastion host)
 * Access to repositories which contain the Dev Preview code
 * Access to an existing registry or create a local Quay registry

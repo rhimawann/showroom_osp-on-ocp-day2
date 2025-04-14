@@ -22,22 +22,48 @@ In this lab, you will cover the following topics:
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.
 
-== Fork the lab repo
+== Fork the Lab Repository
 
-Fork the github repo https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2 into your github personal space. 
+Fork the GitHub repository into your personal GitHub space:
 
-In the next chapter we will refer to this repo as the variable: $YOUR_REPO_URL
+https://github.com/rh-osp-demo/showroom_osp-on-ocp-day2
+
+== Add the Bastion SSH Key to the SSH Agent
+
+[source,bash,subs=attributes]
+----
+eval "$(ssh-agent -s)"
+ssh-add ~/.ssh/{guid}key.pem
+----
+
+== Add the SSH Public Key to GitHub
+
+Copy the public key `~/.ssh/{guid}key.pub` from the bastion to your GitHub account:
+
+1. Copy the SSH public key to your clipboard.
+2. In the upper-right corner of any page on GitHub, click your profile photo, then click *Settings*.
+3. In the "Access" section of the sidebar, click *SSH and GPG keys*.
+4. Click *New SSH key* or *Add SSH key*.
+5. In the *Title* field, add a descriptive label, such as `"bastion RHOSO gitops key"`.
+6. Click *Add SSH key*.
+
+== Set Your Repository URL
+
+In the next chapter, we will refer to your forked repository using the variable: `$YOUR_REPO_URL`.
 
 Example:
 
-Replace $YOUR_REPO_URL by 'https://github.com/$your_github_id/showroom_osp-on-ocp-day2.git'
+During the lab, replace `$YOUR_REPO_URL` with: 'https://github.com/$your_github_id/showroom_osp-on-ocp-day2.git'
 
-Clone your your own forked repo in the bastion:
+== Clone Your Forked Repository
 
-[source,bash,role=execute]
+In the bastion, clone your forked repository to the bastion using SSH:
+
+[source,bash]
 ----
-git clone $YOUR_REPO_URL labrepo
+cd
+git clone git@github.com:$your_github_id/showroom_osp-on-ocp-day2.git labrepo
 cd labrepo
 ----
 
-*Be sure to review all commands carefully both for functionality and syntax!*
+*Be sure to review all commands carefully for both functionality and syntax!*

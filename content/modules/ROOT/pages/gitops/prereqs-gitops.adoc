@@ -1,5 +1,26 @@
 = Install pre-requisites
 
+== Access Your Lab Environment
+
+. Access to the bastion executing the following command: 
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh {bastion_ssh_user_name}@{bastion_public_hostname} -p {bastion_ssh_port} 
+----
++
+SSH password is `{bastion_ssh_password}`. The uuid of your lab is: `{guid}`
+. Optionally copy your public SSH key to the bastion allowing you to authenticate with the server without entering a password every time you connect: 
++
+[source,bash,role=execute,subs=attributes]
+----
+ssh-copy-id -p {bastion_ssh_port} {bastion_ssh_user_name}@{bastion_public_hostname} 
+----
++
+
+If needed, you can navigate to the OpenShift console URL: {openshift_cluster_console_url}[{openshift_cluster_console_url}^] using user `admin` and password `{openshift_cluster_admin_password}`
+
+
 == Using ArgoCD application to install RHOSO pre-requisites
 
 Create an argocd application manifest to deploy all the prerequisites for the RHOSO control plane installation:
@@ -20,7 +41,12 @@ Review the Application state to verify that the health status is Healthy:
 
 [source,bash,role=execute]
 ----
-oc get applications.argoproj.io -nopenshift-gitops openstack-prerequisites
+oc get applications.argoproj.io -nopenshift-gitops openstack-prerequisites -w
+----
+
+. Sample Output
+----
+openstack-prerequisites   Synced        Healthy
 ----
 
 You can also access the OpenShift Gitops console by logging in with the username admin and the password:
@@ -39,11 +65,6 @@ Get the Route for the OpenShift Gitops/OpenShift GitOps server:
 argoURL=$(oc get route openshift-gitops-server -n openshift-gitops -o jsonpath='{.spec.host}{"\n"}')
 echo $argoURL
 ----
-
-You should see that the pre-requisites-operators-installation is completed
-
-image::2_pre_requisites_operators_installation.png[Prerequisites Operators Installation]
-
 
 == Install kustomize
 

@@ -10,6 +10,7 @@ cd /home/lab-user/labrepo/content/files/manifests
 ----
 
 Create the environment/base directory
+[source,bash,role=execute]
 ----
 mkdir -p environments/base
 ----
@@ -56,14 +57,14 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base/controlplane
+  - ../../../base/controlplane
 EOF
 ----
 
 Validate the base configuration can be generated with *kustomize build*:
 [source,bash,role=execute]
 ----
-kustomize build environments/demo-env
+kustomize build environments/demo-env/controlplane
 ----
 
 ==== Patching the NodeNetworkConfigurationPolicy
@@ -89,7 +90,7 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base/controlplane
+  - ../../../base/controlplane
 
 patches:
   - target:
@@ -131,6 +132,26 @@ patches:
         path: /spec/nodeSelector/kubernetes.io~1hostname
         value: "control-plane-cluster-{guid}-3"
 
+  - target:
+      kind: NetConfig
+      name: openstacknetconfig
+    patch: |-
+      - op: replace
+        path: /spec/networks/0/dnsDomain
+        value: ctlplane.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/1/dnsDomain
+        value: internalapi.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/2/dnsDomain
+        value: tenant.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/3/dnsDomain
+        value: storage.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/4/dnsDomain
+        value: external.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+
 ----
 
 Validate the base configuration can be generated with *kustomize build*:
@@ -161,7 +182,11 @@ mkdir -p applications/rhoso
 
 Create the Application manifest:
 
-[source,bash,role=execute]
+[IMPORTANT]
+
+replace `$your_github_id` string with your Github id
+
+[source,bash]
 ----
 cat > applications/rhoso/application-environment-demo-env-controlplane.yaml <<EOF
 apiVersion: argoproj.io/v1alpha1
@@ -198,9 +223,26 @@ Wait for the Application to deploy successfully:
 oc wait --timeout=600s -nopenshift-gitops applications.argoproj.io/environment-rhoso-demo-env-controlplane --for jsonpath='{.status.health.status}'=Healthy
 ----
 
-Wait for the Application to deploy successfully:
+Wait for the Application to deploy successfully. Type Control + C, to exit the wait command:
 
 [source,bash,role=execute]
 ----
-oc get -n openshift-gitops application.argoproj.io environment-rhoso-demo-env-controlplane
+oc get -n openshift-gitops application.argoproj.io environment-rhoso-demo-env-controlplane -w
+----
+
+Wait until the OpenStack control plane deployment is completed:
+
+[source,bash,role=execute]
+----
+oc get openstackcontrolplane -n openstack -w
+----
+
+WARNING: This can take several minutes.
+
+Type Control + C, to exit the wait command when you see message "Setup Complete"
+
+.Sample Output
+----
+NAME                                 STATUS   MESSAGE
+openstack-control-plane   True     Setup complete
 ----

@@ -8,6 +8,7 @@ You have four installation options:
 * xref:connected/connected.adoc[Install RHOSO using CDN - Connected environment]
 * xref:adoption/adoption.adoc[Upgrade a RHOSP 17.1 to RHOSO 18 using the adoption mechanism]
 * xref:updates/updates.adoc[Install a previous version of RHOSO to update it to the latest]
+* xref:gitops/gitops.adoc[Install RHOSO using Gitops ArgoCD]
 
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.

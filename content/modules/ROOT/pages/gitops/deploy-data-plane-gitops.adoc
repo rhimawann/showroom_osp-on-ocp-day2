@@ -33,6 +33,13 @@ logout
 
 ==== Creating the environment overlay configuration
 
+Change directory to your base forked gitops repo, in your bastion:
+
+[source,bash,role=execute]
+----
+cd /home/lab-user/labrepo/content/files/manifests
+----
+
 Create an environment directory to store the managed cluster overlay configuration:
 
 [source,bash,role=execute]
@@ -49,19 +56,21 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base/dataplane
+  - ../../../base/dataplane
 EOF
 ----
 
 Validate the base configuration can be generated with *kustomize build*:
 [source,bash,role=execute]
 ----
-kustomize build environments/demo-env
+kustomize build environments/demo-env/dataplane
 ----
 
 ==== Patching the OpenStackDataplaneNodeSet
 
-Create a kustomization patch to update the :
+In the previous chapter, we used `patches` inside kustomize.yaml file. 
+
+In this chapter, we will learn how to put those `patches` into files instead.
 
 Edit the *kustomization.yaml* created in the previous step:
 
@@ -78,41 +87,47 @@ apiVersion: kustomize.config.k8s.io/v1beta1
 kind: Kustomization
 
 resources:
-  - ../base/dataplane
+  - ../../../base/dataplane
 
 patches:
-  - target:
-      group: nmstate.io
-      version: v1
+  - path: patch-nodeset-nodes.yaml
+    target:
       kind: OpenStackDataPlaneNodeSet
       name: preprovisioned-nodeset
-    patch: |-
-      - op: add
-        path: /spec/nodes/edpm-compute-1
-        value:
-          hostName: edpm-compute-1.sandbox-UUID-ocp4-cluster.svc.cluster.local
-          networks:
-          - name: ctlplane
-            subnetName: subnet1
-            defaultRoute: false
-            fixedIP: 172.22.0.100
-          - name: internalapi
-            subnetName: subnet1
-            fixedIP: 172.17.0.100
-          - name: storage
-            subnetName: subnet1
-            fixedIP: 172.18.0.100
-          - name: tenant
-            subnetName: subnet1
-            fixedIP: 172.19.0.100
-          - name: external
-            subnetName: subnet1
-            fixedIP: 172.21.0.100
-          ansible:
-            ansibleHost: 172.22.0.100
-            ansibleUser: cloud-user
-            ansibleVars:
-              fqdn_internal_api: edpm-compute-1.sandbox-UUID-ocp4-cluster.svc.cluster.local
+----
+
+Let's create the patches files, *patch-nodeset-nodes.yaml* content:
+
+[source,bash,role=execute,subs=attributes]
+----
+cat << EOF > environments/demo-env/dataplane/patch-nodeset-nodes.yaml
+  - op: add
+    path: /spec/nodes/edpm-compute-1
+    value:
+      hostName: edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+      networks:
+      - name: ctlplane
+        subnetName: subnet1
+        defaultRoute: false
+        fixedIP: 172.22.0.100
+      - name: internalapi
+        subnetName: subnet1
+        fixedIP: 172.17.0.100
+      - name: storage
+        subnetName: subnet1
+        fixedIP: 172.18.0.100
+      - name: tenant
+        subnetName: subnet1
+        fixedIP: 172.19.0.100
+      - name: external
+        subnetName: subnet1
+        fixedIP: 172.21.0.100
+      ansible:
+        ansibleHost: 172.22.0.100
+        ansibleUser: cloud-user
+        ansibleVars:
+          fqdn_internal_api: edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+EOF
 ----
 
 Validate the base configuration can be generated with *kustomize build*:
@@ -134,14 +149,11 @@ git push origin
 
 Deploy the RHOSO data plane using a GitOps Application which will be deployed using sync-waves, resulting in the automated deployment of the environment on OpenShift.
 
-Make a directory to hold the Application manifest:
-
-[source,bash,role=execute]
-----
-mkdir -p applications/rhoso
-----
-
 Create the Application manifest:
+
+[IMPORTANT]
+
+replace `$your_github_id` string with your Github id
 
 [source,bash,role=execute]
 ----
@@ -170,7 +182,7 @@ Deploy the RHOSO control plane with the GitOps Application:
 
 [source,bash,role=execute]
 ----
-oc create --save-config -f applications/rhoso/application-environment-demo-env-dataplane
+oc create --save-config -f applications/rhoso/application-environment-demo-env-dataplane.yaml
 ----
 
 Wait for the Application to deploy successfully:
