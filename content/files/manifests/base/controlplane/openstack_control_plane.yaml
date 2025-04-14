@@ -151,6 +151,7 @@ spec:
       networkAttachments:
       - internalapi
   horizon:
+    enabled: true
     apiOverride:
       route: {}
     template:
