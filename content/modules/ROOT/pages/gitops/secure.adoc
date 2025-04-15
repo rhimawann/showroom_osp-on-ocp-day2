@@ -2,6 +2,13 @@
 
 We will be utilizing a preconfigured yaml file (`files/osp-ng-ctlplane-secret.yaml`) to create a seperate base64 password for heat and one for the remaining services.
 
+Make sure that you are in the *openstack* namespace:
+
+[source,bash,role=execute]
+----
+oc project openstack
+----
+
 Create the osp-secret Secret:
 
 [source,bash,role=execute]
