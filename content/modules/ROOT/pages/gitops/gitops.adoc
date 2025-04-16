@@ -22,6 +22,9 @@ In this lab, you will cover the following topics:
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.
 
+[IMPORTANT]
+The content presented in this guide is not officially supported by Red Hat. It is intended solely for exploratory purposes and to gather feedback that may inform potential future productization.
+
 == Fork the Lab Repository
 
 Fork the GitHub repository into your personal GitHub space:
