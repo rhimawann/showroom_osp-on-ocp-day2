@@ -228,7 +228,7 @@ openstack compute service delete 5
 
 . Generate Files for Compute Installation
 +
-Execute the *openstack_compute_prepare.sh* script and copy the generated files to *compute02*:
+Execute the *openstack_compute_prepare.sh* script and copy the generated files to *compute02* and *compute03*:
 +
 [source,bash,role=execute,subs=attributes]
 ----
@@ -356,13 +356,13 @@ openstack router add subnet vrouter private-net
 openstack server create \
     --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute02.localdomain \
     --image cirros test-server-compute-02
-openstack floating ip create public --floating-ip-addres 172.21.0.201
+openstack floating ip create public --floating-ip-addres 172.21.0.204
 
 openstack server create \
     --flavor tiny --key-name default --network private --security-group basic --availability-zone=nova:compute03.localdomain \
     --image cirros test-server-compute-03
-openstack floating ip create public --floating-ip-addres 172.21.0.202
+openstack floating ip create public --floating-ip-addres 172.21.0.205
 
-openstack server add floating ip test-server-compute-02 172.21.0.201
-openstack server add floating ip test-server-compute-03 172.21.0.202
+openstack server add floating ip test-server-compute-02 172.21.0.204
+openstack server add floating ip test-server-compute-03 172.21.0.205
 ----
