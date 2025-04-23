@@ -88,7 +88,7 @@ spec:
 EOF
 ----
 
-== Option 2: *compute03* was remoted from your cluster
+== Option 2: *compute03* was removed from your cluster
 
 . Or use the next *OpenStackDataplneDeployment* if you have removed *compute03* of your deployment:
 +
