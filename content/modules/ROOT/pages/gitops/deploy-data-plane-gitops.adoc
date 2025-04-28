@@ -192,9 +192,9 @@ Wait for the Application to deploy successfully:
 oc wait --timeout=600s -nopenshift-gitops applications.argoproj.io/environment-rhoso-demo-env-dataplane --for jsonpath='{.status.health.status}'=Healthy
 ----
 
-Wait for the Application to deploy successfully:
+Wait for the Application to deploy successfully. Type Control + C, to exit the wait command:
 
 [source,bash,role=execute]
 ----
-oc get -n openshift-gitops application.argoproj.io environment-rhoso-demo-env-dataplane
+oc get -n openshift-gitops application.argoproj.io environment-rhoso-demo-env-dataplane -w
 ----

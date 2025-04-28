@@ -32,9 +32,11 @@ oc wait --timeout=600s -nopenshift-gitops applications.argoproj.io/openstack-ope
 
 Review the Application state to verify that the health status is Healthy:
 
+Click Control + C when you see that the ArgoCD has moved to Healthy state
+
 [source,bash,role=execute]
 ----
-oc get applications.argoproj.io -nopenshift-gitops openstack-operator
+oc get applications.argoproj.io -nopenshift-gitops openstack-operator -w
 ----
 
 Access the OpenShift Gitops console to check the deployment of the RHOSO operators
