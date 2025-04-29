@@ -90,6 +90,10 @@ resources:
   - ../../../base/dataplane
 
 patches:
+  - path: patch-nodeset-ansible.yaml
+    target:
+      kind: OpenStackDataPlaneNodeSet
+      name: preprovisioned-nodeset
   - path: patch-nodeset-nodes.yaml
     target:
       kind: OpenStackDataPlaneNodeSet
@@ -127,6 +131,17 @@ cat << EOF > environments/demo-env/dataplane/patch-nodeset-nodes.yaml
         ansibleUser: cloud-user
         ansibleVars:
           fqdn_internal_api: edpm-compute-1.sandbox-{guid}-ocp4-cluster.svc.cluster.local
+EOF
+----
+
+Let's create the patches files, *patch-nodeset-ansible.yaml* content:
+
+[source,bash,role=execute,subs=attributes]
+----
+cat << EOF > environments/demo-env/dataplane/patch-nodeset-ansible.yaml
+- op: replace
+  path: /spec/nodeTemplate/ansible/ansibleVars/dns_search_domains
+  value: sandbox-{guid}-ocp4-cluster.svc.cluster.local
 EOF
 ----
 
