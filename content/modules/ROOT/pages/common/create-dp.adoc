@@ -56,6 +56,10 @@ oc create secret generic nova-migration-ssh-key --from-file=ssh-privatekey=id --
 
 Create a secret for the subscription manager and a secret for the Red Hat registry:
 
+[IMPORTANT]
+
+Add your username and password
+
 [source,bash,role=execute]
 ----
 oc create secret generic subscription-manager \

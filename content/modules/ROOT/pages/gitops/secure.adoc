@@ -35,6 +35,10 @@ oc create secret generic cinder-nfs-config --from-file=nfs-cinder-conf
 
 Create a secret for the subscription manager:
 
+[IMPORTANT]
+
+Add your username and password
+
 [source,bash,role=execute]
 ----
 oc create secret generic subscription-manager \
