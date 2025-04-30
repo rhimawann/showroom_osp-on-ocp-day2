@@ -55,7 +55,7 @@ If needed, you can navigate to the OpenShift console URL: {openshift_cluster_con
 
 In the bastion, add the bastion ssh key to the ssh agent:
 
-[source,bash,subs=attributes]
+[source,bash,role=execute,subs=attributes]
 ----
 eval "$(ssh-agent -s)"
 ssh-add ~/.ssh/{guid}key.pem
@@ -74,11 +74,12 @@ Copy the public key `~/.ssh/{guid}key.pub` from the bastion to your GitHub accou
 
 == Set Your Repository URL
 
-In the next chapter, we will refer to your forked repository using the variable: `$YOUR_REPO_URL`.
+In the next chapter, we will refer to your forked repository using the variable: "$your_github_id", for example:
 
-Example:
-
-During the lab, replace `$YOUR_REPO_URL` with: 'https://github.com/$your_github_id/showroom_osp-on-ocp-day2.git'
+[source,bash,subs=attributes]
+----
+your_github_id=pnavarro
+----
 
 == Clone Your Forked Repository
 

@@ -186,7 +186,7 @@ Create the Application manifest:
 
 replace `$your_github_id` string with your Github id
 
-[source,bash]
+[source,bash,role=execute]
 ----
 cat > applications/rhoso/application-environment-demo-env-controlplane.yaml <<EOF
 apiVersion: argoproj.io/v1alpha1
