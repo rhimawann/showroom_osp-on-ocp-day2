@@ -44,19 +44,6 @@ spec:
       name: enp6s0
       state: up
       type: ethernet
-    - description: Configuring external enp7s0
-      ipv4:
-        address:
-        - ip: 172.21.0.10
-          prefix-length: 24 
-        enabled: true
-        dhcp: false
-      ipv6:
-        enabled: false
-      mtu: 1500
-      name: enp7s0
-      state: up
-      type: ethernet
     - description: Configuring ctlplane enp3s0
       ipv4:
         address:
@@ -120,19 +107,6 @@ spec:
       name: enp6s0
       state: up
       type: ethernet
-    - description: Configuring external enp7s0
-      ipv4:
-        address:
-        - ip: 172.21.0.11
-          prefix-length: 24 
-        enabled: true
-        dhcp: false
-      ipv6:
-        enabled: false
-      mtu: 1500
-      name: enp7s0
-      state: up
-      type: ethernet
     - description: Configuring ctlplane enp3s0
       ipv4:
         address:
@@ -194,19 +168,6 @@ spec:
         enabled: false
       mtu: 1500
       name: enp6s0
-      state: up
-      type: ethernet
-    - description: Configuring external enp7s0
-      ipv4:
-        address:
-        - ip: 172.21.0.12
-          prefix-length: 24 
-        enabled: true
-        dhcp: false
-      ipv6:
-        enabled: false
-      mtu: 1500
-      name: enp7s0
       state: up
       type: ethernet
     - description: Configuring ctlplane enp3s0
