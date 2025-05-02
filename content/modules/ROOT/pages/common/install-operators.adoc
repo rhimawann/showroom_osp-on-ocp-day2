@@ -26,9 +26,9 @@ oc new-project openstack-operators
 oc new-project openstack
 ----
 
-. Configure the **Catalog Source, OperatorGroup and Subscription** for the **OpenStack Operator** using your registry:
+. Configure the **OperatorGroup and Subscription** for the **OpenStack Operator** using your registry:
 +
-Create the new **CatalogSource, OperatorGroup, and Subscription** CRs in the **openstack** namespace from **files/openstack-operators.yaml**:
+Create the new **OperatorGroup and Subscription** CRs in the **openstack-operators** namespace from **files/osp-ng-openstack-operator.yaml**:
 +
 [source,bash,role=execute]
 ----
