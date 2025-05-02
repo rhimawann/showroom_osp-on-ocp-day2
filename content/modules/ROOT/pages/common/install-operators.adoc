@@ -47,7 +47,7 @@ NAME            CSV                       APPROVAL   APPROVED
 install-lfs4j   openstack-operator.v1.0.7   Manual     false
 ----
 
-. Approve the installation of the operator by updating the approved field of the InstallPlan. You will need to replace the <install-plan-id> with the NAME from the following command:
+. Approve the installation of the operator by updating the approved field of the InstallPlan. You will need to replace <install-plan-id> with the NAME from the previous command:
 +
 [source,bash,role=execute]
 ----
