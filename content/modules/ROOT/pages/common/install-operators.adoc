@@ -26,9 +26,9 @@ oc new-project openstack-operators
 oc new-project openstack
 ----
 
-. Configure the **Catalog Source, OperatorGroup and Subscription** for the **OpenStack Operator** using your registry:
+. Configure the **OperatorGroup and Subscription** for the **OpenStack Operator** using your registry:
 +
-Create the new **CatalogSource, OperatorGroup, and Subscription** CRs in the **openstack** namespace from **files/openstack-operators.yaml**:
+Create the new **OperatorGroup and Subscription** CRs in the **openstack-operators** namespace from **files/osp-ng-openstack-operator.yaml**:
 +
 [source,bash,role=execute]
 ----
@@ -47,7 +47,7 @@ NAME            CSV                       APPROVAL   APPROVED
 install-lfs4j   openstack-operator.v1.0.7   Manual     false
 ----
 
-. Approve the installation of the operator by updating the approved field of the InstallPlan. You will need to replace the <install-plan-id> with the NAME from the following command:
+. Approve the installation of the operator by updating the approved field of the InstallPlan. You will need to replace <install-plan-id> with the NAME from the previous command:
 +
 [source,bash,role=execute]
 ----

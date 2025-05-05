@@ -34,5 +34,6 @@ nmcli con up "static-eth1"
 
 systemctl start nfs-server
 systemctl enable nfs-server
+exit
 logout
 ----
