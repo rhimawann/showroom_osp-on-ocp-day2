@@ -152,10 +152,10 @@ sh-5.1openstack image list
 [source,bash,role=execute,subs=attributes]
 ----
 
-* On the `nfs-server` node, the same `uuid` is in the exported `/var/nfs`:
+* On the `nfs-server` node, the same `uuid` is in the exported `/nfs/glance`:
 +
 [source,bash,role=execute,subs=attributes]
 ----
-ls /var/nfs/
+ls /nfs/glance/
 634482ca-4002-4a6d-b1d5-64502ad02630
 ----
