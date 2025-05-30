@@ -223,7 +223,7 @@ After the {OpenStackShort} control plane services are shut down, if any of the e
 +
 [source,bash,role=execute,subs=attributes]
 ----
-cat >~/.source_cloud_exported_variables <<\EOF
+cat >~/.source_cloud_exported_variables << EOF
 PULL_OPENSTACK_CONFIGURATION_DATABASES="$PULL_OPENSTACK_CONFIGURATION_DATABASES"
 PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK="$PULL_OPENSTACK_CONFIGURATION_MYSQLCHECK_NOK"
 PULL_OPENSTACK_CONFIGURATION_NOVADB_MAPPED_CELLS="$PULL_OPENSTACK_CONFIGURATION_NOVADB_MAPPED_CELLS"
