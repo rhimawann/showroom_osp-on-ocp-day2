@@ -6,7 +6,7 @@ Create an argocd application manifest to deploy all the prerequisites for the RH
 
 [source,bash,role=execute]
 ----
-oc apply -k https://github.com/openstack-gitops/rhoso-gitops/applications/base/prerequisites
+oc apply -k https://github.com/pnavarro/rhoso-gitops/applications/base/prerequisites
 ----
 
 Wait for the Application to deploy successfully:
