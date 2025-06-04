@@ -6,7 +6,7 @@ To adopt the {identity_service_first_ref}, you patch an existing `OpenStackContr
 
 .Prerequisites
 
-* Create the keystone secret that includes the Fernet keys that were copied from the {OpenStackShort} environment:
+* In the *bastion* host, create the keystone secret that includes the Fernet keys that were copied from the {OpenStackShort} environment:
 +
 [source,bash,role=execute]
 ----
