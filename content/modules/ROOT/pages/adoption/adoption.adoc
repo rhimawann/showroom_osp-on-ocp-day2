@@ -14,24 +14,24 @@ In this lab, you will use the following infrastructure:
 
 Pre-requisites before adoption process:
 
-* xref:install-rhosp-17.1.adoc[Install RHOSP 17.1]
-* xref:prereqs.adoc[Perform Prerequisite Operations in the OpenShift cluster]
-* xref:install-operators.adoc[Install the Red Hat OpenStack Platform Service Operators]
-* xref:network-isolation.adoc[Prepare OCP for OpenStack Network Isolation]
+* Install RHOSP 17.1
+* Perform Prerequisite Operations in the OpenShift cluster
+* Install the Red Hat OpenStack Platform Service Operators
+* Prepare OCP for OpenStack Network Isolation
 
 Adoption process:
 
-* xref:migrating-databases.adoc[Migrating DBs]
-* xref:adoption-cp.adoc[Control plane Adoption]
+* Migrating DBs
+* xControl plane Adoption
 
 In the dataplane adoption you have 2 choices:
 
-* xref:adoption-dp.adoc[Data plane Adoption]
-* xref:adoption-dp-recovery.adoc[Data plane Adoption showing how to recover a failure during the adoption of a Compute Node]
+* Data plane Adoption
+* Data plane Adoption showing how to recover a failure during the adoption of a Compute Node
 
 Finally, after the update you can add an additional compute node:
 
-* xref:add-additional-compute.adoc[Add additional compute Node after adoption]
+* Add additional compute Node after adoption
 
 Within the lab environment, you will be able to copy and paste the specified commands into the CLI.
 For some steps you may also need to edit some of the commands from the  instructions.
