@@ -1,0 +1,65 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - ../../../base/controlplane
+
+patches:
+  - target:
+      group: nmstate.io
+      version: v1
+      kind: NodeNetworkConfigurationPolicy
+      name: osp-multi-nic-worker-ocp4-worker1
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: "control-plane-cluster-7v44g-1"
+      - op: replace
+        path: /spec/nodeSelector/kubernetes.io~1hostname
+        value: "control-plane-cluster-7v44g-1"
+
+  - target:
+      group: nmstate.io
+      version: v1
+      kind: NodeNetworkConfigurationPolicy
+      name: osp-multi-nic-worker-ocp4-worker2
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: "control-plane-cluster-7v44g-2"
+      - op: replace
+        path: /spec/nodeSelector/kubernetes.io~1hostname
+        value: "control-plane-cluster-7v44g-2"
+
+  - target:
+      group: nmstate.io
+      version: v1
+      kind: NodeNetworkConfigurationPolicy
+      name: osp-multi-nic-worker-ocp4-worker3
+    patch: |-
+      - op: replace
+        path: /metadata/name
+        value: "control-plane-cluster-7v44g-3"
+      - op: replace
+        path: /spec/nodeSelector/kubernetes.io~1hostname
+        value: "control-plane-cluster-7v44g-3"
+
+  - target:
+      kind: NetConfig
+      name: openstacknetconfig
+    patch: |-
+      - op: replace
+        path: /spec/networks/0/dnsDomain
+        value: ctlplane.sandbox-7v44g-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/1/dnsDomain
+        value: internalapi.sandbox-7v44g-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/2/dnsDomain
+        value: tenant.sandbox-7v44g-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/3/dnsDomain
+        value: storage.sandbox-7v44g-ocp4-cluster.svc.cluster.local
+      - op: replace
+        path: /spec/networks/4/dnsDomain
+        value: external.sandbox-7v44g-ocp4-cluster.svc.cluster.local
